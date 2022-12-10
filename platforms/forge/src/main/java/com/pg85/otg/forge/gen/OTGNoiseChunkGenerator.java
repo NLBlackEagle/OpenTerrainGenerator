@@ -18,7 +18,6 @@ import com.pg85.otg.constants.SettingsEnums.CustomStructureType;
 import com.pg85.otg.core.OTG;
 import com.pg85.otg.core.config.dimensions.DimensionConfig;
 import com.pg85.otg.core.config.dimensions.DimensionConfig.OTGDimension;
-import com.pg85.otg.core.config.world.WorldConfig;
 import com.pg85.otg.core.gen.OTGChunkDecorator;
 import com.pg85.otg.core.gen.OTGChunkGenerator;
 import com.pg85.otg.core.presets.Preset;
@@ -46,18 +45,13 @@ import net.minecraft.ReportedException;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.*;
 import net.minecraft.data.worldgen.*;
-import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
-import net.minecraft.util.random.WeightedRandomList;
-import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.biome.*;
 import net.minecraft.world.level.biome.Climate.Sampler;
-import net.minecraft.world.level.biome.Climate.TargetPoint;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.CarvingMask;
@@ -71,10 +65,6 @@ import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.carver.CarvingContext;
 import net.minecraft.world.level.levelgen.carver.ConfiguredWorldCarver;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraft.world.level.levelgen.feature.configurations.StrongholdConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.structures.JigsawJunction;
-import net.minecraft.world.level.levelgen.feature.structures.StructureTemplatePool.Projection;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.structure.*;
 import net.minecraft.world.level.levelgen.structure.placement.ConcentricRingsStructurePlacement;
@@ -310,7 +300,7 @@ public final class OTGNoiseChunkGenerator extends ChunkGenerator
 		Random random = new Random();
 		// Fetch any chunks that are cached in the WorldGenRegion, so we can
 		// pre-emptively generate and cache base terrain for them asynchronously.
-		this.shadowChunkGenerator.queueChunksForWorkerThreads((WorldGenRegion)chunk.getWorldForge(), manager, chunk, this, (OTGBiomeProvider)this.biomeSource, this.internalGenerator, this.getSettings(), this.preset.getWorldConfig().getWorldHeightCap());
+		this.shadowChunkGenerator.queueChunksForWorkerThreads((WorldGenRegion)chunk.getWorldForge(), manager, chunk, this, (OTGBiomeProvider)this.biomeSource, this.internalGenerator, this.preset.getWorldConfig().getWorldHeightCap());
 		
 		// If we've already (shadow-)generated and cached this	
 		// chunk while it was unloaded, use cached data.
@@ -370,7 +360,7 @@ public final class OTGNoiseChunkGenerator extends ChunkGenerator
 					}
 				});
 			}		
-			this.internalGenerator.populateNoise(this.preset.getWorldConfig().getWorldHeightCap(), random, buffer, buffer.getChunkCoordinate(), structures, junctions);
+			this.internalGenerator.populateNoise(random, buffer, buffer.getChunkCoordinate(), structures, junctions);
 			this.shadowChunkGenerator.setChunkGenerated(chunkCoord);
 		}
 	}
@@ -867,22 +857,22 @@ public final class OTGNoiseChunkGenerator extends ChunkGenerator
 
 	public Boolean checkHasVanillaStructureWithoutLoading(ServerLevel world, ChunkCoordinate chunkCoord)
 	{
-		return this.shadowChunkGenerator.checkHasVanillaStructureWithoutLoading(world, this, (OTGBiomeProvider)this.biomeSource, this.getSettings(), chunkCoord, this.internalGenerator.getCachedBiomeProvider(), false);
+		return this.shadowChunkGenerator.checkHasVanillaStructureWithoutLoading(world, this, (OTGBiomeProvider)this.biomeSource, chunkCoord, this.internalGenerator.getCachedBiomeProvider(), false);
 	}
 
 	public int getHighestBlockYInUnloadedChunk(Random worldRandom, int x, int z, boolean findSolid, boolean findLiquid, boolean ignoreLiquid, boolean ignoreSnow, ServerLevel level)
 	{
-		return this.shadowChunkGenerator.getHighestBlockYInUnloadedChunk(this.internalGenerator, this.preset.getWorldConfig().getWorldHeightCap(), worldRandom, x, z, findSolid, findLiquid, ignoreLiquid, ignoreSnow, level);
+		return this.shadowChunkGenerator.getHighestBlockYInUnloadedChunk(this.internalGenerator, worldRandom, x, z, findSolid, findLiquid, ignoreLiquid, ignoreSnow, level);
 	}
 
 	public LocalMaterialData getMaterialInUnloadedChunk(Random worldRandom, int x, int y, int z, ServerLevel level)
 	{
-		return this.shadowChunkGenerator.getMaterialInUnloadedChunk(this.internalGenerator, this.preset.getWorldConfig().getWorldHeightCap(), worldRandom, x, y, z, level);
+		return this.shadowChunkGenerator.getMaterialInUnloadedChunk(this.internalGenerator, worldRandom, x, y, z, level);
 	}
 
 	public ForgeChunkBuffer getChunkWithoutLoadingOrCaching(Random random, ChunkCoordinate chunkCoord, ServerLevel level)
 	{
-		return this.shadowChunkGenerator.getChunkWithoutLoadingOrCaching(this.internalGenerator, this.preset.getWorldConfig().getWorldHeightCap(), random, chunkCoord, level);
+		return this.shadowChunkGenerator.getChunkWithoutLoadingOrCaching(this.internalGenerator, random, chunkCoord, level);
 	}
 	
 	// Modpack config

@@ -719,7 +719,7 @@ public class OTGChunkGenerator implements ISurfaceGeneratorNoiseProvider
 			{
 				// Get the current biome config and some properties
 				biome = biomes[x * Constants.CHUNK_SIZE + z];
-				biome.getBiomeConfig().doSurfaceAndGroundControl(worldSeed, generatingChunk, chunkBuffer, chunkCoord.getBlockX() + x, chunkCoord.getBlockZ() + z, maxY, biome);
+				biome.getBiomeConfig().doSurfaceAndGroundControl(worldSeed, generatingChunk, chunkBuffer, chunkCoord.getBlockX() + x, chunkCoord.getBlockZ() + z, minY, biome);
 			}
 		}
 	}

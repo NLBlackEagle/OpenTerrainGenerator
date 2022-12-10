@@ -1078,9 +1078,9 @@ abstract class BiomeConfigBase extends ConfigFile implements IBiomeConfig
 	}
 	
 	@Override
-	public void doSurfaceAndGroundControl(long worldSeed, GeneratingChunk generatingChunk, ChunkBuffer chunkBuffer, int x, int z, int maxY, IBiome biome)
+	public void doSurfaceAndGroundControl(long worldSeed, GeneratingChunk generatingChunk, ChunkBuffer chunkBuffer, int x, int z, int minY, IBiome biome)
 	{
-		this.settings.surfaceAndGroundControl.spawn(worldSeed, generatingChunk, chunkBuffer, biome, x, z, maxY);
+		this.settings.surfaceAndGroundControl.spawn(worldSeed, generatingChunk, chunkBuffer, biome, x, z, minY);
 	}
 	
 	@Override
