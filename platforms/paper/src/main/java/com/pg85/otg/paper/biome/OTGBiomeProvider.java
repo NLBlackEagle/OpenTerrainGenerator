@@ -34,26 +34,20 @@ public class OTGBiomeProvider extends BiomeSource implements ILayerSource
 		(instance) -> instance.group(
 			Codec.STRING.fieldOf("preset_name").stable().forGetter((provider) -> provider.presetFolderName),
 			Codec.LONG.fieldOf("seed").stable().forGetter((provider) -> provider.seed),
-			Codec.BOOL.optionalFieldOf("legacy_biome_init_layer", Boolean.FALSE, Lifecycle.stable()).forGetter((provider) -> provider.legacyBiomeInitLayer),
-			Codec.BOOL.fieldOf("large_biomes").orElse(false).stable().forGetter((provider) -> provider.largeBiomes),
 			RegistryOps.retrieveRegistry(Registry.BIOME_REGISTRY).forGetter((provider) -> provider.registry)
 		).apply(instance, instance.stable(OTGBiomeProvider::new))
 	);
 	private final long seed;
-	private final boolean legacyBiomeInitLayer;
-	private final boolean largeBiomes;
 	private final Registry<Biome> registry;
 	private final ThreadLocal<CachingLayerSampler> layer;
 	private final Int2ObjectMap<ResourceKey<Biome>> keyLookup;
 	private final String presetFolderName;
 
-	public OTGBiomeProvider (String presetFolderName, long seed, boolean legacyBiomeInitLayer, boolean largeBiomes, Registry<Biome> registry)
+	public OTGBiomeProvider (String presetFolderName, long seed, Registry<Biome> registry)
 	{
 		super(getAllBiomesByPreset(presetFolderName, registry));
 		this.presetFolderName = presetFolderName;
 		this.seed = seed;
-		this.legacyBiomeInitLayer = legacyBiomeInitLayer;
-		this.largeBiomes = largeBiomes;
 		this.registry = registry;
 		this.layer = ThreadLocal.withInitial(() -> BiomeLayers.create(seed, ((PaperPresetLoader)OTG.getEngine().getPresetLoader()).getPresetGenerationData().get(presetFolderName), OTG.getEngine().getLogger()));
 		this.keyLookup = new Int2ObjectOpenHashMap<>();
@@ -95,12 +89,11 @@ public class OTGBiomeProvider extends BiomeSource implements ILayerSource
 		return CODEC;
 	}
 
-	// TODO: This is only used by MC internally, OTG fetches all biomes via CachedBiomeProvider.
-	// Could make this use the cache too?
+	// This is only used by MC internally, OTG fetches all biomes via CachedBiomeProvider.
 	@Override
 	public Holder<Biome> getNoiseBiome(int biomeX, int biomeY, int biomeZ, Climate.Sampler p_186738_)
 	{
-		return Holder.direct(registry.get(keyLookup.get(this.layer.get().sample(biomeX, biomeZ))));
+		return this.registry.getHolderOrThrow(this.keyLookup.get(this.layer.get().sample(biomeX, biomeZ)));
 	}
 
 	@Override
@@ -112,6 +105,6 @@ public class OTGBiomeProvider extends BiomeSource implements ILayerSource
 	@Override
 	public BiomeSource withSeed(long seed)
 	{
-		return new OTGBiomeProvider(this.presetFolderName, seed, this.legacyBiomeInitLayer, this.largeBiomes, this.registry);
+		return new OTGBiomeProvider(this.presetFolderName, seed, this.registry);
 	}
 }

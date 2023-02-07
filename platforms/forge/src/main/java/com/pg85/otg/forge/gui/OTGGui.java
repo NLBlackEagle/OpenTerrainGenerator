@@ -69,26 +69,19 @@ public class OTGGui
 				currentSelection.Overworld = new OTGOverWorld(OTG.getEngine().getPresetLoader().getDefaultPresetFolderName(), seed, null, null);
 				Registry<Biome> biomeRegistry = registry.registryOrThrow(Registry.BIOME_REGISTRY);
 				Registry<NoiseParameters> noiseParamsRegistry = registry.registryOrThrow(Registry.NOISE_REGISTRY);
-				
-				// Dummy list
-				ParameterList<Supplier<Biome>> paramList = new Climate.ParameterList<Supplier<Biome>>(
-					ImmutableList.of(
-						Pair.of(
-							(ParameterPoint)Climate.parameters(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), 
-							(Supplier<Biome>)() -> { return biomeRegistry.getOrThrow(Biomes.PLAINS); }
-						)
-					)
-				);
+				Registry<StructureSet> structureSetRegistry = registry.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY);
+				Registry<NoiseGeneratorSettings> noiseGeneratorSettingsRegistry = registry.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY);
+
 				
 				return new OTGNoiseChunkGenerator(
-					noiseParamsRegistry,
 					new OTGBiomeProvider(
 						OTG.getEngine().getPresetLoader().getDefaultPresetFolderName(),
-						paramList,
 						Optional.of(new OTGBiomeProvider.PresetInstance(OTG.getEngine().getPresetLoader().getDefaultPresetFolderName(), OTGBiomeProvider.Preset.DEFAULT, biomeRegistry))				
 					),
 					seed,
-					() -> registry.registryOrThrow(Registry.NOISE_GENERATOR_SETTINGS_REGISTRY).getOrThrow(NoiseGeneratorSettings.OVERWORLD)
+					structureSetRegistry,
+					noiseParamsRegistry,
+					noiseGeneratorSettingsRegistry.getHolderOrThrow(NoiseGeneratorSettings.OVERWORLD)
 				);
 			} else {
 				// If no presets are installed, return the default chunkgenerator / biomeprovider
@@ -208,10 +201,11 @@ public class OTGGui
 										biomesRegistry,
 										dimensionSettingsRegistry,
 										noiseParamsRegistry,
+										structureSetRegistry,
 										seed,
 										generateFeatures,
 										bonusChest,
-									(MappedRegistry<LevelStem>) dimensions
+										(MappedRegistry<LevelStem>) dimensions
 									)
 								);
 							}

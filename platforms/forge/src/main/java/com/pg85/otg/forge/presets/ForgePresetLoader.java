@@ -329,12 +329,7 @@ public class ForgePresetLoader extends LocalPresetLoader
 			}
 			presetIdMapping[otgBiomeId] = otgBiome;
 
-			List<Integer> idsForBiome = worldBiomes.get(biomeConfig.getValue().getName());
-			if(idsForBiome == null)
-			{
-				idsForBiome = new ArrayList<Integer>();
-				worldBiomes.put(biomeConfig.getValue().getName(), idsForBiome);
-			}
+			List<Integer> idsForBiome = worldBiomes.computeIfAbsent(biomeConfig.getValue().getName(), k1 -> new ArrayList<>());
 			idsForBiome.add(otgBiomeId);
 			
 			// Make a list of isle and border biomes per generation depth

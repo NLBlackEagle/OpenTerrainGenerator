@@ -177,16 +177,6 @@ public class OTGDimensionTypeHelper
 		// Create a new registry object and register dimensions to it.
 		MappedRegistry<LevelStem> dimensions = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.experimental(), null);
 		boolean nonOTGOverWorld = dimConfig.Overworld.PresetFolderName == null;
-
-		// Dummy list
-		ParameterList<Supplier<Biome>> paramList = new Climate.ParameterList<Supplier<Biome>>(
-			ImmutableList.of(
-				Pair.of(
-					(ParameterPoint)Climate.parameters(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F), 
-					(Supplier<Biome>)() -> { return biomesRegistry.getOrThrow(Biomes.PLAINS); }
-				)
-			)
-		);
 		
 		if(dimConfig.Overworld != null && dimConfig.Overworld.PresetFolderName != null && !nonOTGOverWorld)
 		{
@@ -195,7 +185,6 @@ public class OTGDimensionTypeHelper
 				dimConfigName,
 					new OTGBiomeProvider(
 							dimConfig.Overworld.PresetFolderName,
-							paramList,
 							Optional.of(new OTGBiomeProvider.PresetInstance(dimConfig.Overworld.PresetFolderName, OTGBiomeProvider.Preset.DEFAULT, biomesRegistry))
 					),
 					structureSetRegistry,
@@ -213,7 +202,6 @@ public class OTGDimensionTypeHelper
 					dimConfigName,
 					new OTGBiomeProvider(
 							dimConfig.Nether.PresetFolderName,
-							paramList,
 							Optional.of(new OTGBiomeProvider.PresetInstance(dimConfig.Nether.PresetFolderName, OTGBiomeProvider.Preset.DEFAULT, biomesRegistry))
 					),
 					structureSetRegistry,
@@ -231,7 +219,6 @@ public class OTGDimensionTypeHelper
 					dimConfigName,
 					new OTGBiomeProvider(
 							dimConfig.End.PresetFolderName,
-							paramList,
 							Optional.of(new OTGBiomeProvider.PresetInstance(dimConfig.Nether.PresetFolderName, OTGBiomeProvider.Preset.DEFAULT, biomesRegistry))
 					),
 					structureSetRegistry,
@@ -253,7 +240,6 @@ public class OTGDimensionTypeHelper
 						dimConfigName,
 							new OTGBiomeProvider(
 									otgDim.PresetFolderName,
-									paramList,
 									Optional.of(new OTGBiomeProvider.PresetInstance(otgDim.PresetFolderName, OTGBiomeProvider.Preset.DEFAULT, biomesRegistry))
 							),
 							structureSetRegistry,

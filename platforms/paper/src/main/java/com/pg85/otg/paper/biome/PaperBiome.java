@@ -52,16 +52,23 @@ public class PaperBiome implements IBiome
 {
 	private final Biome biomeBase;
 	private final IBiomeConfig biomeConfig;
+	private final Holder<Biome> holder;
 
-	public PaperBiome(Biome biomeBase, IBiomeConfig biomeConfig)
+	public PaperBiome(Holder<Biome> biomeBase, IBiomeConfig biomeConfig)
 	{
-		this.biomeBase = biomeBase;
+		this.biomeBase = biomeBase.value();
+		this.holder = biomeBase;
 		this.biomeConfig = biomeConfig;
 	}
 
 	public Biome getBiome()
 	{
 		return this.biomeBase;
+	}
+
+	public Holder<Biome> getHolder()
+	{
+		return holder;
 	}
 
 	@Override

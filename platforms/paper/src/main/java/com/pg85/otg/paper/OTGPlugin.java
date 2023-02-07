@@ -198,7 +198,7 @@ public class OTGPlugin extends JavaPlugin implements Listener
 			NoiseSettings noiseSettings = getNoiseSettings(OTGGen.getPreset().getWorldConfig());
 			OTGDelegate = new OTGNoiseChunkGenerator(
 				OTGGen.getPreset().getFolderName(),
-				new OTGBiomeProvider(OTGGen.getPreset().getFolderName(), world.getSeed(), false, false, registryAccess.registryOrThrow(Registry.BIOME_REGISTRY)),
+				new OTGBiomeProvider(OTGGen.getPreset().getFolderName(), world.getSeed(), registryAccess.registryOrThrow(Registry.BIOME_REGISTRY)),
 				registryAccess.registryOrThrow(Registry.STRUCTURE_SET_REGISTRY),
 				registryAccess.registryOrThrow(Registry.NOISE_REGISTRY),
 				world.getSeed(),

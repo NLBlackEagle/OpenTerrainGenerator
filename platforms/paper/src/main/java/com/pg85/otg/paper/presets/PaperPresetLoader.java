@@ -222,7 +222,8 @@ public class PaperPresetLoader extends LocalPresetLoader
 //				});
 //			}
 
-			IBiome otgBiome = new PaperBiome(biome, biomeConfig.getValue());
+			ResourceKey<Biome> k = biomeRegistry.getResourceKey(biome).get();
+			IBiome otgBiome = new PaperBiome(biomeRegistry.getHolderOrThrow(k), biomeConfig.getValue());
 			if(otgBiomeId >= presetIdMapping.length)
 			{
 				OTG.getEngine().getLogger().log(LogLevel.FATAL, LogCategory.CONFIGS, "Fatal error while registering OTG biome id's for preset " + preset.getFolderName() + ", most likely you've assigned a DefaultOceanBiome that doesn't exist.");
@@ -230,7 +231,7 @@ public class PaperPresetLoader extends LocalPresetLoader
 			}
 			presetIdMapping[otgBiomeId] = otgBiome;
 
-			List<Integer> idsForBiome = worldBiomes.computeIfAbsent(biomeConfig.getValue().getName(), k -> new ArrayList<>());
+			List<Integer> idsForBiome = worldBiomes.computeIfAbsent(biomeConfig.getValue().getName(), k1 -> new ArrayList<>());
 			idsForBiome.add(otgBiomeId);
 			
 			// Make a list of isle and border biomes per generation depth
