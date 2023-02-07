@@ -17,6 +17,7 @@ import com.pg85.otg.forge.gen.OTGNoiseChunkGenerator;
 import com.pg85.otg.forge.gui.OTGGui;
 import com.pg85.otg.forge.network.OTGClientSyncManager;
 
+import com.pg85.otg.forge.presets.ForgePresetLoader;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.Registry;
@@ -39,7 +40,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.ForgeRegistry;
 
 @Mod(Constants.MOD_ID_SHORT) // Should match META-INF/mods.toml
 @Mod.EventBusSubscriber(modid = Constants.MOD_ID_SHORT, bus = Mod.EventBusSubscriber.Bus.MOD) 
@@ -56,11 +56,12 @@ public class OTGPlugin
 		// Register self for server and other game events we are interested in
 		MinecraftForge.EVENT_BUS.register(this);
 
-		// Let MC know about our chunk generator and biome provider. 
+		// Let MC know about our chunk generator and biome provider.
 		// If they're not added, we get errors and MC does not save properly.
-
-		Registry.register(Registry.BIOME_SOURCE, new ResourceLocation(Constants.MOD_ID_SHORT, "default"), OTGBiomeProvider.CODEC);
-		Registry.register(Registry.CHUNK_GENERATOR, new ResourceLocation(Constants.MOD_ID_SHORT, "default"), OTGNoiseChunkGenerator.CODEC);
+		var biomeRegistry = DeferredRegister.create(Registry.BIOME_SOURCE_REGISTRY, Constants.MOD_ID_SHORT);
+		var chunkRegistry = DeferredRegister.create(Registry.CHUNK_GENERATOR_REGISTRY, Constants.MOD_ID_SHORT);
+		biomeRegistry.register("default", () -> OTGBiomeProvider.CODEC);
+		chunkRegistry.register("default", () -> OTGNoiseChunkGenerator.CODEC);
 		ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(Constants.MOD_ID_SHORT, "default"));
 
 		// Deferred registers
@@ -101,7 +102,7 @@ public class OTGPlugin
 		// Register all biomes
 		// TODO: Use proper Forge way of registering biomes, we're not using
 		// deferredregister (wasn't working before) or event.getRegistry().register atm.
-		OTG.getEngine().getPresetLoader().registerBiomes();
+		((ForgePresetLoader) OTG.getEngine().getPresetLoader()).registerBiomes(event.getRegistry());
 
 		// Fog & colors networking/handlers
 		OTGClientSyncManager.setup();
