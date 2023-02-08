@@ -69,7 +69,7 @@ public class ChunkProviderOTG
     private final int maxSmoothRadius;
 
     // TODO: Should this really be limited to 1024?
-    private BiomeConfig[] biomes = new BiomeConfig[1024];
+    private BiomeConfig[] biomes = new BiomeConfig[2048]; // Changed to 2048
     
     public ChunkProviderOTG(ConfigProvider configs, LocalWorld world)
     {    	

@@ -166,7 +166,7 @@ public class OTGDimensionManager
 	private static int getNextFreeDimId(String presetName)
 	{
 		HashMap<Integer, String> reservedIds = OTG.getEngine().getModPackConfigManager().getReservedDimIds();
-		for(int i = 3; i <= 1024; i++)
+		for(int i = 3; i <= 2048; i++) // Changed to 2048
 		{
 			String presetReservingId = reservedIds.get(Integer.valueOf(i)); 
 			if(presetReservingId == null || presetReservingId.equals(presetName))

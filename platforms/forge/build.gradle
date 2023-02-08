@@ -38,7 +38,7 @@ repositories
 {
     maven 
     {   // Worldedit API
-   		url "https://maven.sk89q.com/repo/" 
+   		url "https://maven.enginehub.org/artifactory/repo/" 
    	}
 }
 
@@ -49,7 +49,7 @@ dependencies
 		exclude group: 'com.google.guava'
 		exclude group: 'com.google.gson'
 	}
-	provided ('com.sk89q.worldedit:worldedit-core:6.1') {
+	provided ('com.sk89q.worldedit:worldedit-core:6.0.1') {
 		exclude group: 'com.google.guava'
 		exclude group: 'com.google.gson'
 	}

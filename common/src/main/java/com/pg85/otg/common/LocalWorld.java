@@ -79,8 +79,8 @@ public interface LocalWorld
 
     /**
      * Gets how many different biome ids are in the world. Biome ids will start
-     * at zero, so a returned value of 1024 means that the biome ids range from
-     * 0 to 1023, inclusive.
+     * at zero, so a returned value of 2048 means that the biome ids range from
+     * 0 to 2047, inclusive.
      *
      * @return How many different biome ids are in the world.
      */
