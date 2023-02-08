@@ -14,7 +14,7 @@ public class LayerBiomeInBiome extends Layer
     {
         short biomeId;
         int chance = 10;
-        boolean[] canSpawnIn = new boolean[1024];
+        boolean[] canSpawnIn = new boolean[2048]; // Changed to 2048
         long scrambledWorldSeed;
         boolean inOcean = false;
     }

@@ -287,7 +287,7 @@ public final class LayerFactory
                 )
                 {
                     haveIsle = true;
-                    biomeCanSpawnIn = new boolean[1024];
+                    biomeCanSpawnIn = new boolean[2048]; // Changed to 2048
                     inOcean = false;
                     for (String islandInName : biomeConfig.isleInBiome)
                     {
@@ -493,7 +493,7 @@ public final class LayerFactory
                 )
                 {
                     haveIsle = true;
-                    biomeCanSpawnIn = new boolean[1024];
+                    biomeCanSpawnIn = new boolean[2048]; // Changed to 2048
                     inOcean = false;
                     for (String islandInName : biomeConfig.isleInBiome)
                     {

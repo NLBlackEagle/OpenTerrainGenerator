@@ -5,7 +5,7 @@ apply plugin: 'java'
 // Project properties
 archivesBaseName = "openterraingenerator-bukkit"
 description = "Open Terrain Generator for Bukkit"
-ext.worldeditVersion = "6.1.5"
+ext.worldeditVersion = "6.1.4"
 ext.bukkitVersion = "1.12.2-R0.1-SNAPSHOT"
 
 repositories
@@ -22,7 +22,7 @@ repositories
     }
     maven 
     {   // Worldedit API
-   		url "https://maven.sk89q.com/repo/" 
+   		url "https://maven.enginehub.org/artifactory/repo/"
    	}
 }
 

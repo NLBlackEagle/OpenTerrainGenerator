@@ -304,7 +304,7 @@ public abstract class OTGEngine
 	{
     	if(!otgBiomeIdsByWorld.containsKey(worldName))
     	{
-    		otgBiomeIdsByWorld.put(worldName, new BiomeConfig[1024]);
+    		otgBiomeIdsByWorld.put(worldName, new BiomeConfig[2048]); // Changed to 2048
     	}
     	if(replaceExisting || otgBiomeIdsByWorld.get(worldName)[i] == null)
     	{
@@ -316,7 +316,7 @@ public abstract class OTGEngine
 
     public BiomeConfig[] getOTGBiomeIds(String worldName)
     {
-    	return otgBiomeIdsByWorld.containsKey(worldName) ? otgBiomeIdsByWorld.get(worldName) : new BiomeConfig[1024];
+    	return otgBiomeIdsByWorld.containsKey(worldName) ? otgBiomeIdsByWorld.get(worldName) : new BiomeConfig[2048]; // Changed to 2048
     }
     
 	public boolean isOTGBiomeIdAvailable(String worldName, int i)

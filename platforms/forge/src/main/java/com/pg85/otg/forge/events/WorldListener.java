@@ -289,7 +289,7 @@ public class WorldListener
 	        BiomeProvider biomeprovider = forgeWorld.getWorld().provider.getBiomeProvider();
 	        List<Biome> list = biomeprovider.getBiomesToSpawnIn();
 	        Random random = new Random(forgeWorld.getSeed());
-	        int range = 1024;
+	        int range = 2048; // Changed to 2048
 	        BlockPos blockpos = biomeprovider.findBiomePosition(0, 0, range, list, random);
 	        int i = 8;
 	        int j = forgeWorld.getWorld().provider.getAverageGroundLevel();
