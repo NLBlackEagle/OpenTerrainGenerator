@@ -54,6 +54,7 @@ public class BO4Config extends CustomObjectConfigFile
     public ConfigMode settingsMode;
     public boolean doReplaceBlocks;
     public int frequency;
+	public Rotation fixedRotation;
     
     private final int xSize = 16;
     private final int zSize = 16;
@@ -1067,6 +1068,10 @@ public class BO4Config extends CustomObjectConfigFile
         // Main settings
         writer.bigTitle("Main settings");
 
+		writer.comment("If this BO4 should spawn with a fixed rotation, set it here.");
+		writer.comment("For example: NORTH, EAST, SOUTH or WEST. Empty by default");
+		writer.setting(BO4Settings.FIXED_ROTATION, this.fixedRotation == null ? "" : this.fixedRotation.name());
+
 		writer.comment("This BO4 can only spawn at least Frequency chunks distance away from any other BO4 with the exact same name.");
 		writer.comment("You can use this to make this BO4 spawn in groups or make sure that this BO4 only spawns once every X chunks.");
         writer.setting(BO4Settings.FREQUENCY, this.frequency);
@@ -1343,7 +1348,10 @@ public class BO4Config extends CustomObjectConfigFile
         this.maxHeight = this.maxHeight < this.minHeight ? this.minHeight : this.maxHeight;
 
         this.doReplaceBlocks = readSettings(BO4Settings.DO_REPLACE_BLOCKS);
-        
+
+		String fixedRotation = readSettings(BO4Settings.FIXED_ROTATION);
+		this.fixedRotation = fixedRotation == null || fixedRotation.trim().length() == 0 ? null : Rotation.FromString(fixedRotation);
+
         // Read the resources
         readResources();
 
