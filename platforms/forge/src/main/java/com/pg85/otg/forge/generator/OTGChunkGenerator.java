@@ -77,7 +77,7 @@ public class OTGChunkGenerator implements IChunkGenerator
         // TODO: Add a setting to the worldconfig for the size of these caches. 
         // Worlds with lots of BO4's and large smoothing areas may want to increase this. 
         this.unloadedBlockColumnsCache = new FifoMap<BlockPos2D, LocalMaterialData[]>(1024);
-        this.unloadedChunksCache = new FifoMap<ChunkCoordinate, Chunk>(128);
+        this.unloadedChunksCache = new FifoMap<ChunkCoordinate, Chunk>(1024); //Changed 128 chunks cache to 1024 chunks cache for customstructures
     	lastUsedChunk1 = null;
     	lastUsedChunk2 = null;
     	lastUsedChunk3 = null;
