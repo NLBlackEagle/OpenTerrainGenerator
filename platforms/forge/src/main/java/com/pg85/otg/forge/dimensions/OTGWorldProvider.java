@@ -11,6 +11,7 @@ import com.pg85.otg.configuration.world.WorldConfig;
 import com.pg85.otg.forge.ForgeEngine;
 import com.pg85.otg.forge.OTGPlugin;
 import com.pg85.otg.forge.world.ForgeWorld;
+import com.pg85.otg.logging.LogMarker;
 import com.pg85.otg.util.ChunkCoordinate;
 
 import net.minecraft.util.math.BlockPos;
@@ -178,7 +179,13 @@ public class OTGWorldProvider extends WorldProviderSurface
                 randZ = maxZ == 0 ? 0 : -maxZ + rand.nextInt(maxZ * 2);
             }
 
-			return new BlockPos(this.world.getWorldInfo().getSpawnX() + randX, this.world.getWorldInfo().getSpawnY(), this.world.getWorldInfo().getSpawnZ() + randZ);
+            int SpawnPosX = (this.world.getWorldInfo().getSpawnX() + randX);
+            int SpawnPosZ = (this.world.getWorldInfo().getSpawnZ() + randZ);
+
+            BlockPos SpawnPos = new BlockPos(SpawnPosX, 0, SpawnPosZ);
+            BlockPos SpawnPosNew = world.getTopSolidOrLiquidBlock(SpawnPos);
+
+			return new BlockPos(SpawnPosNew);
     	} else {
     		return super.getRandomizedSpawnPoint();
     	}
