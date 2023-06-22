@@ -177,8 +177,13 @@ public class OTGWorldProvider extends WorldProviderSurface
                 int maxZ =  (int)Math.floor(Math.sqrt((dimConfig.GameRules.SpawnRadius * dimConfig.GameRules.SpawnRadius) - (randX * randX)));
                 randZ = maxZ == 0 ? 0 : -maxZ + rand.nextInt(maxZ * 2);
             }
+            int SpawnPosX = (this.world.getWorldInfo().getSpawnX() + randX);
+            int SpawnPosZ = (this.world.getWorldInfo().getSpawnZ() + randZ);
 
-			return new BlockPos(this.world.getWorldInfo().getSpawnX() + randX, this.world.getWorldInfo().getSpawnY(), this.world.getWorldInfo().getSpawnZ() + randZ);
+            BlockPos SpawnPos = new BlockPos(SpawnPosX, 0, SpawnPosZ);
+            BlockPos SpawnPosNew = world.getTopSolidOrLiquidBlock(SpawnPos);
+
+            return new BlockPos(SpawnPosNew);
     	} else {
     		return super.getRandomizedSpawnPoint();
     	}
