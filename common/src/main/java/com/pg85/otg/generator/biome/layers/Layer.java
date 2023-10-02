@@ -102,23 +102,23 @@ public abstract class Layer
      * 7) Rivers size
      */
     // [ Biome Data ]
-    protected static final int BiomeBits = 1023;            //>>	1st-10th Bits           // 255 63
-    protected static final int BiomeBitsAreSetBit = (1 << 22);       //	23rd Bit, 4194304
-    
+    protected static final int BiomeBits = 2047;            //>>	1st-11th Bits           // 255 63
+    protected static final int BiomeBitsAreSetBit = (1 << 23);       //	24rd Bit, 4194304
+
     // [ Flags ]
-    protected static final int LandBit = (1 << 10);         //>>	11th Bit, 1024          // 256 64
-    protected static final int IslandBit = (1 << 11);       //>>	12th Bit, 2048          // 4096 1024
-    protected static final int IceBit = (1 << 12);          //>>	13th Bit, 4096
+    protected static final int LandBit = (1 << 11);         //>>	12th Bit, 1024          // 256 64
+    protected static final int IslandBit = (1 << 12);       //>>	13th Bit, 2048          // 4096 1024
+    protected static final int IceBit = (1 << 13);          //>>	14th Bit, 4096
 
     // [ Biome Group Data ]
-    protected static final int BiomeGroupShift = 13;        //>>	Shift amount for biome group data
-    protected static final int BiomeGroupBits = (127 << BiomeGroupShift);   //>>	14th-20th Bits, 1040384
+    protected static final int BiomeGroupShift = 14;        //>>	Shift amount for biome group data
+    protected static final int BiomeGroupBits = (127 << BiomeGroupShift);   //>>	15th-20th Bits, 1040384
 
     // [ River Data ]
-    private static final int RiverShift = 20;
-    protected static final int RiverBits = (3 << RiverShift);               //>>	21st-22nd Bits, 3145728  //3072 768
-    protected static final int RiverBitOne = (1 << RiverShift);             //>>	21st Bit, 1048576
-    protected static final int RiverBitTwo = (1 << (RiverShift + 1));       //>>	22nd Bit, 2097152
+    private static final int RiverShift = 21;
+    protected static final int RiverBits = (3 << RiverShift);               //>>	22st-23nd Bits, 3145728  //3072 768
+    protected static final int RiverBitOne = (1 << RiverShift);             //>>	22st Bit, 1048576
+    protected static final int RiverBitTwo = (1 << (RiverShift + 1));       //>>	23nd Bit, 2097152
 
     private static long getScrambledBaseSeed(long baseSeed)
     {
