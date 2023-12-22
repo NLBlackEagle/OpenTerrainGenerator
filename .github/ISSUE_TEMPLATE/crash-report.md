@@ -10,6 +10,7 @@ about: Oops! Don't be sad. I'll do better next time, I promise!
 
 #### OTG Version
 [Please specify the full OTG version that you are running by placing "x" into []]
+- [ ] 1.12.2_v9.5_r2
 - [ ] 1.12.2_v8_r1
 - [ ] 1.12.2_v7_DEV_r26
 - [ ] 1.12.2-v6
