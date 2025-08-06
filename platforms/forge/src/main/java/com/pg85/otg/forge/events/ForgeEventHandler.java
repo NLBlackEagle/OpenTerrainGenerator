@@ -50,9 +50,7 @@ public class ForgeEventHandler extends EventHandler
     public boolean onResourceProcess(Resource resource, LocalWorld localWorld, Random random, boolean villageInChunk, int chunkX, int chunkZ, boolean isCancelled)
     {
         ForgeWorld world = (ForgeWorld) localWorld;
-        int blockX = chunkX * CHUNK_SIZE;
-        int blockZ = chunkZ * CHUNK_SIZE;
-        BlockPos blockPos = new BlockPos(blockX, 0, blockZ);
+        BlockPos blockPos = new BlockPos(chunkX * CHUNK_SIZE, 0, chunkZ * CHUNK_SIZE);
                 
         // Convert to Forge event and fire
         if (
@@ -65,7 +63,7 @@ public class ForgeEventHandler extends EventHandler
         {
             // Fire population event
             Populate.EventType forgeEvent = getPopulateEventType(resource.getMaterial());
-            return TerrainGen.populate(world.getChunkGenerator(), world.getWorld(), random, blockX, blockZ, villageInChunk, forgeEvent);
+            return TerrainGen.populate(world.getChunkGenerator(), world.getWorld(), random, chunkX, chunkZ, villageInChunk, forgeEvent);
         }        
         else if(
     		resource instanceof OreGen ||
