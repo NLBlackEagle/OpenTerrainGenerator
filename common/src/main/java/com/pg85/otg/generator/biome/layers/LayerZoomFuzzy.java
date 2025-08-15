@@ -11,7 +11,11 @@ public class LayerZoomFuzzy extends LayerZoom
     @Override
     protected int getRandomOf4(int a, int b, int c, int d)
     {
-        return this.getRandomInArray(a, b, c, d);
+        switch (this.nextInt(4)){
+            case 0: return a;
+            case 1: return b;
+            case 2: return c;
+            case 3: default: return d;
+        }
     }
-
 }

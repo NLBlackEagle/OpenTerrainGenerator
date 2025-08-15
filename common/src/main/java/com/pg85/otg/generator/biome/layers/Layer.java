@@ -216,37 +216,26 @@ public abstract class Layer
 
     public abstract int[] getInts(LocalWorld world, ArraysCache cache, int x, int z, int xSize, int zSize);
 
-    protected int getRandomInArray(int... biomes)
-    {
-        return biomes[this.nextInt(biomes.length)];
-    }
-
     protected int getRandomOf4(int a, int b, int c, int d)
     {
-        return b == c && c == d
-               ? b
-               : (a == b && a == c
-                  ? a
-                  : (a == b && a == d
-                     ? a
-                     : (a == c && a == d
-                        ? a
-                        : (a == b && c != d
-                           ? a
-                           : (a == c && b != d
-                              ? a
-                              : (a == d && b != c
-                                 ? a
-                                 : (b == c && a != d
-                                    ? b
-                                    : (b == d && a != c
-                                       ? b
-                                       : (c == d && a != b
-                                          ? c
-                                          : this.getRandomInArray(new int[]
-                                          {
-                                              a, b, c, d
-        }))))))))));
+        if (b == c && c == d) return b; // b = c = d, a different
+        if (a == b && a == c) return a; // a = b = c, d different
+        if (a == b && a == d) return a; // a = b = d, c different
+        if (a == c && a == d) return a; // a = c = d, b different
+
+        if (a == b && c != d) return a;
+        if (a == c && b != d) return a;
+        if (a == d && b != c) return a;
+        if (b == c && a != d) return b;
+        if (b == d && a != c) return b;
+        if (c == d && a != b) return c;
+
+        switch (this.nextInt(4)){
+            case 0: return a;
+            case 1: return b;
+            case 2: return c;
+            case 3: default: return d;
+        }
     }
 
     /**

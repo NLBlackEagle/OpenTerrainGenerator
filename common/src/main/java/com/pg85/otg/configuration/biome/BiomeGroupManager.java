@@ -163,10 +163,9 @@ public final class BiomeGroupManager
         return true;
     }
 
-    public static int getMaxRarityFromPossibles(Map<Integer, ?> map)
+    public static int getMaxRarityFromPossibles(SortedMap<Integer, ?> sortedMap)
     {
-        Integer[] totalRarity = map.keySet().toArray(new Integer[map.size()]);
-        return totalRarity[totalRarity.length - 1];
+        return sortedMap.lastKey();
     }
 
     public void processBiomeData(LocalWorld world)
