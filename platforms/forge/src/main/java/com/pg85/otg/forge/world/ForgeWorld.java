@@ -415,7 +415,7 @@ public class ForgeWorld implements LocalWorld
     public LocalBiome getBiomeForPopulation(int worldX, int worldZ, ChunkCoordinate chunkBeingPopulated)
     {
     	// Cache is invalidated when cascading chunkgen happens.
-    	return !cacheIsValid ? getBiome(worldZ, worldX) : this.cachedBiomes[worldX - chunkBeingPopulated.getBlockX()][worldZ - chunkBeingPopulated.getBlockZ()];
+    	return !cacheIsValid ? getBiome(worldX, worldZ) : this.cachedBiomes[worldX - chunkBeingPopulated.getBlockX()][worldZ - chunkBeingPopulated.getBlockZ()];
     }
 
 	@Override
