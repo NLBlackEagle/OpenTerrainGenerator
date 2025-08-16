@@ -56,7 +56,7 @@ public class OTGMineshaftGen extends OTGMapGenStructure
             		//this.usedCoords2.add(chunkCoord);
             	//}
                 
-                LocalBiome biome = this.forgeWorld.getBiome(chunkCoord.getBlockXCenter(), chunkCoord.getBlockXCenter());
+                LocalBiome biome = this.forgeWorld.getBiome(chunkCoord.getBlockXCenter(), chunkCoord.getBlockZCenter());
                 BiomeConfig biomeConfig = biome.getBiomeConfig();
                 cachedCoord = new CachedCoord(biomeConfig.mineshaftType != MineshaftType.disabled, biomeConfig.mineshaftsRarity);
                 this.cachedCoordsByChunk.put(chunkCoord, cachedCoord);
