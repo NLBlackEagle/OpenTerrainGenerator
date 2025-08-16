@@ -49,9 +49,11 @@ public class ChunkCoordinate
     }
 
     @Override
-    public int hashCode()
-    {
-        return (chunkX >> 13) ^ chunkZ;
+    public int hashCode() {
+        int result = 1;
+        result = 31 * result + chunkX;
+        result = 31 * result + chunkZ;
+        return result;
     }
 
     @Override
