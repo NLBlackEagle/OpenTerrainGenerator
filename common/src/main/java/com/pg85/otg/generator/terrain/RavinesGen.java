@@ -194,7 +194,7 @@ public class RavinesGen extends TerrainGenBase
                 d9 = (localX + generatingChunk.getBlockX() + 0.5D - paramDouble1) / d3;
                 for (int localZ = i2; localZ < i3; localZ++)
                 {
-                    biome = world.getBiome(localZ + generatingChunk.getBlockX(), localX + generatingChunk.getBlockZ());
+                    biome = world.getBiome(localX + generatingChunk.getBlockX(), localZ + generatingChunk.getBlockZ());
                     biomeConfig = biome.getBiomeConfig();
                     //surfaceblockDefaultMaterial = biomeConfig.surfaceBlock;
                     d10 = (localZ + generatingChunk.getBlockZ() + 0.5D - paramDouble3) / d3;
