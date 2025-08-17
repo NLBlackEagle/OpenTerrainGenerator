@@ -14,10 +14,8 @@ import java.util.*;
 public final class BiomeGroupManager
 {
     static final int MAX_BIOME_GROUP_COUNT = 127;
-    private int cumulativeGroupRarity = 0;
-    private Map<String, BiomeGroup> nameToGroup = new LinkedHashMap<String, BiomeGroup>(4);
-    private Map<Integer, BiomeGroup> idToGroup = new LinkedHashMap<Integer, BiomeGroup>(4);
-
+    private final Map<String, BiomeGroup> nameToGroup = new LinkedHashMap<String, BiomeGroup>(4);
+    private final BiomeGroup[] idToGroup = new BiomeGroup[MAX_BIOME_GROUP_COUNT + 1];
     public BiomeGroupManager()
     {
 
@@ -44,7 +42,7 @@ public final class BiomeGroupManager
                 newGroup.setGroupId(newGroupId);
 
                 nameToGroup.put(newGroup.getName(), newGroup);
-                idToGroup.put(newGroupId, newGroup);
+                idToGroup[newGroupId] = newGroup;
             }
         } else {
             OTG.log(LogMarker.WARN, "Biome group \"{}\" could not be added. Max biome group count reached.", newGroup.getName());
@@ -79,7 +77,7 @@ public final class BiomeGroupManager
      */
     public BiomeGroup getGroupById(int groupId)
     {
-        return idToGroup.get(groupId);
+        return idToGroup[groupId];
     }
 
     /**
@@ -98,7 +96,7 @@ public final class BiomeGroupManager
      */
     public Collection<BiomeGroup> getGroups()
     {
-        return idToGroup.values();
+        return nameToGroup.values();
     }
 
     /**
@@ -108,27 +106,27 @@ public final class BiomeGroupManager
      */
     public int getGroupCount()
     {
-        return idToGroup.size();
+        return nameToGroup.size();
     }
 
     // TODO: Turn into array?
-    HashMap<Integer, TreeMap<Integer, BiomeGroup>> cachedGroupDepthMaps = new HashMap<Integer, TreeMap<Integer, BiomeGroup>>();
+    HashMap<Integer, TreeMap<Integer, BiomeGroup>> cachedGroupDepthMaps = new HashMap<>();
     public SortedMap<Integer, BiomeGroup> getGroupDepthMap(int depth)
     {
-    	TreeMap<Integer, BiomeGroup> map = cachedGroupDepthMaps.get(new Integer(depth));
+    	TreeMap<Integer, BiomeGroup> map = cachedGroupDepthMaps.get(depth);
     	if(map != null)
     	{
     		return map;
     	}
     	
-        map = new TreeMap<Integer, BiomeGroup>();
-        this.cumulativeGroupRarity = 0;
+        map = new TreeMap<>();
+        int cumulativeGroupRarity = 0;
         for (BiomeGroup group : getGroups())
         {
             if (group.getGenerationDepth() == depth)
             {
-                this.cumulativeGroupRarity += group.getGroupRarity();
-                map.put(this.cumulativeGroupRarity, group);
+                cumulativeGroupRarity += group.getGroupRarity();
+                map.put(cumulativeGroupRarity, group);
             }
         }
         if (cumulativeGroupRarity < map.size() * 100)
@@ -136,7 +134,7 @@ public final class BiomeGroupManager
             map.put(map.size() * 100, null);
         }
         
-        cachedGroupDepthMaps.put(new Integer(depth), map);
+        cachedGroupDepthMaps.put(depth, map);
         
         return map;
     }
@@ -170,7 +168,7 @@ public final class BiomeGroupManager
 
     public void processBiomeData(LocalWorld world)
     {
-        for (BiomeGroup entry : idToGroup.values())
+        for (BiomeGroup entry : nameToGroup.values())
         {
             entry.processBiomeData(world);
         }
@@ -183,7 +181,7 @@ public final class BiomeGroupManager
      */
     public void filterBiomes(ArrayList<String> customBiomeNames, boolean logWarnings)
     {
-        for (Iterator<BiomeGroup> it = idToGroup.values().iterator(); it.hasNext();)
+        for (Iterator<BiomeGroup> it = nameToGroup.values().iterator(); it.hasNext();)
         {
             BiomeGroup group = it.next();
             group.filterBiomes(customBiomeNames, logWarnings);
