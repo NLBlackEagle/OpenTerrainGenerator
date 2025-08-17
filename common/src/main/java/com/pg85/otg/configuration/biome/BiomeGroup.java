@@ -24,11 +24,14 @@ import java.util.Map.Entry;
 public final class BiomeGroup extends ConfigFunction<WorldConfig>
 {
     private int groupId;
-    private String name;
-    private int groupRarity;
-    private int generationDepth = 0;
+    private final String name;
+    private final int groupRarity;
+    private final int generationDepth;
     private float avgTemp = 0;
-    private Map<String, LocalBiome> biomes = new LinkedHashMap<String, LocalBiome>(32);
+    private final Map<String, LocalBiome> biomes = new LinkedHashMap<String, LocalBiome>(32);
+    private final List<TreeMap<Integer, LocalBiome>> cachedDepthMapOrHigher = new ArrayList<>();
+    private final List<TreeMap<Integer, LocalBiome>> cachedDepthMaps = new ArrayList<>();
+    private TreeMap<Integer, LocalBiome> defaultDepthMap = null;
 
     /**
      * Variable used by the the ungrouped biome generator. This generator
@@ -58,6 +61,11 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
         {
             this.biomes.put(biome, null);
         }
+        for (int i = 0; i <= config.generationDepth; i++)
+        {
+            this.cachedDepthMapOrHigher.add(null);
+            this.cachedDepthMaps.add(null);
+        }
     }
 
     /**
@@ -77,6 +85,11 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
         for (String biome : biomes)
         {
             this.biomes.put(biome, null);
+        }
+        for (int i = 0; i <= config.generationDepth; i++)
+        {
+            this.cachedDepthMapOrHigher.add(null);
+            this.cachedDepthMaps.add(null);
         }
     }
 
@@ -227,53 +240,80 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
         return false;
     }
 
-	HashMap<Integer, TreeMap<Integer, LocalBiome>> cachedDepthMapOrHigher = new HashMap<Integer, TreeMap<Integer, LocalBiome>>();
     public SortedMap<Integer, LocalBiome> getDepthMapOrHigher(int depth)
-    {    	
-    	TreeMap<Integer, LocalBiome> map = cachedDepthMapOrHigher.get(new Integer(depth));
-    	if(map != null)
-    	{
-    		return map;
-    	}
+    {
+        if (depth < 0) {
+            return getDefaultDepthMap();
+        }
+
+        TreeMap<Integer, LocalBiome> map = cachedDepthMapOrHigher.get(depth);
+        if (map != null)
+        {
+            return map;
+        }
     	
         int cumulativeBiomeRarity = 0;
-        map = new TreeMap<Integer, LocalBiome>();
+        map = new TreeMap<>();
         for (Entry<String, LocalBiome> biome : this.biomes.entrySet())
-        {                                                           //>>	When depth given is negative, include all biomes in group
-            if (biome.getValue().getBiomeConfig().biomeSize >= depth || depth < 0)
+        {
+            if (biome.getValue().getBiomeConfig().biomeSize >= depth)
             {
                 cumulativeBiomeRarity += biome.getValue().getBiomeConfig().biomeRarity;
                 map.put(cumulativeBiomeRarity, biome.getValue());
             }
         }
-        
-        cachedDepthMapOrHigher.put(new Integer(depth), map);
-        
+
+        cachedDepthMapOrHigher.set(depth, map);
+
         return map;
     }
 
-    HashMap<Integer, TreeMap<Integer, LocalBiome>> cachedDepthMaps = new HashMap<Integer, TreeMap<Integer, LocalBiome>>();
     SortedMap<Integer, LocalBiome> getDepthMap(int depth)
     {
-    	TreeMap<Integer, LocalBiome> map = cachedDepthMaps.get(new Integer(depth));
-    	if(map != null)
-    	{
-    		return map;
-    	}
+        if (depth < 0)
+        {
+            return getDefaultDepthMap();
+        }
+
+        TreeMap<Integer, LocalBiome> map = cachedDepthMaps.get(depth);
+        if (map != null)
+        {
+            return map;
+        }
     	
         int cumulativeBiomeRarity = 0;
-        map = new TreeMap<Integer, LocalBiome>();
+        map = new TreeMap<>();
         for (Entry<String, LocalBiome> biome : this.biomes.entrySet())
-        {                                                           //>>	When depth given is negative, include all biomes in group
-            if (biome.getValue().getBiomeConfig().biomeSize == depth || depth < 0)
+        {
+            if (biome.getValue().getBiomeConfig().biomeSize == depth)
             {
                 cumulativeBiomeRarity += biome.getValue().getBiomeConfig().biomeRarity;
                 map.put(cumulativeBiomeRarity, biome.getValue());
             }
         }
-        
-        cachedDepthMaps.put(new Integer(depth), map);
-        
+
+        cachedDepthMaps.set(depth, map);
+
+        return map;
+    }
+
+    SortedMap<Integer, LocalBiome> getDefaultDepthMap()
+    {
+        if (defaultDepthMap != null)
+        {
+            return defaultDepthMap;
+        }
+
+        int cumulativeBiomeRarity = 0;
+        TreeMap<Integer, LocalBiome> map = new TreeMap<>();
+        for (Entry<String, LocalBiome> biome : this.biomes.entrySet())
+        {
+            cumulativeBiomeRarity += biome.getValue().getBiomeConfig().biomeRarity;
+            map.put(cumulativeBiomeRarity, biome.getValue());
+        }
+
+        defaultDepthMap = map;
+
         return map;
     }
 
