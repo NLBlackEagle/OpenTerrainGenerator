@@ -1,35 +1,28 @@
-// Information for all projects
-
-// The default tasks for all projects
-defaultTasks 'clean', 'build', 'createReleaseJar', 'install'
-
-allprojects
-{
-    version = "1.12.2-v9.5-R2"
-    group = "com.pg85.otg"
-
-    // Version of the shadow plugin
-    ext.shadowVersion = '1.2.4'
+plugins {
+    id 'java'
 }
 
-// Information for all subprojects
-// (common, forge and bukkit, but not this file)
-subprojects
-{   task ->
+base.archivesName = "${mod_name}"
 
-    task.plugins.withType(org.gradle.api.plugins.JavaBasePlugin)
-    {
-        sourceCompatibility = '1.8'
-        targetCompatibility = '1.8'
+allprojects {
+    plugins.withType(org.gradle.api.plugins.JavaBasePlugin) {
+        java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
-        // Generate Eclipse config files when using "gradle eclipse"
-        task.apply plugin: 'eclipse'
-
-        // Generate IntelliJ IDEA config files
-        task.apply plugin: 'idea'
-
+        project.apply plugin: 'eclipse'
+        project.apply plugin: 'idea'
     }
 
-    // Generate a pom.xml, upload to local Maven repository
-    apply plugin: 'maven'
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    version = "${minecraft_version}-${mod_version}"
+    group = "${mod_group}"
+}
+
+jar {
+    from { zipTree(project(':common').shadowJar.archiveFile) }
+    from { zipTree(project(':bukkit').jar.archiveFile) }
+    from { zipTree(project(':forge').jar.archiveFile) }
 }
