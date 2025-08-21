@@ -38,3 +38,11 @@ jar {
 }
 
 jar.finalizedBy('reobfJar')
+
+configurations {
+    shadow
+}
+
+artifacts {
+    shadow jar.archiveFile
+}

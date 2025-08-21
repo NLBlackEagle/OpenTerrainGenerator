@@ -1,3 +1,5 @@
+import java.util.jar.JarFile
+
 plugins {
     id 'java'
 }
@@ -21,8 +23,30 @@ allprojects {
     group = "${mod_group}"
 }
 
+configurations {
+    shadow {
+        canBeConsumed = false
+        canBeResolved = true
+    }
+}
+
+dependencies {
+    shadow project(path: ':common', configuration: 'shadow')
+    shadow project(path: ':bukkit', configuration: 'shadow')
+    shadow project(path: ':forge', configuration: 'shadow')
+}
+
 jar {
-    from { zipTree(project(':common').shadowJar.archiveFile) }
-    from { zipTree(project(':bukkit').jar.archiveFile) }
-    from { zipTree(project(':forge').jar.archiveFile) }
+    dependsOn(':common:shadowJar')
+    dependsOn(':bukkit:jar')
+    dependsOn(':forge:reobfJar')
+
+    doFirst {
+        from {
+            configurations.shadow.incoming.files.collect { zipTree(it) }
+        }
+        manifest {
+            attributes configurations.shadow.incoming.files.collectEntries { new JarFile(it).manifest.mainAttributes.collectEntries { k, v -> [k.toString(), v] } }
+        }
+    }
 }

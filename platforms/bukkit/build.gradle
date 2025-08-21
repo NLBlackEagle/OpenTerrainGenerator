@@ -25,3 +25,11 @@ processResources {
         expand version: inputs.properties.get('version')
     }
 }
+
+configurations {
+    shadow
+}
+
+artifacts {
+    shadow jar.archiveFile
+}
