@@ -49,11 +49,13 @@ class CachedBiomeGenerator extends BiomeGenerator
      * The uncached biome generator.
      */
     private final BiomeGenerator generator;
+    private final CachedBiomeGeneratorDebugger debugger;
 
     public CachedBiomeGenerator(BiomeGenerator generator)
     {
         super(generator.world);
         this.generator = generator;
+        this.debugger = new CachedBiomeGeneratorDebugger(this);
     }
 
     /**
@@ -92,6 +94,7 @@ class CachedBiomeGenerator extends BiomeGenerator
     private CachedBiomeGenerator.Chunk getBiomeCacheChunk(ChunkCoordinate chunkCoord)
     {
         CachedBiomeGenerator.Chunk chunk = this.cacheMap.get(chunkCoord);
+        this.debugger.record(chunkCoord, chunk != null);
 
         if (chunk == null)
         {

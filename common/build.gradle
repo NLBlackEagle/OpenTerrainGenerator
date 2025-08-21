@@ -12,6 +12,8 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-databind:${jackson_version}"
     implementation "org.yaml:snakeyaml:${snakeyaml_version}"
     implementation "org.apache.commons:commons-lang3:${commons_lang3_version}"
+    implementation 'org.apache.logging.log4j:log4j-api:2.15.0'
+    implementation 'org.apache.logging.log4j:log4j-core:2.15.0'
 }
 
 shadowJar {
@@ -25,7 +27,7 @@ shadowJar {
     }
     relocate 'com.fasterxml.jackson', 'com.pg85.otg.shaded.fasterxml.jackson'
     relocate 'org.yaml', 'com.pg85.otg.shaded.org.yaml'
-    relocate 'org.apache', 'com.pg85.otg.shaded.org.apache'
+    relocate 'org.apache.commons', 'com.pg85.otg.shaded.org.apache.commons'
 }
 
 configurations {

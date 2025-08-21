@@ -1,6 +1,13 @@
 package com.pg85.otg.forge.events.server;
 
 import java.io.File;
+
+import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
@@ -18,6 +25,7 @@ import com.pg85.otg.forge.commands.OTGCommandHandler;
 import com.pg85.otg.forge.dimensions.OTGDimensionManager;
 import com.pg85.otg.forge.gui.GuiHandler;
 import com.pg85.otg.forge.world.OTGWorldType;
+import com.pg85.otg.generator.biome.CachedBiomeGeneratorDebugger;
 import com.pg85.otg.logging.LogMarker;
 
 public class ServerEventListener
@@ -36,6 +44,42 @@ public class ServerEventListener
 
     public static void serverLoad(FMLServerStartingEvent event)
     {
+        event.registerServerCommand(new CommandBase()
+        {
+            long lastTimeUsed = System.currentTimeMillis();
+
+            @Override
+            public String getUsage(ICommandSender sender)
+            {
+                return "/printBiomeCacheAccesses";
+            }
+
+            @Override
+            public String getName()
+            {
+                return "printBiomeCacheAccesses";
+            }
+
+            @Override
+            public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
+            {
+                if (System.currentTimeMillis() - lastTimeUsed < 5_000)
+                {
+                    sender.sendMessage(new TextComponentString("Command on cooldown please wait " + MathHelper.ceil((5_000 - (System.currentTimeMillis() - lastTimeUsed)) / 1000.0) + " seconds"));
+                } else
+                {
+                    CachedBiomeGeneratorDebugger.printAll();
+                    sender.sendMessage(new TextComponentString("Printed biome cache accesses in log"));
+                    lastTimeUsed = System.currentTimeMillis();
+                }
+            }
+
+            @Override
+            public int getRequiredPermissionLevel()
+            {
+                return 0;
+            }
+        });
         event.registerServerCommand(new OTGCommandHandler());
 
         World overWorld = DimensionManager.getWorld(0);
