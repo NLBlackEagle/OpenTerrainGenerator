@@ -33,7 +33,7 @@ jar {
     manifest {
         attributes 'FMLAT': "${forge_access_transformers}"
         attributes 'FMLCorePlugin': "${forge_plugin_class}"
-        attributes 'FMLCorePluginContainsMod': 'true'
+        attributes 'FMLCorePluginContainsFMLMod': 'true'
     }
 }
 
