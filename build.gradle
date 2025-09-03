@@ -5,7 +5,7 @@ defaultTasks 'clean', 'build', 'createReleaseJar', 'install'
 
 allprojects
 {
-    version = "1.12.2-v9.5-R2"
+    version = "1.12.2-v9.6"
     group = "com.pg85.otg"
 
     // Version of the shadow plugin
@@ -17,7 +17,7 @@ allprojects
 subprojects
 {   task ->
 
-    task.plugins.withType(org.gradle.api.plugins.JavaBasePlugin)
+    task.plugins.withType(JavaBasePlugin)
     {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
