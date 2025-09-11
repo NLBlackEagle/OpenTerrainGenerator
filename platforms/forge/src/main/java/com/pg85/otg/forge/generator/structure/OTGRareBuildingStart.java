@@ -22,6 +22,8 @@ public class OTGRareBuildingStart extends StructureStart
 	
     OTGRareBuildingStart(World world, Random random, int chunkX, int chunkZ)
     {
+        super(chunkX, chunkZ);
+        
         LocalWorld localWorld = ((ForgeEngine)OTG.getEngine()).getWorld(world);
         BiomeConfig biomeConfig = localWorld.getBiome(chunkX * 16 + 8, chunkZ * 16 + 8).getBiomeConfig();
         StructureComponent building;

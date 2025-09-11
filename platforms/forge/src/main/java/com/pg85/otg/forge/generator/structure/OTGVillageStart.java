@@ -31,6 +31,8 @@ public class OTGVillageStart extends StructureStart
     // TODO: Extra large villages aren't working?
     OTGVillageStart(World world, Random random, int chunkX, int chunkZ, int size)
     {
+        super(chunkX, chunkZ);
+
         List<PieceWeight> villagePieces = StructureVillagePieces.getStructureVillageWeightedPieceList(random, size);
 
         int startX = (chunkX << 4) + 2;
