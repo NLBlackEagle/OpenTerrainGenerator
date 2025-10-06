@@ -19,20 +19,21 @@ import com.pg85.otg.util.minecraft.defaults.DefaultMaterial;
  */
 public abstract class LocalMaterialData
 {
-	protected DefaultMaterial defaultMaterial;
-	protected String rawEntry;
-	protected boolean isBlank = false;
-	protected boolean checkedFallbacks = false;
-	protected boolean parsedDefaultMaterial = false;
-	
+    protected DefaultMaterial defaultMaterial;
+    protected String rawEntry;
+    protected boolean isBlank = false;
+    protected boolean checkedFallbacks = false;
+    protected boolean parsedDefaultMaterial = false;
+
     /**
      * Gets a {@code LocalMaterialData} of the given material and data.
+     * 
      * @param material The material.
      * @param data     The block data.
      * @return The {@code LocalMaterialData} instance.
      */
-	protected abstract LocalMaterialData ofDefaultMaterialPrivate(DefaultMaterial material, int data);
-    
+    protected abstract LocalMaterialData ofDefaultMaterialPrivate(DefaultMaterial material, int data);
+
     /**
      * Gets the name of this material. If a {@link #toDefaultMaterial()
      * DefaultMaterial is available,} that name is used, otherwise it's up to
@@ -41,7 +42,7 @@ public abstract class LocalMaterialData
      * 
      * @return The name of this material.
      */
-	public abstract String getName();
+    public abstract String getName();
 
     /**
      * Gets the internal block id. At the moment, all of Minecraft's vanilla
@@ -50,7 +51,7 @@ public abstract class LocalMaterialData
      * 
      * @return The internal block id.
      */
-	public abstract int getBlockId();
+    public abstract int getBlockId();
 
     /**
      * Gets the internal block data. Block data represents things like growth
@@ -81,14 +82,15 @@ public abstract class LocalMaterialData
      * Gets whether this material is air. This is functionally equivalent to
      * {@code isMaterial(DefaultMaterial.AIR)}, but may yield better
      * performance.
+     * 
      * @return True if this material is air, false otherwise.
      */
     public abstract boolean isEmptyOrAir();
-    
+
     public abstract boolean isAir();
 
     public abstract boolean isEmpty();
-    
+
     /**
      * Gets the default material belonging to this material. The block data will
      * be lost. If the material is not one of the vanilla Minecraft materials,
@@ -110,7 +112,7 @@ public abstract class LocalMaterialData
      * as {@link DefaultMaterial} doesn't include block data.
      * 
      * @param material
-     *            The material to check.
+     *                 The material to check.
      * @return True if this block is of the given material, false otherwise.
      */
     public abstract boolean isMaterial(DefaultMaterial material);
@@ -120,7 +122,7 @@ public abstract class LocalMaterialData
      * given block data. This instance is not modified.
      *
      * @param newData
-     *            The new block data.
+     *                The new block data.
      * @return An instance with the given block data.
      */
     public abstract LocalMaterialData withBlockData(int newData);
@@ -138,7 +140,7 @@ public abstract class LocalMaterialData
      * taken into account.
      * 
      * @param other
-     *            The other material.
+     *              The other material.
      * @return True if the materials are equal, false otherwise.
      */
     public abstract boolean equals(Object other);
@@ -164,11 +166,11 @@ public abstract class LocalMaterialData
         // From 0 to 4095 when there are 4096 block ids
         return getBlockId();
     }
-    
+
     public String toString()
     {
-    	return getName();
-    }   
+        return getName();
+    }
 
     /**
      * Gets a new material that is rotated 90 degrees. North -> west -> south ->
@@ -179,9 +181,9 @@ public abstract class LocalMaterialData
      */
     public LocalMaterialData rotate()
     {
-    	return rotate(1);
+        return rotate(1);
     }
-    
+
     /**
      * Gets a new material that is rotated 90 degrees. North -> west -> south ->
      * east. If this material cannot be rotated, the material itself is
@@ -191,23 +193,23 @@ public abstract class LocalMaterialData
      */
     public LocalMaterialData rotate(int rotateTimes)
     {
-    	// TODO: Rotate modded blocks?
-    	
+        // TODO: Rotate modded blocks?
+
         // Try to rotate
         DefaultMaterial defaultMaterial = toDefaultMaterial();
-        if (defaultMaterial != null)
+        if(defaultMaterial != null)
         {
             // We only know how to rotate vanilla blocks
-        	byte blockDataByte = 0;
+            byte blockDataByte = 0;
             int newData = 0;
             for(int i = 0; i < rotateTimes; i++)
             {
-            	blockDataByte = getBlockData();
-            	newData = BlockHelper.rotateData(defaultMaterial, blockDataByte);	
+                blockDataByte = getBlockData();
+                newData = BlockHelper.rotateData(defaultMaterial, blockDataByte);
             }
-            if (newData != blockDataByte)
+            if(newData != blockDataByte)
             {
-            	return ofDefaultMaterialPrivate(defaultMaterial, newData);
+                return ofDefaultMaterialPrivate(defaultMaterial, newData);
             }
         }
 
@@ -222,52 +224,53 @@ public abstract class LocalMaterialData
      * @return The parsed material
      */
     public abstract LocalMaterialData parseForWorld(LocalWorld world);
-    
-	public LocalMaterialData parseWithBiomeAndHeight(LocalWorld world, BiomeConfig biomeConfig, int y)
-	{	
-        if (!biomeConfig.worldConfig.biomeConfigsHaveReplacement)
+
+    public LocalMaterialData parseWithBiomeAndHeight(LocalWorld world, BiomeConfig biomeConfig, int y)
+    {
+        if(!biomeConfig.worldConfig.biomeConfigsHaveReplacement)
         {
             // Don't waste time here, ReplacedBlocks is empty everywhere
             return this;
         }
         return biomeConfig.replacedBlocks.replaceBlock(y, this);
-	}
+    }
 
     /**
      * Gets whether this material falls down when no other block supports this
      * block, like gravel and sand do.
+     * 
      * @return True if this material can fall, false otherwise.
      */
     public abstract boolean canFall();
-    
+
     /**
-     * Gets whether this material can be used as an anchor point for a smooth area    
+     * Gets whether this material can be used as an anchor point for a smooth area
      * 
      * @return True if this material is a solid block, false if it is a tile-entity, half-slab, stairs(?), water, wood or leaves
-     */    
+     */
     public boolean isSmoothAreaAnchor(boolean allowWood, boolean ignoreWater)
     {
-    	return
-			(
-				isSolid() || 
-				(
-					!ignoreWater && isLiquid()
-				)
-			) || (
-	    		(
-					isMaterial(DefaultMaterial.ICE) ||
-					isMaterial(DefaultMaterial.PACKED_ICE) ||
-					isMaterial(DefaultMaterial.FROSTED_ICE)
-				) && (
-					allowWood || 
-					!(
-						isMaterial(DefaultMaterial.LOG) || 
-						isMaterial(DefaultMaterial.LOG_2)
-					)
-				) &&
-				!isMaterial(DefaultMaterial.WATER_LILY)
-			);
+        return
+                (
+                    isSolid() || 
+                    (
+                        !ignoreWater && isLiquid()
+                    )
+                ) || (
+                    (
+                        isMaterial(DefaultMaterial.ICE) ||
+                        isMaterial(DefaultMaterial.PACKED_ICE) ||
+                        isMaterial(DefaultMaterial.FROSTED_ICE)
+                    ) && (
+                        allowWood || 
+                        !(
+                            isMaterial(DefaultMaterial.LOG) || 
+                            isMaterial(DefaultMaterial.LOG_2)
+                        )
+                    ) &&
+                    !isMaterial(DefaultMaterial.WATER_LILY)
+                );
     }
 
-	public abstract boolean hasData();
+    public abstract boolean hasData();
 }
