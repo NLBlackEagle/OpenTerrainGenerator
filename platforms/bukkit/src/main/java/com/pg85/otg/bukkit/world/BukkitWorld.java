@@ -1,7 +1,7 @@
 package com.pg85.otg.bukkit.world;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -647,54 +647,47 @@ public class BukkitWorld implements LocalWorld
     		(worldConfig.woodLandMansionsEnabled && isStructureInRadius(chunkCoord, this.woodLandMansionGen, 4))
 		;
 	}
-	
-	static Method canSpawnStructureAtCoordsMethod;
-    public boolean isStructureInRadius(ChunkCoordinate startChunk, StructureGenerator structure, int radiusInChunks)
-    {    	
-        if(canSpawnStructureAtCoordsMethod == null)
+
+    private static final Field worldField;
+    private static final Method canSpawnStructureAtCoordsMethod;
+    static
+    {
+        try
         {
-	        try
-	        {
-	        	canSpawnStructureAtCoordsMethod = StructureGenerator.class.getDeclaredMethod("a", int.class, int.class);
-	        	canSpawnStructureAtCoordsMethod.setAccessible(true);
-	        } catch (NoSuchMethodException | SecurityException e) {
-	        	OTG.log(LogMarker.ERROR, "Error, could not reflect canSpawnStructureAtCoords, BO4's may not be able to detect default/modded structures. OTG may not fully support your Spigot/Bukkit version.");
-	        	e.printStackTrace();
-	        }
+            worldField = WorldGenBase.class.getDeclaredField("g");
+            worldField.setAccessible(true);
+            canSpawnStructureAtCoordsMethod = StructureGenerator.class.getDeclaredMethod("a", int.class, int.class);
+            canSpawnStructureAtCoordsMethod.setAccessible(true);
         }
-    	    	
-        int chunkX = startChunk.getChunkX();
-        int chunkZ = startChunk.getChunkZ();        
-        for (int cycle = 0; cycle <= radiusInChunks; ++cycle)
+        catch(ReflectiveOperationException e)
         {
-            for (int xRadius = -cycle; xRadius <= cycle; ++xRadius)
+            throw new UnsupportedOperationException(e);
+        }
+    }
+
+    public boolean isStructureInRadius(ChunkCoordinate startChunk, StructureGenerator structure, int radiusInChunks)
+    {
+        try
+        {
+            worldField.set(structure, this.world);
+            for(int x = -radiusInChunks; x <= radiusInChunks; x++)
             {
-                for (int zRadius = -cycle; zRadius <= cycle; ++zRadius)
+                for(int z = -radiusInChunks; z <= radiusInChunks; z++)
                 {
-                    int distance = (int)Math.floor(Math.sqrt(Math.pow (chunkX-chunkX + xRadius, 2) + Math.pow (chunkZ-chunkZ + zRadius, 2)));                    
-                    if (distance == cycle)
+                    if((boolean) canSpawnStructureAtCoordsMethod.invoke(structure, startChunk.getChunkX() + x, startChunk.getChunkZ() + z))
                     {
-                    	boolean canSpawnStructureAtCoords = false;
-						try
-						{
-							canSpawnStructureAtCoords = (boolean) canSpawnStructureAtCoordsMethod.invoke(structure, chunkX + xRadius, chunkZ + zRadius);
-						}
-						catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
-						{
-							OTG.log(LogMarker.ERROR, "Error, could not reflect canSpawnStructureAtCoords, BO4's may not be able to detect default/modded structures. OTG may not fully support your Spigot/Bukkit version.");
-							e.printStackTrace();
-						}
-                    	if(canSpawnStructureAtCoords)
-                    	{
-                    		return true;
-                    	}
+                        return true;
                     }
                 }
             }
+            return false;
         }
-        return false;
+        catch(ReflectiveOperationException e)
+        {
+            throw new UnsupportedOperationException(e);
+        }
     }
-    
+
     @Override
     public boolean placeDefaultStructures(Random random, ChunkCoordinate chunkCoord)
     {

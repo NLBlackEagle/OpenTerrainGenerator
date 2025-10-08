@@ -71,13 +71,12 @@ import net.minecraft.world.gen.structure.StructureOceanMonument;
 import net.minecraft.world.gen.structure.template.Template;
 import net.minecraft.world.gen.structure.template.TemplateManager;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.relauncher.ReflectionHelper.UnableToFindMethodException;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.RandomUtils;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -1053,87 +1052,33 @@ public class ForgeWorld implements LocalWorld
     		(worldConfig.woodLandMansionsEnabled && isStructureInRadius(chunkCoord, this.woodLandMansionGen, 4))
 		;
 	}
-	
-	
-	private static boolean inited = false;
-	private static Method canSpawnStructureAtCoordsMethodObf = null;
-	private static Method canSpawnStructureAtCoordsMethodDeObf = null;
+
+    private static final Field worldField = ObfuscationReflectionHelper.findField(MapGenBase.class, "field_75039_c");
+    private static final Method canSpawnStructureAtCoordsMethod = ObfuscationReflectionHelper.findMethod(MapGenStructure.class, "func_75047_a", boolean.class, int.class, int.class);
+
     public boolean isStructureInRadius(ChunkCoordinate startChunk, MapGenStructure structure, int radiusInChunks)
     {
-    	if(!inited)
-    	{   
-    		inited = true;
-    		try
-    		{
-    			canSpawnStructureAtCoordsMethodObf = ObfuscationReflectionHelper.findMethod(MapGenStructure.class, "func_75047_a", boolean.class, int.class, int.class);
-    		} catch(UnableToFindMethodException ex) { }
-    		try
-    		{
-    			canSpawnStructureAtCoordsMethodDeObf = ObfuscationReflectionHelper.findMethod(MapGenStructure.class, "canSpawnStructureAtCoords", boolean.class, int.class, int.class);
-    		} catch(UnableToFindMethodException ex) { }
-    		
-        	if(canSpawnStructureAtCoordsMethodObf == null && canSpawnStructureAtCoordsMethodDeObf == null)
-        	{
-    			OTG.log(LogMarker.ERROR, "Error, could not reflect MapGenStructure.canSpawnStructureAtCoords, BO4's may not be able to detect default/modded structures. OTG may not fully support your Forge version or modded structures.");
-    			return false;
-        	}
-    	}
-    	
-    	if(canSpawnStructureAtCoordsMethodObf == null && canSpawnStructureAtCoordsMethodDeObf == null)
-    	{
-			return false;
-    	}
-    	
-        int chunkX = startChunk.getChunkX();
-        int chunkZ = startChunk.getChunkZ();
-        for (int cycle = 0; cycle <= radiusInChunks; ++cycle)
+        try
         {
-            for (int xRadius = -cycle; xRadius <= cycle; ++xRadius)
+            worldField.set(structure, this.world);
+            for(int x = -radiusInChunks; x <= radiusInChunks; x++)
             {
-                for (int zRadius = -cycle; zRadius <= cycle; ++zRadius)
+                for(int z = -radiusInChunks; z <= radiusInChunks; z++)
                 {
-                    int distance = (int)Math.floor(Math.sqrt(Math.pow (xRadius, 2) + Math.pow (zRadius, 2)));                    
-                    if (distance == cycle)
+                    if((boolean) canSpawnStructureAtCoordsMethod.invoke(structure, startChunk.getChunkX() + x, startChunk.getChunkZ() + z))
                     {
-                    	boolean canSpawnStructureAtCoords = false;
-						
-                    	try
-						{
-							if(canSpawnStructureAtCoordsMethodObf != null)
-							{
-								canSpawnStructureAtCoords = (boolean) canSpawnStructureAtCoordsMethodObf.invoke(structure, chunkX + xRadius, chunkZ + zRadius);
-		                    	if(canSpawnStructureAtCoords)
-		                    	{
-		                    		return true;
-		                    	}
-		                    	continue;
-							}
-						}
-						catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) { }
-						
-						try
-						{
-							if(canSpawnStructureAtCoordsMethodDeObf != null)
-							{
-								canSpawnStructureAtCoords = (boolean) canSpawnStructureAtCoordsMethodDeObf.invoke(structure, chunkX + xRadius, chunkZ + zRadius);
-		                    	if(canSpawnStructureAtCoords)
-		                    	{
-		                    		return true;
-		                    	}
-							}
-						}
-						catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
-						{
-							OTG.log(LogMarker.ERROR, "Error, could not reflect MapGenStructure.canSpawnStructureAtCoords, BO4's may not be able to detect default/modded structures. OTG may not fully support your Forge version or modded structures.");
-							return false;
-						}
+                        return true;
                     }
                 }
             }
+            return false;
         }
-        return false;
+        catch(ReflectiveOperationException e)
+        {
+            throw new UnsupportedOperationException(e);
+        }
     }
-	
+
 	// TODO: No clue what this is used for, leads to some MC advancements "test" code. 
     public boolean isInsideStructure(String structureName, BlockPos pos)
     {
