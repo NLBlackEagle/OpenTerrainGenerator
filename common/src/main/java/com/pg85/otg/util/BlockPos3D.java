@@ -14,6 +14,16 @@ public class BlockPos3D
     }
 
     @Override
+    public int hashCode()
+    {
+        int hash = 1;
+        hash = hash * 31 + this.x;
+        hash = hash * 31 + this.y;
+        hash = hash * 31 + this.z;
+        return hash;
+    }
+
+    @Override
     public boolean equals(Object obj)
     {
         if(this == obj)
