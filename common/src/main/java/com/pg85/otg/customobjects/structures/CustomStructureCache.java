@@ -14,7 +14,7 @@ import com.pg85.otg.customobjects.structures.bo4.CustomStructurePlotter;
 import com.pg85.otg.generator.resource.CustomStructureGen;
 import com.pg85.otg.logging.LogMarker;
 import com.pg85.otg.util.ChunkCoordinate;
-import com.pg85.otg.util.FifoMap;
+import com.pg85.otg.util.LRUCache;
 import com.pg85.otg.util.helpers.RandomHelper;
 
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public class CustomStructureCache
 	public static final int REGION_SIZE = 100;
 	
 	// BO3
-	private FifoMap<ChunkCoordinate, BO3CustomStructure> bo3StructureCache;
+	private LRUCache<ChunkCoordinate, BO3CustomStructure> bo3StructureCache;
 	
 	// BO4
 	
@@ -56,7 +56,7 @@ public class CustomStructureCache
         this.world = world;
         this.worldInfoChunks = new HashMap<ChunkCoordinate, StructureDataRegion>();
         this.plotter = new CustomStructurePlotter();
-        this.bo3StructureCache = new FifoMap<ChunkCoordinate, BO3CustomStructure>(400);
+        this.bo3StructureCache = new LRUCache<ChunkCoordinate, BO3CustomStructure>(400);
         loadStructureCache();
     }
     

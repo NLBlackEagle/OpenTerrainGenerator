@@ -21,7 +21,7 @@ import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.generator.resource.CustomStructureGen;
 import com.pg85.otg.logging.LogMarker;
 import com.pg85.otg.util.ChunkCoordinate;
-import com.pg85.otg.util.FifoMap;
+import com.pg85.otg.util.LRUCache;
 import com.pg85.otg.util.bo3.Rotation;
 
 public class CustomStructurePlotter
@@ -51,14 +51,14 @@ public class CustomStructurePlotter
 	private boolean structurePlottedAtSpawn; // Used by ObjectSpawner to make sure the structureatspawn is plotted first.
 	
 	// Non-persistent caches (optimisations)
-	private final FifoMap<ChunkCoordinate, ArrayList<String>> structureNamesPerChunk;
-	private final FifoMap<ChunkCoordinate, Object> plottedChunksFastCache; // TODO: Technically we don't need a map, we need a FIFO list with unique entries.
+	private final LRUCache<ChunkCoordinate, ArrayList<String>> structureNamesPerChunk;
+	private final LRUCache<ChunkCoordinate, Object> plottedChunksFastCache; // TODO: Technically we don't need a map, we need a FIFO list with unique entries.
 	
 	public CustomStructurePlotter()
 	{
 		// Non-persistent caches
-		this.structureNamesPerChunk = new FifoMap<ChunkCoordinate, ArrayList<String>>(2048);
-        this.plottedChunksFastCache = new FifoMap<ChunkCoordinate, Object>(2048);
+		this.structureNamesPerChunk = new LRUCache<ChunkCoordinate, ArrayList<String>>(2048);
+        this.plottedChunksFastCache = new LRUCache<ChunkCoordinate, Object>(2048);
         
         // Persistent caches
         this.spawnedStructuresByName = new HashMap<String, ArrayList<ChunkCoordinate>>();

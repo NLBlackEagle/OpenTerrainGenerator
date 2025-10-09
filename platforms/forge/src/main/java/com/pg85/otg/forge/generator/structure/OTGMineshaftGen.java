@@ -8,7 +8,7 @@ import com.pg85.otg.configuration.biome.BiomeConfig.MineshaftType;
 import com.pg85.otg.forge.ForgeEngine;
 import com.pg85.otg.forge.world.ForgeWorld;
 import com.pg85.otg.util.ChunkCoordinate;
-import com.pg85.otg.util.FifoMap;
+import com.pg85.otg.util.LRUCache;
 import com.pg85.otg.util.minecraft.defaults.StructureNames;
 
 import net.minecraft.util.math.BlockPos;
@@ -37,7 +37,7 @@ public class OTGMineshaftGen extends OTGMapGenStructure
 		}
 	}
 	
-	FifoMap<ChunkCoordinate, CachedCoord> cachedCoordsByChunk = new FifoMap<ChunkCoordinate, CachedCoord>(256);
+	LRUCache<ChunkCoordinate, CachedCoord> cachedCoordsByChunk = new LRUCache<ChunkCoordinate, CachedCoord>(256);
 	
 	
     @Override

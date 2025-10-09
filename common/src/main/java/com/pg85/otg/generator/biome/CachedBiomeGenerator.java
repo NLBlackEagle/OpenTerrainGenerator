@@ -2,7 +2,7 @@ package com.pg85.otg.generator.biome;
 
 import com.pg85.otg.common.LocalWorld;
 import com.pg85.otg.util.ChunkCoordinate;
-import com.pg85.otg.util.FifoMap;
+import com.pg85.otg.util.LRUCache;
 
 /**
  * Wraps uncached biome generators.
@@ -44,7 +44,7 @@ class CachedBiomeGenerator extends BiomeGenerator
     /**
      * The map of cached BiomeCacheBlocks.
      */
-    private FifoMap<ChunkCoordinate, CachedBiomeGenerator.Chunk> cacheMap = new FifoMap<ChunkCoordinate, Chunk>(4096); // TODO: This gets slow at large sizes, test/profile to find the best size.
+    private LRUCache<ChunkCoordinate, CachedBiomeGenerator.Chunk> cacheMap = new LRUCache<ChunkCoordinate, Chunk>(4096); // TODO: This gets slow at large sizes, test/profile to find the best size.
     /**
      * The uncached biome generator.
      */

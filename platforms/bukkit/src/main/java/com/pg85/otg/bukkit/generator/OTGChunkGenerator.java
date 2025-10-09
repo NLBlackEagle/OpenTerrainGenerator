@@ -14,7 +14,7 @@ import com.pg85.otg.generator.ObjectSpawner;
 import com.pg85.otg.logging.LogMarker;
 import com.pg85.otg.util.BlockPos2D;
 import com.pg85.otg.util.ChunkCoordinate;
-import com.pg85.otg.util.FifoMap;
+import com.pg85.otg.util.LRUCache;
 import com.pg85.otg.util.bo3.NamedBinaryTag;
 import com.pg85.otg.util.minecraft.defaults.DefaultMaterial;
 
@@ -49,8 +49,8 @@ public class OTGChunkGenerator extends ChunkGenerator
     private BukkitWorld world;
     
     // Caches
-	private FifoMap<BlockPos2D, LocalMaterialData[]> unloadedBlockColumnsCache;
-	private FifoMap<ChunkCoordinate, ChunkData> unloadedChunksCache;
+	private LRUCache<BlockPos2D, LocalMaterialData[]> unloadedBlockColumnsCache;
+	private LRUCache<ChunkCoordinate, ChunkData> unloadedChunksCache;
 	private Entry<ChunkCoordinate, Chunk> lastUsedChunk1;
 	private Entry<ChunkCoordinate, Chunk> lastUsedChunk2;
 	private Entry<ChunkCoordinate, Chunk> lastUsedChunk3;
@@ -65,8 +65,8 @@ public class OTGChunkGenerator extends ChunkGenerator
         this.dataConverter = DataConverterRegistry.a();
         // TODO: Add a setting to the worldconfig for the size of these caches. 
         // Worlds with lots of BO4's and large smoothing areas may want to increase this. 
-        this.unloadedBlockColumnsCache = new FifoMap<BlockPos2D, LocalMaterialData[]>(1024);
-        this.unloadedChunksCache = new FifoMap<ChunkCoordinate, ChunkData>(1024); //Changed 128 chunks cache to 1024 chunks cache for customstructures
+        this.unloadedBlockColumnsCache = new LRUCache<BlockPos2D, LocalMaterialData[]>(1024);
+        this.unloadedChunksCache = new LRUCache<ChunkCoordinate, ChunkData>(1024); //Changed 128 chunks cache to 1024 chunks cache for customstructures
     	lastUsedChunk1 = null;
     	lastUsedChunk2 = null;
     	lastUsedChunk3 = null;
