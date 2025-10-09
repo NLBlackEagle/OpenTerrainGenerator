@@ -23,7 +23,7 @@ public class BlockPos3D
         if(obj instanceof BlockPos3D)
         {
             BlockPos3D other = (BlockPos3D) obj;
-            return this.x == other.x && this.z == other.z;
+            return this.x == other.x && this.y == other.y && this.z == other.z;
         }
         return false;
     }
