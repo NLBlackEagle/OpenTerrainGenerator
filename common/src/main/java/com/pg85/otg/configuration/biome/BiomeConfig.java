@@ -31,6 +31,7 @@ import com.pg85.otg.util.minecraft.defaults.DefaultMaterial;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BiomeConfig extends ConfigFile
 {
@@ -837,7 +838,7 @@ public class BiomeConfig extends ConfigFile
             "TreeTypeChance: similar to Rarity. Example:",
             "                Tree(10,Taiga1,35,Taiga2,100) - plugin tries 10 times, for each attempt it tries to place Taiga1 (35% chance),",
             "                if that fails, it attempts to place Taiga2 (100% chance).",
-            "PlantType:      one of the plant types: " + StringHelper.join(PlantType.values(), ", "),
+            "PlantType:      one of the plant types: " + StringHelper.join(PlantType.values().stream().sorted(Comparator.comparing(PlantType::getName, String.CASE_INSENSITIVE_ORDER)).collect(Collectors.toList()), ", "),
             "                or simply a BlockName",
             "IceSpikeType:   one of the ice spike types: " + StringHelper.join(IceSpikeGen.SpikeType.values(), ","),
             "Object:         can be a any kind of custom object (bo2 or bo3) but without the file extension. You can",
