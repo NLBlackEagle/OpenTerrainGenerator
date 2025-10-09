@@ -3,8 +3,10 @@ package com.pg85.otg.util.minecraft.defaults;
 import com.pg85.otg.common.LocalMaterialData;
 import com.pg85.otg.common.LocalWorld;
 
+import java.util.Arrays;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Enum of the materials the server will at least support.
@@ -256,7 +258,14 @@ public enum DefaultMaterial
     /**
      * A DefaultMaterial lookup table with the material ID as the index
      */
-    private static DefaultMaterial[] LookupID;
+    private static final DefaultMaterial[] LookupID = new DefaultMaterial[Arrays.stream(DefaultMaterial.values()).mapToInt(m -> m.id).max().orElse(0)];
+    static
+    {
+        for(DefaultMaterial m : DefaultMaterial.values())
+        {
+            LookupID[m.id] = m;
+        }
+    }
 	
     /**
      * The ID of the material
@@ -337,19 +346,7 @@ public enum DefaultMaterial
     /**
      * A DefaultMaterial lookup table with the material name as the index
      */
-    private static Map<String, DefaultMaterial> lookupName;
-
-    static
-    {
-        LookupID = new DefaultMaterial[256];
-        lookupName = new TreeMap<String, DefaultMaterial>(String.CASE_INSENSITIVE_ORDER);
-
-        for (DefaultMaterial material : DefaultMaterial.values())
-        {
-            LookupID[material.id] = material;
-            lookupName.put(material.name(), material);
-        }
-    }
+    private static final Map<String, DefaultMaterial> lookupName = Arrays.stream(DefaultMaterial.values()).collect(Collectors.toMap(Enum::name, Function.identity()));
 
     /**
      * Returns a DefaultMaterial object with the given material name. Name is
@@ -411,7 +408,7 @@ public enum DefaultMaterial
      */
     public static DefaultMaterial getMaterial(int id)
     {
-        if (id < 256 && id > -1 && LookupID[id] != null)
+        if (id >= 0 && id < LookupID.length)
         {
             return LookupID[id];
         }
@@ -430,7 +427,7 @@ public enum DefaultMaterial
      */
     public static boolean contains(int id)
     {
-        return id < 256 && LookupID[id] != null;
+        return id >= 0 && id < LookupID.length && LookupID[id] != null;
     }
 
 }
