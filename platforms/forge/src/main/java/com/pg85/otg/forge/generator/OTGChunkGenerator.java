@@ -418,10 +418,16 @@ public class OTGChunkGenerator implements IChunkGenerator
         
         // Disable nearby block physics (except for tile entities) and set block
         boolean oldCaptureBlockStates = this.world.getWorld().captureBlockSnapshots;
-    	this.world.getWorld().captureBlockSnapshots = !(newState.getBlock().hasTileEntity(newState));    	
-        //this.world.getWorld().captureBlockSnapshots = true;
-        IBlockState iblockstate = chunk.setBlockState(pos, newState);
-        this.world.getWorld().captureBlockSnapshots = oldCaptureBlockStates;
+        IBlockState iblockstate;
+        try
+        {
+            this.world.getWorld().captureBlockSnapshots = !(newState.getBlock().hasTileEntity(newState));
+            iblockstate = chunk.setBlockState(pos, newState);
+        }
+        finally
+        {
+            this.world.getWorld().captureBlockSnapshots = oldCaptureBlockStates;
+        }
         
         if (iblockstate == null)
         {
