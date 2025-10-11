@@ -1,68 +1,35 @@
-// Build script for OpenTerrainGenerator for Bukkit
-
-apply plugin: 'java'
-
-// Project properties
-archivesBaseName = "openterraingenerator-bukkit"
-description = "Open Terrain Generator for Bukkit"
-ext.worldeditVersion = "6.1.4"
-ext.bukkitVersion = "1.12.2-R0.1-SNAPSHOT"
-
-repositories
-{
-    mavenLocal() // For Spigot Server
-    mavenCentral() // For log4j
-    maven 
-    {   // Fallback for Spigot Server, no official repo exists
-        url = "http://rutgerkok.nl/repo" 
-    }
-    maven
-    {   // For Bukkit API, updated by Spigot
-		url = "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
-    }
-    maven 
-    {   // Worldedit API
-   		url "https://maven.enginehub.org/artifactory/repo/"
-   	}
+plugins {
+    id 'java'
 }
 
-dependencies
-{
-    compile 'org.bukkit:bukkit:' + project.ext.bukkitVersion
-    compile 'org.spigotmc:spigot:' + project.ext.bukkitVersion
-    compileOnly 'com.sk89q.worldedit:worldedit-bukkit:' + project.ext.worldeditVersion
-    compile project(':common')
-    compile 'org.apache.logging.log4j:log4j-api:2.0-beta9'
-    compile 'org.apache.logging.log4j:log4j-core:2.0-beta9'
+base.archivesName = "${mod_name}-bukkit"
+
+repositories {
+    maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' } // bukkit
+    maven { url = "https://rutgerkok.nl/repo/" } // spigot
+    maven { url = 'https://maven.enginehub.org/artifactory/repo/' } // worldedit
 }
 
-// Replace text in plugin.yml
-processResources
-{
-    // This will ensure that this task is redone when the versions change.
-    inputs.property "version", project.version
+dependencies {
+    implementation "org.bukkit:bukkit:${minecraft_version}-${bukkit_version}"
+    implementation "org.spigotmc:spigot:${minecraft_version}-${bukkit_version}"
+    implementation project(':common')
+    compileOnly "com.sk89q.worldedit:worldedit-bukkit:${worldedit_bukkit_version}"
+    compileOnly "com.sk89q.worldedit:worldedit-core:${worldedit_core_version}"
+}
 
-    // Replace stuff in plugin.yml, nothing else
-    from(sourceSets.main.resources.srcDirs) {
-        include 'plugin.yml'
+processResources {
+    inputs.property 'version', "${mod_version}"
 
-        // Replace version
-        expand 'version': project.version
-    }
-
-    // Copy everything else, that's not the plugin.yml
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'plugin.yml'
+    filesMatching('plugin.yml') {
+        expand version: inputs.properties.get('version')
     }
 }
 
-// Include all Open Terrain Generator files in the jar
-jar
-{
-    destinationDir = new File(project.buildDir, "distributions")
-    classifier = ''
-    from
-    {
-        project(":common").sourceSets.main.output.files
-    }
+configurations {
+    shadow
+}
+
+artifacts {
+    shadow jar.archiveFile
 }

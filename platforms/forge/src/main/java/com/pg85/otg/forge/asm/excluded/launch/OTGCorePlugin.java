@@ -18,7 +18,7 @@ public class OTGCorePlugin implements IFMLLoadingPlugin
 	@Override
 	public String getModContainerClass()
 	{
-		return "com.pg85.otg.forge.asm.excluded.launch.OTGASMModContainer";
+		return null;
 	}
 
 	@Override

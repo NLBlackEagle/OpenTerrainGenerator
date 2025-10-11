@@ -1,35 +1,55 @@
-// Information for all projects
+import java.util.jar.JarFile
+import org.gradle.api.plugins.JavaBasePlugin
 
-// The default tasks for all projects
-defaultTasks 'clean', 'build', 'createReleaseJar', 'install'
-
-allprojects
-{
-    version = "1.12.2-v9.7"
-    group = "com.pg85.otg"
-
-    // Version of the shadow plugin
-    ext.shadowVersion = '1.2.4'
+plugins {
+    id 'java'
 }
 
-// Information for all subprojects
-// (common, forge and bukkit, but not this file)
-subprojects
-{   task ->
+base.archivesName = "${mod_name}"
 
-    task.plugins.withType(JavaBasePlugin)
-    {
-        sourceCompatibility = '1.8'
-        targetCompatibility = '1.8'
+allprojects {
+    plugins.withType(JavaBasePlugin) {
+        java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
-        // Generate Eclipse config files when using "gradle eclipse"
-        task.apply plugin: 'eclipse'
-
-        // Generate IntelliJ IDEA config files
-        task.apply plugin: 'idea'
-
+        project.apply plugin: 'eclipse'
+        project.apply plugin: 'idea'
     }
 
-    // Generate a pom.xml, upload to local Maven repository
-    apply plugin: 'maven'
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
+    version = "${minecraft_version}-${mod_version}"
+    group = "${mod_group}"
+}
+
+configurations {
+    shadow {
+        canBeConsumed = false
+        canBeResolved = true
+    }
+}
+
+dependencies {
+    shadow project(path: ':common', configuration: 'shadow')
+    shadow project(path: ':bukkit', configuration: 'shadow')
+    shadow project(path: ':forge', configuration: 'shadow')
+}
+
+jar {
+    dependsOn(':common:shadowJar')
+    dependsOn(':bukkit:jar')
+    dependsOn(':forge:reobfJar')
+
+    inputs.files(configurations.shadow.incoming.files)
+
+    doFirst {
+        from {
+            configurations.shadow.incoming.files.collect { zipTree(it) }
+        }
+        manifest {
+            attributes configurations.shadow.incoming.files.collectEntries { new JarFile(it).manifest.mainAttributes.collectEntries { k, v -> [k.toString(), v] } }
+        }
+    }
 }

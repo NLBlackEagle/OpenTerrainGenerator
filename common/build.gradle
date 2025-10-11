@@ -1,47 +1,34 @@
-// Build script for the Common parts of OpenTerrainGenerator
-
 plugins {
-  id 'java'
-  id 'com.github.johnrengelman.shadow' version '1.2.4'
+    id 'java'
+    id 'com.gradleup.shadow' version "${shadow_version}"
 }
 
-// Project properties
-archivesBaseName = "openterraingenerator-common"
-description = "Core files of OpenTerrainGenerator"
+base.archivesName = "${mod_name}-common"
 
-repositories
-{
-	jcenter()
-    mavenLocal()
-    mavenCentral()
-}
-
-dependencies
-{
-    compile (
-		'com.fasterxml.jackson.core:jackson-annotations:2.9.0',
-		'com.fasterxml.jackson.core:jackson-core:2.9.7',
-		'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.7',
-		'com.fasterxml.jackson.core:jackson-databind:2.9.7',
-		'org.yaml:snakeyaml:1.23',
-		'org.apache.commons:commons-lang3:3.4'
-    )	
+dependencies {
+    implementation "com.fasterxml.jackson.core:jackson-annotations:${jackson_version}"
+    implementation "com.fasterxml.jackson.core:jackson-core:${jackson_version}"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jackson_version}"
+    implementation "com.fasterxml.jackson.core:jackson-databind:${jackson_version}"
+    implementation "org.yaml:snakeyaml:${snakeyaml_version}"
 }
 
 shadowJar {
     dependencies {
-		include dependency(':jackson-annotations')
-		include dependency(':jackson-core')
-		include dependency(':jackson-dataformat-yaml')
-		include dependency(':jackson-databind')
-		include dependency(':snakeyaml')
-		include dependency(':commons-lang3')
+        include dependency(':jackson-annotations')
+        include dependency(':jackson-core')
+        include dependency(':jackson-dataformat-yaml')
+        include dependency(':jackson-databind')
+        include dependency(':snakeyaml')
     }
-	relocate 'com.fasterxml.jackson', 'com.pg85.otg.shaded.fasterxml.jackson'
-	relocate 'org.apache', 'com.pg85.otg.shaded.org.apache'
-	relocate 'org.yaml', 'com.pg85.otg.shaded.org.yaml'
-	archiveName = project.archivesBaseName + '-' + project.version + '.jar'
-	destinationDir = project.distsDir
+    relocate 'com.fasterxml.jackson', 'com.pg85.otg.shaded.fasterxml.jackson'
+    relocate 'org.yaml', 'com.pg85.otg.shaded.org.yaml'
 }
 
-build.finalizedBy(shadowJar)
+configurations {
+    shadow
+}
+
+artifacts {
+    shadow shadowJar.archiveFile
+}
