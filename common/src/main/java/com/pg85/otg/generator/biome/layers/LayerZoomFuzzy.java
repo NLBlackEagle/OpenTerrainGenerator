@@ -1,11 +1,13 @@
 package com.pg85.otg.generator.biome.layers;
 
+import com.pg85.otg.common.LocalWorld;
+
 public class LayerZoomFuzzy extends LayerZoom
 {
 
-    LayerZoomFuzzy(long seed, int defaultOceanId, Layer childLayer)
+    LayerZoomFuzzy(long seed, LocalWorld world, Layer childLayer)
     {
-        super(seed, defaultOceanId, childLayer);
+        super(seed, world, childLayer);
     }
 
     @Override

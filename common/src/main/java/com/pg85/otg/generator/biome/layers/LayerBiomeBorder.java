@@ -9,9 +9,9 @@ public class LayerBiomeBorder extends Layer
     private boolean[][] bordersFrom;
     private int[] bordersTo;
 
-    LayerBiomeBorder(long seed, LocalWorld world, int defaultOceanId)
+    LayerBiomeBorder(long seed, LocalWorld world)
     {
-        super(seed, defaultOceanId);
+        super(seed, world);
         this.bordersFrom = new boolean[world.getMaxBiomesCount()][];
         this.bordersTo = new int[world.getMaxBiomesCount()];
     }

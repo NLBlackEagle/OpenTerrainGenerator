@@ -1,7 +1,10 @@
 package com.pg85.otg.generator.biome.layers;
 
+import com.pg85.otg.OTG;
+import com.pg85.otg.common.LocalBiome;
 import com.pg85.otg.common.LocalWorld;
 import com.pg85.otg.generator.biome.ArraysCache;
+import com.pg85.otg.logging.LogMarker;
 
 /**
  * Layer is the abstract base class for the entire layering system.
@@ -37,43 +40,13 @@ import com.pg85.otg.generator.biome.ArraysCache;
  */
 public abstract class Layer
 {
-
-    /**
-     * The base seed set during layer construction, all other seeds are based
-     * upon this one.
-     */
-    private long baseSeed;
-
-    /**
-     * A general seed kept for use in world generation
-     * @see #initWorldGenSeed(long)
-     */
-    protected long scrambledWorldSeed;
-
-    /**
-     * This seed is used for general random number generation within the Layers
-     * system. It is based off of both the scrambledWorldSeed and baseSeed.
-     * @see #initWorldGenSeed(long)
-     * @see #initChunkSeed(long, long)
-     */
-    private long scrambledChunkSeed;
-
-    /**
-     * This seed is used for generating random numbers for biome groups
-     * @see #initGroupSeed(long, long)
-     */
-    private long scrambledGroupSeed;
+    private final LayerRNG rng;
 
     /**
      * The layer to process before this one. getInts() should call
      * child.getInts() before doing any processing -- in most cases.
      */
     protected Layer child;
-
-    /**
-     * This helps our random numbers be a little more random
-     */
-    protected static final int Entropy = 10000;
 
     /*
      * LayerIsland - chance to big land
@@ -120,40 +93,29 @@ public abstract class Layer
     protected static final int RiverBitOne = (1 << RiverShift);             //>>	22st Bit, 1048576
     protected static final int RiverBitTwo = (1 << (RiverShift + 1));       //>>	23nd Bit, 2097152
 
-    private static long getScrambledBaseSeed(long baseSeed)
+    protected final int defaultOceanId;
+
+    protected Layer(long seed, LocalWorld world)
     {
-        long scrambledBaseSeed = baseSeed;
-        scrambledBaseSeed *= (scrambledBaseSeed * 6364136223846793005L + 1442695040888963407L);
-        scrambledBaseSeed += baseSeed;
-        scrambledBaseSeed *= (scrambledBaseSeed * 6364136223846793005L + 1442695040888963407L);
-        scrambledBaseSeed += baseSeed;
-        scrambledBaseSeed *= (scrambledBaseSeed * 6364136223846793005L + 1442695040888963407L);
-        scrambledBaseSeed += baseSeed;
-        return scrambledBaseSeed;
+        this.rng = LayerRNG.create(world.getConfigs().getWorldSaveData());
+        this.rng.setLayerSeed(seed);
+        this.defaultOceanId = getBiomeId(world, world.getConfigs().getWorldConfig().defaultOceanBiome, "DefaultOceanBiome");
     }
 
-    protected static long getScrambledWorldSeed(long baseSeed, long worldSeed)
+    protected static int getBiomeId(LocalWorld world, String id, String name)
     {
-        long scrambledBaseSeed = getScrambledBaseSeed(baseSeed);
-        long scrambledWorldSeed = worldSeed;
-        scrambledWorldSeed *= (scrambledWorldSeed * 6364136223846793005L + 1442695040888963407L);
-        scrambledWorldSeed += scrambledBaseSeed;
-        scrambledWorldSeed *= (scrambledWorldSeed * 6364136223846793005L + 1442695040888963407L);
-        scrambledWorldSeed += scrambledBaseSeed;
-        scrambledWorldSeed *= (scrambledWorldSeed * 6364136223846793005L + 1442695040888963407L);
-        scrambledWorldSeed += scrambledBaseSeed;
-        return scrambledWorldSeed;
-    }
+        LocalBiome biome = world.getBiomeByNameOrNull(id);
+        if(biome == null)
+        {
+            biome = world.getFirstBiomeOrNull();
+            if(biome == null)
+            {
+                throw new RuntimeException(String.format("Could not find '%s' \"%s\", aborting.", name, id));
+            }
+            OTG.log(LogMarker.WARN, "Could not find '%s' \"%s\", substituting \"%s\".", name, id, biome.getName());
+        }
 
-    protected int defaultOceanId;
-    protected Layer(long seed, int defaultOceanId)
-    {
-        this.baseSeed = seed;
-        this.defaultOceanId = defaultOceanId;
-    }
-
-    public Layer()
-    {
+        return biome.getIds().getOTGBiomeId();
     }
 
     public void initWorldGenSeed(long worldSeed)
@@ -161,57 +123,41 @@ public abstract class Layer
         if (this.child != null)
             this.child.initWorldGenSeed(worldSeed);
 
-        this.scrambledWorldSeed = getScrambledWorldSeed(this.baseSeed, worldSeed);
+        this.rng.setWorldSeed(worldSeed);
     }
 
+    protected void initChunkSeed(int x, int z)
+    {
+        this.rng.initChunkSeed(x, z);
+    }
+
+    @Deprecated
     protected void initChunkSeed(long x, long z)
     {
-        this.scrambledChunkSeed = this.scrambledWorldSeed;
-        this.scrambledChunkSeed *= (this.scrambledChunkSeed * 6364136223846793005L + 1442695040888963407L);
-        this.scrambledChunkSeed += x;
-        this.scrambledChunkSeed *= (this.scrambledChunkSeed * 6364136223846793005L + 1442695040888963407L);
-        this.scrambledChunkSeed += z;
-        this.scrambledChunkSeed *= (this.scrambledChunkSeed * 6364136223846793005L + 1442695040888963407L);
-        this.scrambledChunkSeed += x;
-        this.scrambledChunkSeed *= (this.scrambledChunkSeed * 6364136223846793005L + 1442695040888963407L);
-        this.scrambledChunkSeed += z;
+        this.rng.initChunkSeed(x, z);
     }
 
+    @Deprecated
     protected void initGroupSeed(long x, long z)
     {
-        this.scrambledGroupSeed = this.scrambledChunkSeed;
-        this.scrambledGroupSeed *= (this.scrambledGroupSeed * 6364136223846793005L + 1442695040888963407L);
-        this.scrambledGroupSeed += x;
-        this.scrambledGroupSeed *= (this.scrambledGroupSeed * 6364136223846793005L + 1442695040888963407L);
-        this.scrambledGroupSeed += z;
-        this.scrambledGroupSeed *= (this.scrambledGroupSeed * 6364136223846793005L + 1442695040888963407L);
-        this.scrambledGroupSeed += x;
-        this.scrambledGroupSeed *= (this.scrambledGroupSeed * 6364136223846793005L + 1442695040888963407L);
-        this.scrambledGroupSeed += z;
+        this.rng.initGroupSeed(x, z);
     }
 
     protected int nextInt(int x)
     {
-        int i = (int) ((this.scrambledChunkSeed >> 24) % x);
-        if (i < 0)
-        {
-            i += x;
-        }
-        this.scrambledChunkSeed *= (this.scrambledChunkSeed * 6364136223846793005L + 1442695040888963407L);
-        this.scrambledChunkSeed += this.scrambledWorldSeed;
-        return i;
+        return this.rng.nextChunkInt(x);
     }
 
+    @Deprecated
     protected int nextGroupInt(int x)
     {
-        int i = (int) ((this.scrambledGroupSeed >> 24) % x);
-        if (i < 0)
-        {
-            i += x;
-        }
-        this.scrambledGroupSeed *= (this.scrambledGroupSeed * 6364136223846793005L + 1442695040888963407L);
-        this.scrambledGroupSeed += this.scrambledChunkSeed;
-        return i;
+        return this.rng.nextGroupInt(x);
+    }
+
+    @Deprecated
+    protected int nextGroupIntEntropy(int x)
+    {
+        return this.rng.nextGroupIntEntropy(x);
     }
 
     public abstract int[] getInts(LocalWorld world, ArraysCache cache, int x, int z, int xSize, int zSize);

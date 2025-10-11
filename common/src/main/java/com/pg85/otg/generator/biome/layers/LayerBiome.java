@@ -15,13 +15,13 @@ public class LayerBiome extends Layer
     private int depth;
     private double freezeTemp;
 
-    LayerBiome(long seed, int defaultOceanId, Layer childLayer, BiomeGroupManager groupManager, int depth, double freezeTemp)
+    LayerBiome(long seed, LocalWorld world, Layer childLayer, BiomeGroupManager groupManager, int depth)
     {
-        super(seed, defaultOceanId);
+        super(seed, world);
         this.child = childLayer;
         this.manager = groupManager;
         this.depth = depth;
-        this.freezeTemp = freezeTemp;
+        this.freezeTemp = world.getConfigs().getWorldConfig().frozenOceanTemperature;
     }
 
     @Override

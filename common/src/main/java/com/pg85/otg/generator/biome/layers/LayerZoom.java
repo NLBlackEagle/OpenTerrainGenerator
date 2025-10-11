@@ -6,9 +6,9 @@ import com.pg85.otg.generator.biome.ArraysCache;
 public class LayerZoom extends Layer
 {
 
-    LayerZoom(long seed, int defaultOceanId, Layer childLayer)
+    LayerZoom(long seed, LocalWorld world, Layer childLayer)
     {
-        super(seed, defaultOceanId);
+        super(seed, world);
         this.child = childLayer;
     }
 

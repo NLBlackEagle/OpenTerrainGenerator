@@ -61,6 +61,8 @@ public final class ServerConfigProvider implements ConfigProvider
      */
     private int biomesCount;
 
+    private WorldSaveData worldSaveData;
+
     /**
      * Loads the settings from the given directory for the given world.
      * @param settingsDir The directory to load from.
@@ -469,7 +471,7 @@ public final class ServerConfigProvider implements ConfigProvider
         }
         
         // Get OTG world save version
-        WorldSaveData worldSaveData = WorldSaveData.loadWorldSaveData(worldSaveFolder);
+        worldSaveData = WorldSaveData.loadWorldSaveData(worldSaveFolder);
         
         // This is a legacy (pre-v7) world if its not being created and either has no worldsavedata or worldsavedata version 6. 
         // If this world has biome data but not worldsavedata, it's v7.
@@ -826,4 +828,10 @@ public final class ServerConfigProvider implements ConfigProvider
         
 		return outputBiomes;
 	}
+
+    @Override
+    public WorldSaveData getWorldSaveData()
+    {
+        return worldSaveData;
+    }
 }

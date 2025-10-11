@@ -12,12 +12,12 @@ public class LayerMixWithRiver extends Layer
 {
     private int defaultFrozenOceanId;
 	
-    LayerMixWithRiver(long seed, Layer childLayer, Layer riverLayer, ConfigProvider configs, LocalWorld world, int defaultOceanId, int defaultFrozenOceanId)
+    LayerMixWithRiver(long seed, LocalWorld world, Layer childLayer, Layer riverLayer)
     {
-        super(seed, defaultOceanId);
-        this.defaultFrozenOceanId = defaultFrozenOceanId;
+        super(seed, world);
+        this.defaultFrozenOceanId = getBiomeId(world, world.getConfigs().getWorldConfig().defaultFrozenOceanBiome, "DefaultFrozenOcean");
         this.child = childLayer;
-        this.configs = configs;
+        this.configs = world.getConfigs();
         this.riverLayer = riverLayer;
         this.riverBiomes = new int[world.getMaxBiomesCount()];
         LocalBiome biome;

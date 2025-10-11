@@ -15,12 +15,13 @@ public class LayerBiomeGroups extends Layer
     private int depth;
     private boolean freezeGroups;
 
-    LayerBiomeGroups(Layer paramGenLayer, BiomeGroupManager biomeGroups, int depth, boolean freezeGroups)
+    LayerBiomeGroups(long seed, LocalWorld world, Layer paramGenLayer, BiomeGroupManager biomeGroups, int depth)
     {
+        super(seed, world);
         this.child = paramGenLayer;
         this.biomeGroupManager = biomeGroups;
         this.depth = depth;
-        this.freezeGroups = freezeGroups;
+        this.freezeGroups = world.getConfigs().getWorldConfig().freezeAllColdGroupBiomes;
     }
 
     @Override

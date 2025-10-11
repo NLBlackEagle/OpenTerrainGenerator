@@ -23,12 +23,13 @@ public class LayerFromImage extends Layer
     private int zOffset;
     private WorldConfig.ImageMode imageMode;
 
-    LayerFromImage(long seed, int defaultOceanId, Layer childLayer, WorldConfig config, LocalWorld world)
+    LayerFromImage(long seed, LocalWorld world, Layer childLayer)
     {
-        super(seed, defaultOceanId);
+        super(seed, world);
         this.child = childLayer;
-        xOffset = config.imageXOffset;
-        zOffset = config.imageZOffset;
+        WorldConfig config = world.getConfigs().getWorldConfig();
+        this.xOffset = config.imageXOffset;
+        this.zOffset = config.imageZOffset;
         this.imageMode = config.imageMode;
         
     	this.fillBiome = world.getBiomeByNameOrNull(config.imageFillBiome).getIds().getOTGBiomeId();

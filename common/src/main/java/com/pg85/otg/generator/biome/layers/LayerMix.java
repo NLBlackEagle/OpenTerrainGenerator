@@ -15,12 +15,12 @@ public class LayerMix extends Layer
     private int[] riverBiomes;
     private int defaultFrozenOceanId;
 
-    LayerMix(long seed, Layer childLayer, ConfigProvider configs, LocalWorld world, int defaultOceanId, int defaultFrozenOceanId)
+    LayerMix(long seed, LocalWorld world, Layer childLayer)
     {
-        super(seed, defaultOceanId);
-        this.defaultFrozenOceanId = defaultFrozenOceanId;
+        super(seed, world);
+        this.defaultFrozenOceanId = getBiomeId(world, world.getConfigs().getWorldConfig().defaultFrozenOceanBiome, "DefaultFrozenOcean");
         this.child = childLayer;
-        this.configs = configs;
+        this.configs = world.getConfigs();
         this.riverBiomes = new int[world.getMaxBiomesCount()];
         LocalBiome biome;
         LocalBiome riverBiome;

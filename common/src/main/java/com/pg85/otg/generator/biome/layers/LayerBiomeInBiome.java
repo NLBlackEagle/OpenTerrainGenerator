@@ -4,6 +4,7 @@ import com.pg85.otg.common.LocalBiome;
 import com.pg85.otg.common.LocalWorld;
 import com.pg85.otg.generator.biome.ArraysCache;
 import com.pg85.otg.util.minecraft.defaults.DefaultBiome;
+import com.pg85.otg.worldsave.WorldSaveData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,19 +14,21 @@ public class LayerBiomeInBiome extends Layer
     private static class Isle
     {
         short biomeId;
-        int chance = 10;
-        boolean[] canSpawnIn = new boolean[2048]; // Changed to 2048
-        long scrambledWorldSeed;
-        boolean inOcean = false;
+        int chance;
+        boolean[] canSpawnIn;
+        boolean inOcean;
+        LayerRNG rng;
     }
 
+    private final WorldSaveData worldSaveData;
     private final long worldSeed;
     private List<Isle> isles = new ArrayList<Isle>();
 
-    LayerBiomeInBiome(Layer childLayer, long worldSeed, int defaultOceanId)
+    LayerBiomeInBiome(long seed, LocalWorld world, Layer childLayer)
     {
-    	this.defaultOceanId = defaultOceanId;
-        this.worldSeed = worldSeed;
+        super(seed, world);
+        this.worldSaveData = world.getConfigs().getWorldSaveData();
+        this.worldSeed = world.getSeed();
         this.child = childLayer;
     }
 
@@ -57,7 +60,9 @@ public class LayerBiomeInBiome extends Layer
         	rngSeed = (short) biome.getIds().getSavedId();        	
         }
         
-        isle.scrambledWorldSeed = getScrambledWorldSeed(4000 + rngSeed, this.worldSeed);
+        isle.rng = LayerRNG.create(this.worldSaveData);
+        isle.rng.setLayerSeed(4000 + rngSeed);
+        isle.rng.setWorldSeed(this.worldSeed);
 
         this.isles.add(isle);
     }
@@ -90,8 +95,7 @@ public class LayerBiomeInBiome extends Layer
                 {
                     // Make the scrambled world seed unique for each isle
                     // (each island used to have its own layer)
-                    this.scrambledWorldSeed = isle.scrambledWorldSeed;
-                    initChunkSeed(xi + x, zi + z);
+                    isle.rng.initChunkSeed(xi + x, zi + z);
                     alreadySpawned = false;
                     if (isle.inOcean)
                     {
@@ -100,7 +104,7 @@ public class LayerBiomeInBiome extends Layer
                         swCheck = childInts[(xi + 0 + (zi + 2) * xSize0)] & LandBit;
                         seCheck = childInts[(xi + 2 + (zi + 2) * xSize0)] & LandBit;
 
-                        if (((selection & LandBit) == 0) && (nwCheck == 0) && (neCheck == 0) && (swCheck == 0) && (seCheck == 0) && nextInt(isle.chance) == 0)
+                        if (((selection & LandBit) == 0) && (nwCheck == 0) && (neCheck == 0) && (swCheck == 0) && (seCheck == 0) && isle.rng.nextChunkInt(isle.chance) == 0)
                         {
                             selection = (selection & IceBit) | (selection & RiverBits) | LandBit | isle.biomeId | IslandBit | BiomeBitsAreSetBit;
                             alreadySpawned = true;
@@ -119,7 +123,7 @@ public class LayerBiomeInBiome extends Layer
                     		isle.canSpawnIn[neCheck] && 
                     		isle.canSpawnIn[swCheck] && 
                     		isle.canSpawnIn[seCheck] && 
-                    		nextInt(isle.chance) == 0
+                    		isle.rng.nextChunkInt(isle.chance) == 0
                 		)
                         {
                             selection = (selection & LandBit) | (selection & IceBit) | (selection & RiverBits) | isle.biomeId | IslandBit | BiomeBitsAreSetBit;

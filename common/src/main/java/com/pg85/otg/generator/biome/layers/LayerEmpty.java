@@ -5,9 +5,9 @@ import com.pg85.otg.generator.biome.ArraysCache;
 
 public class LayerEmpty extends Layer
 {
-    LayerEmpty(long seed, int defaultOceanId)
+    LayerEmpty(long seed, LocalWorld world)
     {
-        super(seed, defaultOceanId);
+        super(seed, world);
     }
 
     @Override
