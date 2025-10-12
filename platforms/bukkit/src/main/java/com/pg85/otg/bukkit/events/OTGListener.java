@@ -2,10 +2,7 @@ package com.pg85.otg.bukkit.events;
 
 import com.pg85.otg.OTG;
 import com.pg85.otg.bukkit.OTGPlugin;
-import com.pg85.otg.bukkit.world.BukkitWorld;
-import com.pg85.otg.bukkit.world.WorldHelper;
 import com.pg85.otg.configuration.standard.PluginStandardValues;
-import com.pg85.otg.util.ChunkCoordinate;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -14,7 +11,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerRegisterChannelEvent;
-import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.event.world.WorldInitEvent;
 import org.bukkit.event.world.WorldSaveEvent;
@@ -53,16 +49,6 @@ public class OTGListener implements Listener
 	public void onUnload(WorldUnloadEvent event)
 	{
 		((BukkitEngine)OTG.getEngine()).onSave(event.getWorld());
-	}
-    
-    @EventHandler
-	public void onChunkUnload(ChunkUnloadEvent unloadEvent)
-	{
-    	BukkitWorld bukkitWorld = (BukkitWorld)WorldHelper.toLocalWorld(unloadEvent.getWorld());
-		if(bukkitWorld != null && bukkitWorld.getChunkGenerator() != null && unloadEvent.getChunk() != null)
-		{
-			bukkitWorld.getChunkGenerator().clearChunkFromCache(ChunkCoordinate.fromChunkCoords(unloadEvent.getChunk().getX(), unloadEvent.getChunk().getZ()));
-		}
 	}
     
     @EventHandler

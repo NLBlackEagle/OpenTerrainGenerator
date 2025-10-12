@@ -2,7 +2,6 @@ package com.pg85.otg.forge.generator;
 
 import static com.pg85.otg.util.ChunkCoordinate.CHUNK_SIZE;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,13 +54,8 @@ public class OTGChunkGenerator implements IChunkGenerator
     // Caches
 	private LRUCache<BlockPos2D, LocalMaterialData[]> unloadedBlockColumnsCache;
 	private LRUCache<ChunkCoordinate, Chunk> unloadedChunksCache;
-	private Entry<ChunkCoordinate, Chunk> lastUsedChunk1;
-	private Entry<ChunkCoordinate, Chunk> lastUsedChunk2;
-	private Entry<ChunkCoordinate, Chunk> lastUsedChunk3;
-	private Entry<ChunkCoordinate, Chunk> lastUsedChunk4;
     ForgeChunkBuffer chunkBuffer;
     Object chunkBufferLock = new Object();
-    Object chunkCacheLock = new Object();
     //
 
     private	DataFixer dataFixer = DataFixesManager.createFixer();
@@ -78,51 +72,10 @@ public class OTGChunkGenerator implements IChunkGenerator
         // Worlds with lots of BO4's and large smoothing areas may want to increase this. 
         this.unloadedBlockColumnsCache = new LRUCache<BlockPos2D, LocalMaterialData[]>(1024);
         this.unloadedChunksCache = new LRUCache<ChunkCoordinate, Chunk>(1024); //Changed 128 chunks cache to 1024 chunks cache for customstructures
-    	lastUsedChunk1 = null;
-    	lastUsedChunk2 = null;
-    	lastUsedChunk3 = null;
-    	lastUsedChunk4 = null; 
     }
     
 	// Chunks
-	
-	// Called by /otg flush command to clear memory.
-    public void clearChunkCache()
-    {
-    	synchronized(this.chunkCacheLock)
-    	{
-			lastUsedChunk1 = null;
-			lastUsedChunk2 = null;
-			lastUsedChunk3 = null;
-			lastUsedChunk4 = null;
-	   		this.unloadedBlockColumnsCache.clear();
-	   		this.unloadedChunksCache.clear();
-    	}
-    }
     
-    public void clearChunkFromCache(ChunkCoordinate chunkCoordinate)
-    {
-    	synchronized(this.chunkCacheLock)
-    	{
-    		if(lastUsedChunk1 != null && lastUsedChunk1.getKey().equals(chunkCoordinate))
-    		{
-    			lastUsedChunk1 = null;
-    		}
-    		else if(lastUsedChunk2 != null && lastUsedChunk2.getKey().equals(chunkCoordinate))
-    		{
-    			lastUsedChunk2 = null;
-    		}
-    		else if(lastUsedChunk3 != null && lastUsedChunk3.getKey().equals(chunkCoordinate))
-    		{
-    			lastUsedChunk3 = null;
-    		}
-    		else if(lastUsedChunk4 != null && lastUsedChunk4.getKey().equals(chunkCoordinate))
-    		{
-    			lastUsedChunk4 = null;
-    		}
-    	}
-    }
-
     @Override
     public Chunk generateChunk(int chunkX, int chunkZ)
     {
@@ -198,49 +151,7 @@ public class OTGChunkGenerator implements IChunkGenerator
     
     public Chunk getChunk(int x, int z)
     {
-        ChunkCoordinate chunkCoord = ChunkCoordinate.fromBlockCoords(x, z);
-        
-        Chunk chunk = null;
-    	synchronized(this.chunkCacheLock)
-    	{
-    		if(lastUsedChunk1 != null && lastUsedChunk1.getKey().equals(chunkCoord))
-    		{
-    			chunk = lastUsedChunk1.getValue();
-    		}
-    		else if(lastUsedChunk2 != null && lastUsedChunk2.getKey().equals(chunkCoord))
-    		{
-    			chunk = lastUsedChunk2.getValue();
-    		}
-    		else if(lastUsedChunk3 != null && lastUsedChunk3.getKey().equals(chunkCoord))
-    		{
-    			chunk = lastUsedChunk3.getValue();
-    		}
-    		else if(lastUsedChunk4 != null && lastUsedChunk4.getKey().equals(chunkCoord))
-    		{
-    			chunk = lastUsedChunk4.getValue();
-    		}
-    	}
-        if(chunk == null)
-        {
-        	// Try to fetch the chunk without populating it.
-        	chunk = this.world.getWorld().getChunkProvider().getLoadedChunk(chunkCoord.getChunkX(), chunkCoord.getChunkZ());
-	        if(chunk == null)
-	        {
-	        	// Request the chunk with a risk of it being populated.
-	        	chunk = this.world.getWorld().getChunk(chunkCoord.getChunkX(), chunkCoord.getChunkZ());
-	        }
-	        if(chunk != null)
-	        {
-	        	synchronized(this.chunkCacheLock)
-	        	{
-	        		lastUsedChunk4 = lastUsedChunk3;
-	        		lastUsedChunk3 = lastUsedChunk2;
-	        		lastUsedChunk2 = lastUsedChunk1;
-	        		lastUsedChunk1 = new AbstractMap.SimpleEntry<ChunkCoordinate, Chunk>(chunkCoord, chunk);
-	        	}
-	        }
-        }
-    	return chunk;
+        return this.world.world.getChunk(x >> 4, z >> 4);
     }
 
     // Blocks
