@@ -36,7 +36,6 @@ public class LayerLandRandom extends Layer
                 seCheck = childInts[(xi + 2 + (zi + 2) * xSize0)] & LandBit;
                 centerCheck = childInts[(xi + 1 + (zi + 1) * xSize0)] & LandBit;
                 initChunkSeed(xi + x, zi + z);
-                initGroupSeed(xi + x, zi + z);
                 thisInts[(xi + zi * xSize)] = childInts[(xi + 1 + (zi + 1) * xSize0)] | LandBit;
 
                 // Chances to reset LandBit
