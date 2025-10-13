@@ -29,9 +29,8 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
     private final int generationDepth;
     private float avgTemp = 0;
     private final Map<String, LocalBiome> biomes = new LinkedHashMap<String, LocalBiome>(32);
-    private final List<TreeMap<Integer, LocalBiome>> cachedDepthMapOrHigher = new ArrayList<>();
-    private final List<TreeMap<Integer, LocalBiome>> cachedDepthMaps = new ArrayList<>();
-    private TreeMap<Integer, LocalBiome> defaultDepthMap = null;
+    private final TreeMap<Integer, LocalBiome>[] cachedDepthMapOrHigher;
+    private TreeMap<Integer, LocalBiome> defaultDepthMap;
 
     /**
      * Variable used by the the ungrouped biome generator. This generator
@@ -49,6 +48,7 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
      * @see #BiomeGroup(WorldConfig, String, int, int, List) Constructor to
      * properly initialize this biome group manually.
      */
+    @SuppressWarnings("unchecked")
     public BiomeGroup(WorldConfig config, List<String> args) throws InvalidConfigException
     {
         super(config);
@@ -61,11 +61,7 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
         {
             this.biomes.put(args.get(i), null);
         }
-        for(int i = 0; i <= config.generationDepth; i++)
-        {
-            this.cachedDepthMapOrHigher.add(null);
-            this.cachedDepthMaps.add(null);
-        }
+        this.cachedDepthMapOrHigher = new TreeMap[config.generationDepth];
     }
 
     /**
@@ -76,6 +72,7 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
      * @param rarity    Rarity value of this biome group.
      * @param biomes    List of names of the biomes that spawn in this group.
      */
+    @SuppressWarnings("unchecked")
     public BiomeGroup(WorldConfig config, String groupName, int size, int rarity, List<String> biomes)
     {
         super(config);
@@ -86,11 +83,7 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
         {
             this.biomes.put(biome, null);
         }
-        for(int i = 0; i <= config.generationDepth; i++)
-        {
-            this.cachedDepthMapOrHigher.add(null);
-            this.cachedDepthMaps.add(null);
-        }
+        this.cachedDepthMapOrHigher = new TreeMap[config.generationDepth];
     }
 
     /**
@@ -231,7 +224,7 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
             return getDefaultDepthMap();
         }
 
-        TreeMap<Integer, LocalBiome> map = cachedDepthMapOrHigher.get(depth);
+        TreeMap<Integer, LocalBiome> map = cachedDepthMapOrHigher[depth];
         if(map != null)
         {
             return map;
@@ -248,36 +241,7 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
             }
         }
 
-        cachedDepthMapOrHigher.set(depth, map);
-
-        return map;
-    }
-
-    SortedMap<Integer, LocalBiome> getDepthMap(int depth)
-    {
-        if(depth < 0)
-        {
-            return getDefaultDepthMap();
-        }
-
-        TreeMap<Integer, LocalBiome> map = cachedDepthMaps.get(depth);
-        if(map != null)
-        {
-            return map;
-        }
-
-        int cumulativeBiomeRarity = 0;
-        map = new TreeMap<>();
-        for(Entry<String, LocalBiome> biome : this.biomes.entrySet())
-        {
-            if(biome.getValue().getBiomeConfig().biomeSize == depth)
-            {
-                cumulativeBiomeRarity += biome.getValue().getBiomeConfig().biomeRarity;
-                map.put(cumulativeBiomeRarity, biome.getValue());
-            }
-        }
-
-        cachedDepthMaps.set(depth, map);
+        cachedDepthMapOrHigher[depth] = map;
 
         return map;
     }
@@ -320,5 +284,17 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
     boolean hasNoBiomes()
     {
         return biomes.isEmpty();
+    }
+
+    boolean isBiomeDepthMapEmpty(int depth)
+    {
+        for(LocalBiome biome : this.biomes.values())
+        {
+            if(biome.getBiomeConfig().biomeSize == depth)
+            {
+                return false;
+            }
+        }
+        return true;
     }
 }

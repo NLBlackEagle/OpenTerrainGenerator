@@ -155,7 +155,7 @@ public final class BiomeGroupManager
     {
         for (BiomeGroup group : getGroups())
         {
-            if (!group.getDepthMap(depth).isEmpty())
+            if (!group.isBiomeDepthMapEmpty(depth))
                 return false;
         }
         return true;
