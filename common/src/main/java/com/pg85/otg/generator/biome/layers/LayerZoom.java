@@ -44,7 +44,7 @@ public class LayerZoom extends Layer
                 thisInts[i3] = i4;
                 thisInts[(i3++ + n)] = rndParam(i4, i5);
                 thisInts[i3] = rndParam(i4, northCheck);
-                thisInts[(i3++ + n)] = getRandomOf4(i4, northCheck, i5, centerCheck);
+                thisInts[(i3++ + n)] = mostCommonOrRandom(i4, northCheck, i5, centerCheck);
 
                 i4 = northCheck;
                 i5 = centerCheck;

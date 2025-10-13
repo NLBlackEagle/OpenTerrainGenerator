@@ -216,7 +216,7 @@ public abstract class Layer
 
     public abstract int[] getInts(LocalWorld world, ArraysCache cache, int x, int z, int xSize, int zSize);
 
-    protected int getRandomOf4(int a, int b, int c, int d)
+    protected int mostCommonOrRandom(int a, int b, int c, int d)
     {
         if (b == c && c == d) return b; // b = c = d, a different
         if (a == b && a == c) return a; // a = b = c, d different
