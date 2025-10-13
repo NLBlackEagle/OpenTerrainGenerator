@@ -218,17 +218,57 @@ public abstract class Layer
 
     protected int mostCommonOrRandom(int a, int b, int c, int d)
     {
-        if (b == c && c == d) return b; // b = c = d, a different
-        if (a == b && a == c) return a; // a = b = c, d different
-        if (a == b && a == d) return a; // a = b = d, c different
-        if (a == c && a == d) return a; // a = c = d, b different
-
-        if (a == b && c != d) return a;
-        if (a == c && b != d) return a;
-        if (a == d && b != c) return a;
-        if (b == c && a != d) return b;
-        if (b == d && a != c) return b;
-        if (c == d && a != b) return c;
+        if(a == b)
+        {
+            // x x ? ?
+            if(a == c || c != d)
+            {
+                // x x x x
+                // x x x y
+                // x x y x
+                // x x y z
+                return a;
+            }
+            // x x y y
+        }
+        else if(a == c)
+        {
+            // x y x ?
+            if(b != d)
+            {
+                // x y x x
+                // x y x z
+                return a;
+            }
+            // x y x y
+        }
+        else if(a == d)
+        {
+            // x !x !x x
+            if(b != c)
+            {
+                // x y z x
+                return a;
+            }
+            // x y y x
+        }
+        else
+        {
+            // x !x !x !x
+            if(b == c || b == d)
+            {
+                // x y y y
+                // x y y z
+                // x y z y
+                return b;
+            }
+            if(c == d)
+            {
+                // x y z z
+                return c;
+            }
+            // x y z w
+        }
 
         switch (this.nextInt(4)){
             case 0: return a;
