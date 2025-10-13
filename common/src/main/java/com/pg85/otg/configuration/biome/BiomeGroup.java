@@ -57,9 +57,9 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
         this.name = args.get(0);
         this.generationDepth = readInt(args.get(1), 0, config.generationDepth);
         this.groupRarity = readInt(args.get(2), 1, Integer.MAX_VALUE);
-        for(String biome : readBiomes(args, 3))
+        for(int i = 3; i < args.size(); i++)
         {
-            this.biomes.put(biome, null);
+            this.biomes.put(args.get(i), null);
         }
         for(int i = 0; i <= config.generationDepth; i++)
         {
@@ -128,21 +128,6 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
     public String toString()
     {
         return "BiomeGroup(" + name + ", " + generationDepth + ", " + groupRarity + ", " + StringHelper.join(biomes.keySet(), ", ") + ")";
-    }
-
-    /**
-     * Reads all biomes from the start position until the end of the
-     * list.
-     * @param strings The input strings.
-     * @param start   The position to start. The first element in the list
-     *                has index 0, the last one size() - 1.
-     * @return All biome names.
-     * @throws InvalidConfigException If one of the elements in the list is
-     *                                not a valid block id.
-     */
-    private List<String> readBiomes(List<String> strings, int start) throws InvalidConfigException
-    {
-        return new ArrayList<String>(strings.subList(start, strings.size()));
     }
 
     /**
