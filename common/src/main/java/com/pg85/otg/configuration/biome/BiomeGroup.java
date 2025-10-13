@@ -57,11 +57,11 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
         this.name = args.get(0);
         this.generationDepth = readInt(args.get(1), 0, config.generationDepth);
         this.groupRarity = readInt(args.get(2), 1, Integer.MAX_VALUE);
-        for (String biome : readBiomes(args, 3))
+        for(String biome : readBiomes(args, 3))
         {
             this.biomes.put(biome, null);
         }
-        for (int i = 0; i <= config.generationDepth; i++)
+        for(int i = 0; i <= config.generationDepth; i++)
         {
             this.cachedDepthMapOrHigher.add(null);
             this.cachedDepthMaps.add(null);
@@ -82,11 +82,11 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
         this.name = groupName;
         this.generationDepth = size;
         this.groupRarity = rarity;
-        for (String biome : biomes)
+        for(String biome : biomes)
         {
             this.biomes.put(biome, null);
         }
-        for (int i = 0; i <= config.generationDepth; i++)
+        for(int i = 0; i <= config.generationDepth; i++)
         {
             this.cachedDepthMapOrHigher.add(null);
             this.cachedDepthMaps.add(null);
@@ -103,7 +103,7 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
     {
         float totalTemp = 0;
         this.totalGroupRarity = 0;
-        for (Iterator<Entry<String, LocalBiome>> it = this.biomes.entrySet().iterator(); it.hasNext();)
+        for(Iterator<Entry<String, LocalBiome>> it = this.biomes.entrySet().iterator(); it.hasNext();)
         {
             Entry<String, LocalBiome> entry = it.next();
             String biomeName = entry.getKey();
@@ -113,8 +113,8 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
 
             if(localBiome == null)
             {
-            	OTG.log(LogMarker.FATAL, "Could not find biome with name '"+ biomeName +"' from biome group "+ this.name);
-            	throw new RuntimeException("Could not find biome with name '"+ biomeName +"' from biome group "+ this.name);
+                OTG.log(LogMarker.FATAL, "Could not find biome with name '" + biomeName + "' from biome group " + this.name);
+                throw new RuntimeException("Could not find biome with name '" + biomeName + "' from biome group " + this.name);
             }
 
             BiomeConfig biomeConfig = localBiome.getBiomeConfig();
@@ -161,20 +161,20 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
      */
     void filterBiomes(ArrayList<String> customBiomeNames, boolean logWarnings)
     {
-        for (Iterator<String> it = this.biomes.keySet().iterator(); it.hasNext();)
+        for(Iterator<String> it = this.biomes.keySet().iterator(); it.hasNext();)
         {
             String biomeName = it.next();
             if(biomeName != null && biomeName.trim().length() > 0)
             {
-	            if (DefaultBiome.Contain(biomeName) || customBiomeNames.contains(biomeName))
-	            {
-	                continue;
-	            }
-	            // Invalid biome name, remove
-	            if(logWarnings)
-	            {
-	            	OTG.log(LogMarker.WARN, "Invalid biome name {} in biome group {}", biomeName, this.name);
-	            }
+                if(DefaultBiome.Contain(biomeName) || customBiomeNames.contains(biomeName))
+                {
+                    continue;
+                }
+                // Invalid biome name, remove
+                if(logWarnings)
+                {
+                    OTG.log(LogMarker.WARN, "Invalid biome name {} in biome group {}", biomeName, this.name);
+                }
             }
             it.remove();
         }
@@ -200,10 +200,9 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
      */
     void setGroupId(int groupId)
     {
-        if (groupId > BiomeGroupManager.MAX_BIOME_GROUP_COUNT)
+        if(groupId > BiomeGroupManager.MAX_BIOME_GROUP_COUNT)
         {
-            throw new IllegalArgumentException("Tried to set group id to " + groupId
-                    + ", max allowed is " + BiomeGroupManager.MAX_BIOME_GROUP_COUNT);
+            throw new IllegalArgumentException("Tried to set group id to " + groupId + ", max allowed is " + BiomeGroupManager.MAX_BIOME_GROUP_COUNT);
         }
 
         this.groupId = groupId;
@@ -232,7 +231,7 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
     @Override
     public boolean isAnalogousTo(ConfigFunction<WorldConfig> other)
     {
-        if (other instanceof BiomeGroup)
+        if(other instanceof BiomeGroup)
         {
             BiomeGroup group = (BiomeGroup) other;
             return group.name.equalsIgnoreCase(this.name);
@@ -242,21 +241,22 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
 
     public SortedMap<Integer, LocalBiome> getDepthMapOrHigher(int depth)
     {
-        if (depth < 0) {
+        if(depth < 0)
+        {
             return getDefaultDepthMap();
         }
 
         TreeMap<Integer, LocalBiome> map = cachedDepthMapOrHigher.get(depth);
-        if (map != null)
+        if(map != null)
         {
             return map;
         }
-    	
+
         int cumulativeBiomeRarity = 0;
         map = new TreeMap<>();
-        for (Entry<String, LocalBiome> biome : this.biomes.entrySet())
+        for(Entry<String, LocalBiome> biome : this.biomes.entrySet())
         {
-            if (biome.getValue().getBiomeConfig().biomeSize >= depth)
+            if(biome.getValue().getBiomeConfig().biomeSize >= depth)
             {
                 cumulativeBiomeRarity += biome.getValue().getBiomeConfig().biomeRarity;
                 map.put(cumulativeBiomeRarity, biome.getValue());
@@ -270,22 +270,22 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
 
     SortedMap<Integer, LocalBiome> getDepthMap(int depth)
     {
-        if (depth < 0)
+        if(depth < 0)
         {
             return getDefaultDepthMap();
         }
 
         TreeMap<Integer, LocalBiome> map = cachedDepthMaps.get(depth);
-        if (map != null)
+        if(map != null)
         {
             return map;
         }
-    	
+
         int cumulativeBiomeRarity = 0;
         map = new TreeMap<>();
-        for (Entry<String, LocalBiome> biome : this.biomes.entrySet())
+        for(Entry<String, LocalBiome> biome : this.biomes.entrySet())
         {
-            if (biome.getValue().getBiomeConfig().biomeSize == depth)
+            if(biome.getValue().getBiomeConfig().biomeSize == depth)
             {
                 cumulativeBiomeRarity += biome.getValue().getBiomeConfig().biomeRarity;
                 map.put(cumulativeBiomeRarity, biome.getValue());
@@ -297,16 +297,16 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
         return map;
     }
 
-    SortedMap<Integer, LocalBiome> getDefaultDepthMap()
+    private SortedMap<Integer, LocalBiome> getDefaultDepthMap()
     {
-        if (defaultDepthMap != null)
+        if(defaultDepthMap != null)
         {
             return defaultDepthMap;
         }
 
         int cumulativeBiomeRarity = 0;
         TreeMap<Integer, LocalBiome> map = new TreeMap<>();
-        for (Entry<String, LocalBiome> biome : this.biomes.entrySet())
+        for(Entry<String, LocalBiome> biome : this.biomes.entrySet())
         {
             cumulativeBiomeRarity += biome.getValue().getBiomeConfig().biomeRarity;
             map.put(cumulativeBiomeRarity, biome.getValue());
