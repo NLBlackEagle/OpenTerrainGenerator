@@ -190,7 +190,7 @@ public class BO4WeightedBranchFunction extends BO4BranchFunction
         String configFunctionString = StreamHelper.readStringFromBuffer(buffer);
         int bracketIndex = configFunctionString.indexOf('(');
         String parameters = configFunctionString.substring(bracketIndex + 1, configFunctionString.length() - 1);
-        List<String> args = Arrays.asList(StringHelper.readCommaSeperatedString(parameters));
+        List<String> args = StringHelper.readCommaSeperatedString(parameters);
 		branchFunction.load(args);
     	return branchFunction;
     }

@@ -144,7 +144,7 @@ public class ReplacedBlocksMatrix
         }
 
         List<ReplacedBlocksInstruction> instructions = new ArrayList<ReplacedBlocksInstruction>();
-        String[] keys = StringHelper.readCommaSeperatedString(setting);
+        List<String> keys = StringHelper.readCommaSeperatedString(setting);
 
         for (String key : keys)
         {

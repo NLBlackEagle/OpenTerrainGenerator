@@ -1,8 +1,9 @@
 package com.pg85.otg.util.helpers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -168,43 +169,51 @@ public abstract class StringHelper
      *            The line to parse.
      * @return The parts of the string.
      */
-    public static String[] readCommaSeperatedString(String line)
+    public static List<String> readCommaSeperatedString(String line)
     {
-        if(line.trim().isEmpty())
+        line = line.trim();
+        if(line.isEmpty())
         {
-            // Empty lines have no elements, not one empty element
-            return new String[0];
+            return Collections.emptyList();
         }
 
-        List<String> buffer = new LinkedList<String>();
-
-        int index = 0;
-        int lastFound = 0;
-        int inBracer = 0;
-
-        for(char c : line.toCharArray())
+        int i = indexOf(line, ',', 0);
+        if(i < 0)
         {
-            if(c == ',' && inBracer == 0)
+            return Collections.singletonList(line);
+        }
+
+        List<String> list = new ArrayList<>();
+        int j = 0;
+        while(i >= 0)
+        {
+            list.add(line.substring(j, i).trim());
+            j = i + 1;
+            i = indexOf(line, ',', i + 1);
+        }
+        list.add(line.substring(i + 1, line.length()).trim());
+        return list;
+    }
+
+    private static int indexOf(String s, char c, int start)
+    {
+        for(int i = start; i < s.length(); i++)
+        {
+            char c1 = s.charAt(i);
+            if(c1 == c)
             {
-                buffer.add(line.substring(lastFound, index).trim());
-                lastFound = index + 1;
+                return i;
             }
-
-            if(c == '(')
-                inBracer++;
-            if(c == ')')
-                inBracer--;
-
-            index++;
+            if(c1 == '(')
+            {
+                i = indexOf(s, ')', i + 1);
+                if(i < 0)
+                {
+                    return -1;
+                }
+            }
         }
-        buffer.add(line.substring(lastFound, index).trim());
-
-        String[] output = new String[0];
-
-        if(inBracer == 0)
-            output = buffer.toArray(output);
-
-        return output;
+        return -1;
     }
 
     /**

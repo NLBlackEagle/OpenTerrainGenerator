@@ -116,7 +116,7 @@ public class FileSettingsReaderOTGPlus implements SettingsReaderOTGPlus
             int bracketIndex = configFunctionString.indexOf('(');
             String functionName = configFunctionString.substring(0, bracketIndex);
             String parameters = configFunctionString.substring(bracketIndex + 1, configFunctionString.length() - 1);
-            List<String> args = Arrays.asList(StringHelper.readCommaSeperatedString(parameters));
+            List<String> args = StringHelper.readCommaSeperatedString(parameters);
             CustomObjectConfigFunction<T> function = manager.getConfigFunction(functionName, holder, args);
             if(function == null)
             {
