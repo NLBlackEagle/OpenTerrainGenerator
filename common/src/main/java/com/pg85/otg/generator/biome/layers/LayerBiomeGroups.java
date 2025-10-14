@@ -5,8 +5,7 @@ import com.pg85.otg.configuration.biome.BiomeGroup;
 import com.pg85.otg.configuration.biome.BiomeGroupManager;
 import com.pg85.otg.generator.biome.ArraysCache;
 
-import java.util.Map.Entry;
-import java.util.SortedMap;
+import java.util.function.IntUnaryOperator;
 
 public class LayerBiomeGroups extends Layer
 {
@@ -31,9 +30,9 @@ public class LayerBiomeGroups extends Layer
         int[] thisInts = arraysCache.getArray(x_size * z_size);
 
         int currentPiece;
-        SortedMap<Integer, BiomeGroup> possibleGroups;
-        int newGroupRarity;
         boolean improvedBiomeGroups = world.getConfigs().getWorldConfig().improvedBiomeGroups;
+        IntUnaryOperator rng = improvedBiomeGroups ? this::nextGroupIntEntropy : this::nextGroupInt;
+
         for (int i = 0; i < z_size; i++)
         {
             for (int j = 0; j < x_size; j++)
@@ -50,29 +49,12 @@ public class LayerBiomeGroups extends Layer
                 {
                 	// TODO: even with rarity 1 this always spawns the biome
 
-                    possibleGroups = biomeGroupManager.getGroupDepthMap(depth);
-                    if(improvedBiomeGroups)
+                    BiomeGroup group = biomeGroupManager.getGroupDepthMap(depth).getRandom(rng);
+                    if(group != null)
                     {
-	                    newGroupRarity = nextGroupInt(BiomeGroupManager.getMaxRarityFromPossibles(possibleGroups));
-                    } else {
-	                    newGroupRarity = nextGroupInt(BiomeGroupManager.getMaxRarityFromPossibles(possibleGroups)*Entropy);                    	
-                    }
-                    //>>	Spawn the biome based on the rarity spectrum
-                    for (Entry<Integer, BiomeGroup> group : possibleGroups.entrySet())
-                    {
-                        if (
-                    		(!improvedBiomeGroups && newGroupRarity/Entropy < group.getKey()) ||
-                    		(improvedBiomeGroups && (newGroupRarity < group.getKey()))
-                		)
-                        {
-                            if (group.getValue() != null)
-                            {
-                                currentPiece |= (group.getValue().getGroupId() << BiomeGroupShift) |
-                                //>>	If the average temp of the group is cold
-                                ((group.getValue().isColdGroup() && freezeGroups) ? IceBit : 0);
-                            }
-                            break;
-                        }
+                        currentPiece |= (group.getGroupId() << BiomeGroupShift) |
+                        //>>    If the average temp of the group is cold
+                        ((group.isColdGroup() && freezeGroups) ? IceBit : 0);
                     }
                 }
                 thisInts[(j + i * x_size)] = currentPiece;

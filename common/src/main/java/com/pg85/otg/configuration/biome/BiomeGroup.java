@@ -8,6 +8,7 @@ import com.pg85.otg.configuration.standard.WorldStandardValues;
 import com.pg85.otg.configuration.world.WorldConfig;
 import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.logging.LogMarker;
+import com.pg85.otg.util.WeightedList;
 import com.pg85.otg.util.helpers.StringHelper;
 import com.pg85.otg.util.minecraft.defaults.DefaultBiome;
 
@@ -29,8 +30,8 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
     private final int generationDepth;
     private float avgTemp = 0;
     private final Map<String, LocalBiome> biomes = new LinkedHashMap<String, LocalBiome>(32);
-    private final TreeMap<Integer, LocalBiome>[] cachedDepthMapOrHigher;
-    private TreeMap<Integer, LocalBiome> defaultDepthMap;
+    private final WeightedList<LocalBiome>[] cachedDepthMapOrHigher;
+    private WeightedList<LocalBiome> defaultDepthMap;
 
     /**
      * Variable used by the the ungrouped biome generator. This generator
@@ -61,7 +62,7 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
         {
             this.biomes.put(args.get(i), null);
         }
-        this.cachedDepthMapOrHigher = new TreeMap[config.generationDepth];
+        this.cachedDepthMapOrHigher = new WeightedList[config.generationDepth];
     }
 
     /**
@@ -83,7 +84,7 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
         {
             this.biomes.put(biome, null);
         }
-        this.cachedDepthMapOrHigher = new TreeMap[config.generationDepth];
+        this.cachedDepthMapOrHigher = new WeightedList[config.generationDepth];
     }
 
     /**
@@ -217,53 +218,42 @@ public final class BiomeGroup extends ConfigFunction<WorldConfig>
         return false;
     }
 
-    public SortedMap<Integer, LocalBiome> getDepthMapOrHigher(int depth)
+    public WeightedList<LocalBiome> getDepthMapOrHigher(int depth)
     {
         if(depth < 0)
         {
-            return getDefaultDepthMap();
+            return this.getDefaultDepthMap();
         }
 
-        TreeMap<Integer, LocalBiome> map = cachedDepthMapOrHigher[depth];
-        if(map != null)
+        WeightedList<LocalBiome> map = this.cachedDepthMapOrHigher[depth];
+        if(map == null)
         {
-            return map;
-        }
-
-        int cumulativeBiomeRarity = 0;
-        map = new TreeMap<>();
-        for(Entry<String, LocalBiome> biome : this.biomes.entrySet())
-        {
-            if(biome.getValue().getBiomeConfig().biomeSize >= depth)
+            map = new WeightedList<>();
+            for(LocalBiome biome : this.biomes.values())
             {
-                cumulativeBiomeRarity += biome.getValue().getBiomeConfig().biomeRarity;
-                map.put(cumulativeBiomeRarity, biome.getValue());
+                if(biome.getBiomeConfig().biomeSize >= depth)
+                {
+                    map.add(biome, biome.getBiomeConfig().biomeRarity);
+                }
             }
+            this.cachedDepthMapOrHigher[depth] = map;
         }
-
-        cachedDepthMapOrHigher[depth] = map;
 
         return map;
     }
 
-    private SortedMap<Integer, LocalBiome> getDefaultDepthMap()
+    private WeightedList<LocalBiome> getDefaultDepthMap()
     {
-        if(defaultDepthMap != null)
+        if(this.defaultDepthMap == null)
         {
-            return defaultDepthMap;
+            this.defaultDepthMap = new WeightedList<>();
+            for(LocalBiome biome : this.biomes.values())
+            {
+                this.defaultDepthMap.add(biome, biome.getBiomeConfig().biomeRarity);
+            }
         }
 
-        int cumulativeBiomeRarity = 0;
-        TreeMap<Integer, LocalBiome> map = new TreeMap<>();
-        for(Entry<String, LocalBiome> biome : this.biomes.entrySet())
-        {
-            cumulativeBiomeRarity += biome.getValue().getBiomeConfig().biomeRarity;
-            map.put(cumulativeBiomeRarity, biome.getValue());
-        }
-
-        defaultDepthMap = map;
-
-        return map;
+        return this.defaultDepthMap;
     }
 
     public int getGroupRarity()

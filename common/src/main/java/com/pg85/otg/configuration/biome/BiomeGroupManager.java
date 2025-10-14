@@ -3,6 +3,10 @@ package com.pg85.otg.configuration.biome;
 import com.pg85.otg.OTG;
 import com.pg85.otg.common.LocalWorld;
 import com.pg85.otg.logging.LogMarker;
+import com.pg85.otg.util.WeightedList;
+
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
 import java.util.*;
 
@@ -109,33 +113,29 @@ public final class BiomeGroupManager
         return nameToGroup.size();
     }
 
-    // TODO: Turn into array?
-    HashMap<Integer, TreeMap<Integer, BiomeGroup>> cachedGroupDepthMaps = new HashMap<>();
-    public SortedMap<Integer, BiomeGroup> getGroupDepthMap(int depth)
+    private final Int2ObjectMap<WeightedList<BiomeGroup>> cachedGroupDepthMaps = new Int2ObjectOpenHashMap<>();
+
+    public WeightedList<BiomeGroup> getGroupDepthMap(int depth)
     {
-    	TreeMap<Integer, BiomeGroup> map = cachedGroupDepthMaps.get(depth);
-    	if(map != null)
-    	{
-    		return map;
-    	}
-    	
-        map = new TreeMap<>();
-        int cumulativeGroupRarity = 0;
-        for (BiomeGroup group : getGroups())
+        WeightedList<BiomeGroup> map = this.cachedGroupDepthMaps.get(depth);
+
+        if(map == null)
         {
-            if (group.getGenerationDepth() == depth)
+            map = new WeightedList<>();
+            for(BiomeGroup biomeGroup : this.getGroups())
             {
-                cumulativeGroupRarity += group.getGroupRarity();
-                map.put(cumulativeGroupRarity, group);
+                if(biomeGroup.getGenerationDepth() == depth)
+                {
+                    map.add(biomeGroup, biomeGroup.getGroupRarity());
+                }
             }
+            if(map.totalWeight() < map.size() * 100)
+            {
+                map.add(null, map.size() * 100);
+            }
+            this.cachedGroupDepthMaps.put(depth, map);
         }
-        if (cumulativeGroupRarity < map.size() * 100)
-        {
-            map.put(map.size() * 100, null);
-        }
-        
-        cachedGroupDepthMaps.put(depth, map);
-        
+
         return map;
     }
 
@@ -159,11 +159,6 @@ public final class BiomeGroupManager
                 return false;
         }
         return true;
-    }
-
-    public static int getMaxRarityFromPossibles(SortedMap<Integer, ?> sortedMap)
-    {
-        return sortedMap.lastKey();
     }
 
     public void processBiomeData(LocalWorld world)
