@@ -2,6 +2,7 @@ package com.pg85.otg.generator.resource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 import com.pg85.otg.OTG;
@@ -118,9 +119,9 @@ public abstract class Resource extends ConfigFunction<BiomeConfig> implements Co
     public int hashCode()
     {
         int hash = 5;
-        hash = 53 * hash + (this.material == null ? 0 : material.hashCode());
+        hash = 53 * hash + Objects.hashCode(this.material);
         hash = 53 * hash + this.frequency;
-        hash = 53 * hash + (int) (Double.doubleToLongBits(this.rarity) ^ (Double.doubleToLongBits(this.rarity) >>> 32));
+        hash = 53 * hash + Double.hashCode(this.rarity);
         return hash;
     }
 
