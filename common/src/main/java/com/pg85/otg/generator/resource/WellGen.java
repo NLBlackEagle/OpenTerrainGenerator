@@ -97,7 +97,8 @@ public class WellGen extends Resource
             --y;
         }
         
-        parseMaterials(world, material, sourceBlocks);
+        material = material.parseForWorld(world);
+        sourceBlocks.parseForWorld(world);
 
         worldMaterial = world.getMaterial(x, y, z, chunkBeingPopulated);
 

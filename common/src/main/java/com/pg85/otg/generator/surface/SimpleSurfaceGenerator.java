@@ -72,7 +72,7 @@ public class SimpleSurfaceGenerator implements SurfaceGenerator
             	
                 // Surface blocks logic (grass, dirt, sand, sandstone)
                 blockOnCurrentPos = chunkBuffer.getBlock(x, y, z);
-                if (blockOnCurrentPos.isEmptyOrAir())
+                if (blockOnCurrentPos.isAir())
                 {
                     // Reset when air is found
                     groundLayerDepth = -1;

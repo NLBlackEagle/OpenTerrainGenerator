@@ -164,7 +164,7 @@ public class OTGChunkGenerator extends ChunkGenerator
     	
         try
         {
-            IBlockData blockData = ((BukkitMaterialData) material).internalBlock();
+            IBlockData blockData = ((BukkitMaterialData) material).getBlockState();
 
             // Get chunk from (faster) custom cache
             Chunk chunk = this.getChunk(x, z);
@@ -329,7 +329,7 @@ public class OTGChunkGenerator extends ChunkGenerator
 	        	MaterialData blockInChunk = chunkData.getTypeAndData(blockX, y, blockZ);
 	        	if(blockInChunk != null)
 	        	{
-	        		blocksInColumn[y] = BukkitMaterialData.ofIds(blockInChunk.getItemTypeId(), blockInChunk.getData());
+	        		blocksInColumn[y] = BukkitMaterialData.ofMinecraftBlockState(blockInChunk.getItemTypeId(), blockInChunk.getData());
 	        	} else {       		
 	        		break;
 	        	}
@@ -341,7 +341,7 @@ public class OTGChunkGenerator extends ChunkGenerator
 	        	IBlockData blockInChunk = chunk.getBlockData(new BlockPosition(blockX, y, blockZ));
 	        	if(blockInChunk != null)
 	        	{
-	        		blocksInColumn[y] = BukkitMaterialData.ofMinecraftBlockData(blockInChunk);
+	        		blocksInColumn[y] = BukkitMaterialData.ofMinecraftBlockState(blockInChunk);
 	        	} else {       		
 	        		break;
 	        	}

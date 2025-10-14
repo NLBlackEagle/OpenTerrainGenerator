@@ -395,7 +395,7 @@ public class BO4 implements StructuredCustomObject
 		        		}
 		        	}
 		        	        	
-		        	if(replaceBelowMaterial != null && newBlock.y == 0 && !newBlock.material.isEmptyOrAir() && doReplaceAboveBelowOnly)
+		        	if(replaceBelowMaterial != null && newBlock.y == 0 && !newBlock.material.isEmpty() && doReplaceAboveBelowOnly)
 		        	{
 		        		bFound = false;
 	        			for(Object[] coords : coordsBelowDone)
@@ -595,7 +595,7 @@ public class BO4 implements StructuredCustomObject
 		        		}
 		        	}   			
 	    			
-	    			if(replaceBelowMaterial != null && block.y == 0 && !block.material.isEmptyOrAir() && doReplaceAboveBelowOnly)
+	    			if(replaceBelowMaterial != null && block.y == 0 && !block.material.isEmpty() && doReplaceAboveBelowOnly)
 	    			{
 		        		bFound = false;
 	        			for(Object[] coords : coordsBelowDone)

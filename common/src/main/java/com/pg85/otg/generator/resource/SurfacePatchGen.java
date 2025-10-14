@@ -120,7 +120,8 @@ public class SurfacePatchGen extends Resource
         if (y < minAltitude || y > maxAltitude)
             return;
         
-        parseMaterials(world, material, sourceBlocks);
+        material = material.parseForWorld(world);
+        sourceBlocks.parseForWorld(world);
 		
         double yNoise = noiseGen.getYNoise(x * 0.25D, z * 0.25D);
         if (yNoise > 0.0D)

@@ -221,4 +221,6 @@ public interface LocalWorld
     // Used when setting blocks during population that should 
 	// use the same chc settings as the base terrain.
 	public double getBiomeBlocksNoiseValue(int xInWorld, int zInWorld);
+
+    public boolean canPlaceSnowAt(int x, int y, int z, ChunkCoordinate chunkBeingPopulated);
 }

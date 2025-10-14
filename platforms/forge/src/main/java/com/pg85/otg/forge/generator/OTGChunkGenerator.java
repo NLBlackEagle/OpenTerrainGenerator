@@ -313,7 +313,7 @@ public class OTGChunkGenerator implements IChunkGenerator
             return;
         }
         
-        IBlockState newState = ((ForgeMaterialData) material).internalBlock();
+        IBlockState newState = ((ForgeMaterialData) material).getBlockState();
         
         BlockPos pos = new BlockPos(x, y, z);
 
@@ -416,7 +416,7 @@ public class OTGChunkGenerator implements IChunkGenerator
     	for(int i = PluginStandardValues.WORLD_HEIGHT - 1; i > PluginStandardValues.WORLD_DEPTH; i--)
     	{
     		material = chunkBuffer.getBlock(x, i, z);
-    		if(material != null && !material.isEmptyOrAir())
+    		if(material != null && !material.isAir())
 			{
     			return i;
 			};

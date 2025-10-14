@@ -39,7 +39,7 @@ public class ForgeChunkBuffer extends ChunkBuffer
 
     public void setBlock(int blockX, int blockY, int blockZ, LocalMaterialData material)
     {
-        this.chunkPrimer.setBlockState(blockX, blockY, blockZ, ((ForgeMaterialData) material).internalBlock());
+        this.chunkPrimer.setBlockState(blockX, blockY, blockZ, ((ForgeMaterialData) material).getBlockState());
     }
 
     public LocalMaterialData getBlock(int blockX, int blockY, int blockZ)

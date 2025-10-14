@@ -12,7 +12,6 @@ import com.pg85.otg.configuration.ConfigFunction;
 import com.pg85.otg.configuration.biome.BiomeConfig;
 import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.util.ChunkCoordinate;
-import com.pg85.otg.util.materials.MaterialSet;
 
 /**
  * Represents a Resource: something that can generate in the world.
@@ -98,16 +97,6 @@ public abstract class Resource extends ConfigFunction<BiomeConfig> implements Co
     public LocalMaterialData getMaterial()
     {
         return material;
-    }
-    
-    protected void parseMaterials(LocalWorld world, LocalMaterialData material, MaterialSet sourceBlocks)
-    {
-		material.parseForWorld(world);
-
-        if (sourceBlocks != null)
-        {
-            sourceBlocks.parseForWorld(world);
-        }
     }
 
     public int getPriority()

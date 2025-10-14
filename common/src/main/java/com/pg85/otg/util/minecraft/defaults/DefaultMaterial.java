@@ -316,22 +316,6 @@ public enum DefaultMaterial
         this.id = id;
         this.solid = true;
     }
-    
-    public boolean isAir()
-    {
-    	return this == AIR;
-    }
-
-    /**
-     * Returns true only if this material is flowing or stationary Water
-     *
-     * @return boolean whether or not this material is flowing or stationary
-     *         Water
-     */
-    public boolean isLiquid()
-    {
-        return this == WATER || this == STATIONARY_WATER || this == LAVA || this == STATIONARY_LAVA;
-    }
 
     /**
      * Gets whether this material is solid. Materials that aren't solid are
@@ -343,19 +327,6 @@ public enum DefaultMaterial
     public boolean isSolid()
     {
         return this.solid;
-    }
-
-    /**
-     * Gets whether snow can fall on this block.
-     *
-     * @return Whether snow can fall on this block.
-     */
-    public boolean canSnowFallOn()
-    {
-        // Exceptions for nonsolid leaves
-        // IF we get much more exceptions, we may want to make this a
-        // parameter in the constructor instead.
-        return this == LEAVES || this == LEAVES_2 || (this.solid && this != PACKED_ICE && this != ICE);
     }
 
     /**

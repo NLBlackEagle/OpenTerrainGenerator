@@ -1,15 +1,19 @@
 package com.pg85.otg.util.materials;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.pg85.otg.OTG;
 import com.pg85.otg.common.LocalMaterialData;
 import com.pg85.otg.common.LocalWorld;
 import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.util.helpers.StringHelper;
-import com.pg85.otg.util.materials.MaterialSetEntry;
 
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 
 /**
  * A material set that accepts special values such as "All" or "Solid". These
@@ -19,6 +23,70 @@ import java.util.Set;
  */
 public class MaterialSet
 {
+    enum Mode
+    {
+        ALL
+        {
+            @Override
+            boolean contains(LocalMaterialData material)
+            {
+                return true;
+            }
+
+            @Override
+            boolean contains(MaterialSet set, LocalMaterialData material)
+            {
+                return true;
+            }
+        },
+        SOLID
+        {
+            @Override
+            boolean contains(LocalMaterialData material)
+            {
+                return material.isSolid();
+            }
+
+            @Override
+            boolean contains(MaterialSet set, LocalMaterialData material)
+            {
+                return material.isSolid() || DEFAULT.contains(set, material);
+            }
+        },
+        NON_SOLID
+        {
+            @Override
+            boolean contains(LocalMaterialData material)
+            {
+                return !material.isSolid();
+            }
+
+            @Override
+            boolean contains(MaterialSet set, LocalMaterialData material)
+            {
+                return !material.isSolid() || DEFAULT.contains(set, material);
+            }
+        },
+        DEFAULT
+        {
+            @Override
+            boolean contains(LocalMaterialData material)
+            {
+                return false;
+            }
+
+            @Override
+            boolean contains(MaterialSet set, LocalMaterialData material)
+            {
+                return (set.map.getInt(material.withoutBlockData()) & material.getBlockData()) != 0;
+            }
+        };
+
+        abstract boolean contains(LocalMaterialData material);
+
+        abstract boolean contains(MaterialSet set, LocalMaterialData material);
+    }
+
     /**
      * Keyword that adds all materials to the set when used in
      * {@link #parseAndAdd(String)}.
@@ -37,14 +105,9 @@ public class MaterialSet
      */
     private static final String NON_SOLID_MATERIALS = "NonSolid";
 
-    private boolean allMaterials = false;
-    private boolean allSolidMaterials = false;
-    private boolean allNonSolidMaterials = false;
-
-    private int[] materialIntSet = new int[0];
-    public Set<MaterialSetEntry> materials = new LinkedHashSet<MaterialSetEntry>();
-    private boolean intSetUpToDate = true;
-    private boolean parsed = false;
+    private Mode mode = Mode.DEFAULT;
+    private final Set<LocalMaterialData> materials = new LinkedHashSet<>();
+    private final Reference2IntMap<LocalMaterialData> map = new Reference2IntOpenHashMap<>();
 
     /**
      * Adds the given material to the list.
@@ -65,130 +128,115 @@ public class MaterialSet
      */
     public void parseAndAdd(String input) throws InvalidConfigException
     {
-        if (input.equalsIgnoreCase(ALL_MATERIALS))
+        if(this.mode == Mode.ALL)
         {
-            this.allMaterials = true;
             return;
         }
-        if (input.equalsIgnoreCase(SOLID_MATERIALS))
+        if(input.equalsIgnoreCase(ALL_MATERIALS) || this.mode == Mode.SOLID && input.equalsIgnoreCase(SOLID_MATERIALS) || this.mode == Mode.NON_SOLID && input.equalsIgnoreCase(NON_SOLID_MATERIALS))
         {
-            this.allSolidMaterials = true;
+            this.mode = Mode.ALL;
+            this.materials.clear();
+            this.map.clear();
             return;
         }
-        if (input.equalsIgnoreCase(NON_SOLID_MATERIALS))
+        if(input.equalsIgnoreCase(SOLID_MATERIALS) && this.mode != Mode.SOLID)
         {
-            this.allNonSolidMaterials = true;
+            this.mode = Mode.SOLID;
+            if(this.materials.removeIf(this.mode::contains))
+            {
+                this.recomputeMap();
+            }
+            return;
+        }
+        if(input.equalsIgnoreCase(NON_SOLID_MATERIALS) && this.mode != Mode.NON_SOLID)
+        {
+            this.mode = Mode.NON_SOLID;
+            if(this.materials.removeIf(this.mode::contains))
+            {
+                this.recomputeMap();
+            }
             return;
         }
 
         LocalMaterialData material = MaterialHelper.readMaterial(input);
-        
-        boolean checkIncludesBlockData = StringHelper.specifiesBlockData(input);
-        
-        if(material == null)
+        if(!this.mode.contains(material))
         {
-        	throw new InvalidConfigException("Invalid block check, material \"" + input + "\" could not be found.");
+            if(this.materials.add(material))
+            {
+                this.computeMapEntry(material);
+            }
         }
-        
-        // Add to set
-        add(new MaterialSetEntry(material, checkIncludesBlockData));
+    }
+
+    private void recomputeMap()
+    {
+        this.map.clear();
+        this.materials.forEach(this::computeMapEntry);
+    }
+
+    private void computeMapEntry(LocalMaterialData material)
+    {
+        LocalMaterialData k = material.withoutBlockData();
+        int v = this.map.getInt(k);
+        if((v & material.getBlockDataMask()) != material.getBlockDataMask())
+        {
+            this.map.put(k, v | material.getBlockDataMask());
+        }
     }
 
     @Override
     public int hashCode()
     {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (allMaterials ? 1231 : 1237);
-        result = prime * result + (allNonSolidMaterials ? 1231 : 1237);
-        result = prime * result + (allSolidMaterials ? 1231 : 1237);
-        result = prime * result + materials.hashCode();
-        return result;
+        int hash = 1;
+        hash = 31 * hash + this.mode.hashCode();
+        hash = 31 * hash + this.materials.hashCode();
+        return hash;
     }
 
     @Override
     public boolean equals(Object obj)
     {
-        if (this == obj)
+        if(obj == this)
         {
             return true;
         }
-        if (obj == null)
-        {
-            return false;
-        }
-        if (getClass() != obj.getClass())
+        if(!(obj instanceof MaterialSet))
         {
             return false;
         }
         MaterialSet other = (MaterialSet) obj;
-        if (allMaterials != other.allMaterials)
+        if(this.mode != other.mode)
         {
             return false;
         }
-        if (allNonSolidMaterials != other.allNonSolidMaterials)
-        {
-            return false;
-        }
-        if (allSolidMaterials != other.allSolidMaterials)
-        {
-            return false;
-        }
-        if (!materials.equals(other.materials))
+        if(!this.materials.equals(other.materials))
         {
             return false;
         }
         return true;
     }
 
-    /**
-     * Adds the entry to this material set.
-     *
-     * @param entry The entry to add, may not be null.
-     */
-    private void add(MaterialSetEntry entry)
-    {
-        // Add the appropriate hashCode
-        intSetUpToDate = false;
-        materials.add(entry);
-    }
-    
+    private boolean parsedFallBacks;
+
     public void parseForWorld(LocalWorld world)
     {
-        if (!parsed)
+        if(!this.parsedFallBacks)
         {
-            for (MaterialSetEntry material : materials)
+            this.parsedFallBacks = true;
+            for(LocalMaterialData material : this.materials)
             {
-                material.parseForWorld(world);
+                LocalMaterialData replacement = material.parseForWorld(world);
+                if(replacement != material)
+                {
+                    this.materials.remove(material);
+                    this.map.remove(material.withoutBlockData());
+                    if(this.materials.add(replacement))
+                    {
+                        this.computeMapEntry(replacement);
+                    }
+                }
             }
-            parsed = true;
-            intSetUpToDate = false;
         }
-    }
-
-    /**
-     * Updates the int (hashCode) set, so that is is up to date again with the
-     * material set.
-     */
-    private void updateIntSet()
-    {
-        if (intSetUpToDate)
-        {
-            // Already up to date
-            return;
-        }
-
-        // Update the int set
-        materialIntSet = new int[materials.size()];
-        int i = 0;
-        for (MaterialSetEntry entry : materials)
-        {
-            materialIntSet[i] = entry.hashCode();
-            i++;
-        }
-        // Sort int set so that we can use Arrays.binarySearch
-        Arrays.sort(materialIntSet);
-        intSetUpToDate = true;
     }
 
     /**
@@ -200,37 +248,7 @@ public class MaterialSet
      */
     public boolean contains(LocalMaterialData material)
     {
-        if (material == null || material.isEmpty())
-        {
-            return false;
-        }
-        if (allMaterials)
-        {
-            return true;
-        }
-        if (allSolidMaterials && material.isSolid())
-        {
-            return true;
-        }
-        if (allNonSolidMaterials && !material.isSolid())
-        {
-            return true;
-        }
-
-        // Try to update int set
-        updateIntSet();
-
-        // Check if the material is included
-        // If SAND is in the list, both SAND:0 and SAND:1 return true.
-        if (Arrays.binarySearch(materialIntSet, material.hashCodeWithoutBlockData()) >= 0)
-        {
-            return true;
-        }
-        if (Arrays.binarySearch(materialIntSet, material.hashCode()) >= 0)
-        {
-            return true;
-        }
-        return false;
+        return this.mode.contains(this, material);
     }
 
     /**
@@ -243,36 +261,22 @@ public class MaterialSet
     @Override
     public String toString()
     {
-        // Check if all materials are included
-        if (allMaterials)
+        Stream<String> prefix;
+        switch(this.mode)
         {
-            return ALL_MATERIALS;
+        case ALL:
+            return SOLID_MATERIALS;
+        case SOLID:
+            prefix = Stream.of(SOLID_MATERIALS);
+            break;
+        case NON_SOLID:
+            prefix = Stream.of(NON_SOLID_MATERIALS);
+            break;
+        default:
+            prefix = Stream.empty();
+            break;
         }
-
-        StringBuilder builder = new StringBuilder();
-        // Check for solid materials
-        if (allSolidMaterials)
-        {
-            builder.append(SOLID_MATERIALS).append(',');
-        }
-        // Check for non-solid materials
-        if (allNonSolidMaterials)
-        {
-            builder.append(NON_SOLID_MATERIALS).append(',');
-        }
-        // Add all other materials
-        for (MaterialSetEntry material : materials)
-        {
-            builder.append(material.toString()).append(',');
-        }
-
-        // Remove last ','
-        if (builder.length() > 0)
-        {
-            builder.deleteCharAt(builder.length() - 1);
-        }
-
-        return builder.toString();
+        return Stream.concat(prefix, this.materials.stream().map(Object::toString)).collect(Collectors.joining(","));
     }
 
     /**
@@ -283,23 +287,9 @@ public class MaterialSet
     public MaterialSet rotate()
     {
         MaterialSet rotated = new MaterialSet();
-        if (this.allMaterials)
-        {
-            rotated.allMaterials = true;
-        }
-        if (this.allSolidMaterials)
-        {
-            rotated.allSolidMaterials = true;
-        }
-        if (this.allNonSolidMaterials)
-        {
-            rotated.allNonSolidMaterials = true;
-        }
-        rotated.intSetUpToDate = false;
-        for (MaterialSetEntry material : this.materials)
-        {
-            rotated.materials.add(material.rotate());
-        }
+        rotated.mode = this.mode;
+        this.materials.stream().map(LocalMaterialData::rotate).forEach(rotated.materials::add);
+        rotated.recomputeMap();
         return rotated;
     }
 }

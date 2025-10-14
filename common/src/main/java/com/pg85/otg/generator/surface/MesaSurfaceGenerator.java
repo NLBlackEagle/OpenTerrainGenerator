@@ -344,7 +344,7 @@ public class MesaSurfaceGenerator implements SurfaceGenerator
             }
             else if (i1 < 15 || this.brycePillars)
             {
-            	if(worldMaterial.isEmptyOrAir())
+            	if(worldMaterial.isAir())
                 {
                     k1 = -1;
                 }

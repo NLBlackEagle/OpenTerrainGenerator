@@ -137,7 +137,8 @@ public class VeinGen extends Resource
         // Find all veins that reach this chunk, and spawn them
         int searchRadius = (this.maxRadius + 15) / 16;
         
-        parseMaterials(world, this.material, this.sourceBlocks);
+        material = material.parseForWorld(world);
+        sourceBlocks.parseForWorld(world);
 
         if(world.getConfigs().getWorldConfig().disableOreGen)
         {

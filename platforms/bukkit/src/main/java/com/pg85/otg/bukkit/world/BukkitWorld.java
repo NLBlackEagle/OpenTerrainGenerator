@@ -830,7 +830,7 @@ public class BukkitWorld implements LocalWorld
 	                            			}
 			                            	if(instruction.getFrom().getBlockId() == blockId)
 			                            	{
-			                                    section.setType(sectionX, sectionY, sectionZ, ((BukkitMaterialData)instruction.getTo()).internalBlock());                            		
+			                                    section.setType(sectionX, sectionY, sectionZ, ((BukkitMaterialData)instruction.getTo()).getBlockState());                            		
 			                            	}
 	                            		}
 	                            	}
@@ -1432,7 +1432,7 @@ public class BukkitWorld implements LocalWorld
 		// Get internal coordinates for block in chunk
         int internalX = x & 0xF;
         int internalZ = z & 0xF;
-        return BukkitMaterialData.ofMinecraftBlockData(chunk.a(internalX, y, internalZ));
+        return BukkitMaterialData.ofMinecraftBlockState(chunk.a(internalX, y, internalZ));
     }
 	
     @Override
@@ -1531,7 +1531,7 @@ public class BukkitWorld implements LocalWorld
         {
     		blockData = chunk.getBlockData(new BlockPosition(internalX, i, internalZ));
     		block = blockData.getBlock();
-    		material = BukkitMaterialData.ofMinecraftBlockData(blockData);
+    		material = BukkitMaterialData.ofMinecraftBlockState(blockData);
         	isLiquid = material.isLiquid();
         	isSolid =
 			(
@@ -1726,4 +1726,14 @@ public class BukkitWorld implements LocalWorld
 	{
 		// TODO: Implement this for spigot.
 	}
+
+    @Override
+    public boolean canPlaceSnowAt(int x, int y, int z, ChunkCoordinate chunkBeingPopulated)
+    {
+        if(chunkBeingPopulated != null && OTG.IsInAreaBeingPopulated(x, z, chunkBeingPopulated))
+        {
+            return false;
+        }
+        return Blocks.SNOW_LAYER.canPlace(world, new BlockPosition(x, y, z));
+    }
 }

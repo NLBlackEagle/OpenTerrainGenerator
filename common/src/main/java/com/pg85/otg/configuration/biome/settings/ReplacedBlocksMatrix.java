@@ -1,18 +1,20 @@
 package com.pg85.otg.configuration.biome.settings;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import com.pg85.otg.common.LocalMaterialData;
 import com.pg85.otg.common.LocalWorld;
-import com.pg85.otg.configuration.standard.PluginStandardValues;
 import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.util.helpers.StringHelper;
 import com.pg85.otg.util.materials.MaterialHelper;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map.Entry;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 
 public class ReplacedBlocksMatrix
 {
@@ -23,14 +25,14 @@ public class ReplacedBlocksMatrix
 
     private class ReplaceBlockEntry
     {
-        public final HashMap<Integer, LocalMaterialData> targetsWithoutBlockData = new HashMap<Integer, LocalMaterialData>();
-        public final HashMap<Integer, LocalMaterialData> targetsWithBlockData = new HashMap<Integer, LocalMaterialData>();
+        public final Reference2ReferenceMap<LocalMaterialData, LocalMaterialData> targetsWithoutBlockData = new Reference2ReferenceOpenHashMap<>();
+        public final Reference2ReferenceMap<LocalMaterialData, LocalMaterialData> targetsWithBlockData = new Reference2ReferenceOpenHashMap<>();
     }
 
     public static class ReplacedBlocksInstruction
     {
-        private final LocalMaterialData from;
-        private final LocalMaterialData to;
+        private LocalMaterialData from;
+        private LocalMaterialData to;
         private final int minHeight;
         private final int maxHeight;
 
@@ -167,19 +169,17 @@ public class ReplacedBlocksMatrix
         setInstructions(instructions);
 
         // Fill maps for faster access
+        this.computeMaps();
+    }
+
+    private void computeMaps()
+    {
+        Arrays.fill(this.targetsAtHeights, null);
+
         for(ReplacedBlocksInstruction instruction : this.instructions)
         {
-            for(int y = instruction.minHeight; y <= instruction.maxHeight; y++)
+            for(int y = Math.max(instruction.minHeight, 0); y <= Math.min(instruction.maxHeight, this.targetsAtHeights.length - 1); y++)
             {
-                if(y > PluginStandardValues.WORLD_HEIGHT - 1)
-                {
-                    break;
-                }
-                if(y < PluginStandardValues.WORLD_DEPTH)
-                {
-                    continue;
-                }
-
                 ReplaceBlockEntry targetsAtHeight = this.targetsAtHeights[y];
                 if(targetsAtHeight == null)
                 {
@@ -190,35 +190,28 @@ public class ReplacedBlocksMatrix
                 // Users can chain replacedblocks to replace replacedblocks, instead of actually
                 // replacing the same block to different materials multiple times, we'll calculate
                 // the end result in advance.
-                for(Entry<Integer, LocalMaterialData> entry : targetsAtHeight.targetsWithoutBlockData.entrySet())
+
+                for(Map.Entry<LocalMaterialData, LocalMaterialData> entry : targetsAtHeight.targetsWithoutBlockData.entrySet())
                 {
-                    if(
-                    // BLOCK:X replaces BLOCK:X
-                    (instruction.from.hasData() && instruction.from.hashCode() == entry.getValue().hashCode()) ||
-                    // BLOCK replaces all BLOCK:X
-                            (!instruction.from.hasData() && instruction.from.hashCodeWithoutBlockData() == entry.getValue().hashCodeWithoutBlockData()))
+                    if(instruction.from.matches(entry.getValue()))
                     {
                         entry.setValue(instruction.to);
                     }
                 }
-                for(Entry<Integer, LocalMaterialData> entry : targetsAtHeight.targetsWithBlockData.entrySet())
+                for(Map.Entry<LocalMaterialData, LocalMaterialData> entry : targetsAtHeight.targetsWithBlockData.entrySet())
                 {
-                    if(
-                    // BLOCK:X replaces BLOCK:X
-                    (instruction.from.hasData() && instruction.from.hashCode() == entry.getValue().hashCode()) ||
-                    // BLOCK replaces all BLOCK:X
-                            (!instruction.from.hasData() && instruction.from.hashCodeWithoutBlockData() == entry.getValue().hashCodeWithoutBlockData()))
+                    if(instruction.from.matches(entry.getValue()))
                     {
                         entry.setValue(instruction.to);
                     }
                 }
-                if(instruction.from.hasData())
+                if(instruction.from.getBlockDataMask() != -1)
                 {
-                    targetsAtHeight.targetsWithBlockData.put(instruction.from.hashCode(), instruction.to);
+                    targetsAtHeight.targetsWithBlockData.put(instruction.from, instruction.to);
                 }
                 else
                 {
-                    targetsAtHeight.targetsWithoutBlockData.put(instruction.from.hashCodeWithoutBlockData(), instruction.to);
+                    targetsAtHeight.targetsWithoutBlockData.put(instruction.from, instruction.to);
                 }
             }
         }
@@ -229,39 +222,39 @@ public class ReplacedBlocksMatrix
         // Fill maps for faster access
         for(ReplacedBlocksInstruction instruction : this.instructions)
         {
-            if(!instruction.from.hasData() ? instruction.from.hashCodeWithoutBlockData() == biomeCooledLavaBlock.hashCodeWithoutBlockData() : instruction.from.hashCode() == biomeCooledLavaBlock.hashCode())
+            if(instruction.from.matches(biomeCooledLavaBlock))
             {
                 this.replacesCooledLava = true;
             }
-            if(!instruction.from.hasData() ? instruction.from.hashCodeWithoutBlockData() == biomeIceBlock.hashCodeWithoutBlockData() : instruction.from.hashCode() == biomeIceBlock.hashCode())
+            if(instruction.from.matches(biomeIceBlock))
             {
                 this.replacesIce = true;
             }
-            if(!instruction.from.hasData() ? instruction.from.hashCodeWithoutBlockData() == biomeWaterBlock.hashCodeWithoutBlockData() : instruction.from.hashCode() == biomeWaterBlock.hashCode())
+            if(instruction.from.matches(biomeWaterBlock))
             {
                 this.replacesWater = true;
             }
-            if(!instruction.from.hasData() ? instruction.from.hashCodeWithoutBlockData() == biomeStoneBlock.hashCodeWithoutBlockData() : instruction.from.hashCode() == biomeStoneBlock.hashCode())
+            if(instruction.from.matches(biomeStoneBlock))
             {
                 this.replacesStone = true;
             }
-            if(!instruction.from.hasData() ? instruction.from.hashCodeWithoutBlockData() == biomeGroundBlock.hashCodeWithoutBlockData() : instruction.from.hashCode() == biomeGroundBlock.hashCode())
+            if(instruction.from.matches(biomeGroundBlock))
             {
                 this.replacesGround = true;
             }
-            if(!instruction.from.hasData() ? instruction.from.hashCodeWithoutBlockData() == biomeSurfaceBlock.hashCodeWithoutBlockData() : instruction.from.hashCode() == biomeSurfaceBlock.hashCode())
+            if(instruction.from.matches(biomeSurfaceBlock))
             {
                 this.replacesSurface = true;
             }
-            if(!instruction.from.hasData() ? instruction.from.hashCodeWithoutBlockData() == biomeBedrockBlock.hashCodeWithoutBlockData() : instruction.from.hashCode() == biomeBedrockBlock.hashCode())
+            if(instruction.from.matches(biomeBedrockBlock))
             {
                 this.replacesBedrock = true;
             }
-            if(!instruction.from.hasData() ? instruction.from.hashCodeWithoutBlockData() == biomeSandStoneBlock.hashCodeWithoutBlockData() : instruction.from.hashCode() == biomeSandStoneBlock.hashCode())
+            if(instruction.from.matches(biomeSandStoneBlock))
             {
                 this.replacesSandStone = true;
             }
-            if(!instruction.from.hasData() ? instruction.from.hashCodeWithoutBlockData() == biomeRedSandStoneBlock.hashCodeWithoutBlockData() : instruction.from.hashCode() == biomeRedSandStoneBlock.hashCode())
+            if(instruction.from.matches(biomeRedSandStoneBlock))
             {
                 this.replacesRedSandStone = true;
             }
@@ -275,16 +268,23 @@ public class ReplacedBlocksMatrix
         if(!parsedFallBacks)
         {
             parsedFallBacks = true;
+            boolean instructionsChanged = false;
             for(ReplacedBlocksInstruction instruction : this.instructions)
             {
                 if(instruction.from != null)
                 {
-                    instruction.from.parseForWorld(world);
+                    instruction.from = instruction.from.parseForWorld(world);
+                    instructionsChanged = true;
                 }
                 if(instruction.to != null)
                 {
-                    instruction.to.parseForWorld(world);
+                    instruction.to = instruction.to.parseForWorld(world);
+                    instructionsChanged = true;
                 }
+            }
+            if(instructionsChanged)
+            {
+                this.computeMaps();
             }
         }
     }
@@ -296,12 +296,12 @@ public class ReplacedBlocksMatrix
         {
             return material;
         }
-        LocalMaterialData replaceToMaterial = targetsAtHeight.targetsWithoutBlockData.get(material.hashCodeWithoutBlockData());
+        LocalMaterialData replaceToMaterial = targetsAtHeight.targetsWithoutBlockData.get(material);
         if(replaceToMaterial != null)
         {
             return replaceToMaterial;
         }
-        replaceToMaterial = targetsAtHeight.targetsWithBlockData.get(material.hashCode());
+        replaceToMaterial = targetsAtHeight.targetsWithBlockData.get(material);
         if(replaceToMaterial != null)
         {
             return replaceToMaterial;
@@ -397,7 +397,7 @@ public class ReplacedBlocksMatrix
     {
         for(ReplacedBlocksInstruction instruction : this.instructions)
         {
-            if(instruction.getFrom().hasData() ? surfaceBlock.hashCode() == instruction.from.hashCode() : surfaceBlock.hashCodeWithoutBlockData() == instruction.from.hashCodeWithoutBlockData())
+            if(instruction.from.matches(surfaceBlock))
             {
                 return true;
             }

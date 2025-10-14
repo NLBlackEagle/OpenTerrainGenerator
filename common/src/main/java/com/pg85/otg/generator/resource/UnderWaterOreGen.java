@@ -77,7 +77,8 @@ public class UnderWaterOreGen extends Resource
             return;
         }
         
-        parseMaterials(world, this.material, this.sourceBlocks);
+        material = material.parseForWorld(world);
+        sourceBlocks.parseForWorld(world);
 
         if(world.getConfigs().getWorldConfig().disableOreGen)
         {

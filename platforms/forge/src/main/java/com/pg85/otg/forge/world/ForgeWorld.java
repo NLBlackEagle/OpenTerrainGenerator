@@ -1268,7 +1268,7 @@ public class ForgeWorld implements LocalWorld
 	                            			}
 			                            	if(instruction.getFrom().getBlockId() == blockId)
 			                            	{	                            		
-			                                    section.set(sectionX, sectionY, sectionZ, ((ForgeMaterialData)instruction.getTo()).internalBlock());                            		
+			                                    section.set(sectionX, sectionY, sectionZ, ((ForgeMaterialData)instruction.getTo()).getBlockState());                            		
 			                            	}
 	                            		}
 	                            	}
@@ -1501,4 +1501,14 @@ public class ForgeWorld implements LocalWorld
 		}
 		return isOTGPlus;
 	}
+
+    @Override
+    public boolean canPlaceSnowAt(int x, int y, int z, ChunkCoordinate chunkBeingPopulated)
+    {
+        if(chunkBeingPopulated != null && OTG.IsInAreaBeingPopulated(x, z, chunkBeingPopulated))
+        {
+            return false;
+        }
+        return Blocks.SNOW_LAYER.canPlaceBlockAt(world, new BlockPos(x, y, z));
+    }
 }

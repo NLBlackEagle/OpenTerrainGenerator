@@ -103,7 +103,7 @@ public class SmallLakeGen extends Resource
         // y = floor
         y -= 4;
         
-        parseMaterials(world, material, null);
+        material = material.parseForWorld(world);
 
         // TODO: Why on earth would this be necessary or useful?
         synchronized (BooleanBuffer)
