@@ -374,10 +374,10 @@ public class NamedBinaryTag
         DataInputStream dis = null;
         if (compressed)
         {
-            dis = new DataInputStream(new GZIPInputStream(is));
+            dis = new DataInputStream(new GZIPInputStream(new BufferedInputStream(is)));
         } else
         {
-            dis = new DataInputStream(is);
+            dis = new DataInputStream(new BufferedInputStream(is));
         }
 
         byte type = dis.readByte();
