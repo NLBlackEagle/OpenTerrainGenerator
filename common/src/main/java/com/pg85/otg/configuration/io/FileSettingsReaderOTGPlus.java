@@ -11,8 +11,9 @@ import com.pg85.otg.util.helpers.StringHelper;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -217,65 +218,51 @@ public class FileSettingsReaderOTGPlus implements SettingsReaderOTGPlus
 
     public void readSettings()
     {
-        BufferedReader settingsReader = null;
+        Path path = this.file.toPath();
 
-        if (!file.exists())
+        if(!Files.exists(path))
         {
             return;
         }
 
-        try
+        try(BufferedReader reader = Files.newBufferedReader(path))
         {
-            settingsReader = new BufferedReader(new FileReader(file));
             int lineNumber = 0;
-            String thisLine;
-            while ((thisLine = settingsReader.readLine()) != null)
+            String line;
+            while((line = reader.readLine()) != null)
             {
                 lineNumber++;
-                if (thisLine.trim().isEmpty())
+                line = line.trim();
+                if(line.isEmpty())
                 {
                     // Empty line, ignore
-                } else if (thisLine.startsWith("#") || thisLine.startsWith("<"))
+                    continue;
+                }
+                if(line.startsWith("#") || line.startsWith("<"))
                 {
                     // Comment, ignore
-                } else if (thisLine.contains(":") || thisLine.toLowerCase().contains("("))
+                    continue;
+                }
+
+                int i = line.indexOf(':');
+                if(line.lastIndexOf('(', i >= 0 ? i - 1 : line.length() - 1) >= 0)
                 {
-                    // Setting or resource
-                    if (thisLine.contains("(") && (!thisLine.contains(":") || thisLine.indexOf('(') < thisLine.indexOf(':')))
-                    {
-                        // ( is first, so it's a resource
-                        this.configFunctions.add(new StringOnLine(thisLine.trim(), lineNumber));
-                    } else
-                    {
-                        // : is first, so it's a setting
-                        String[] splitSettings = thisLine.split(":", 2);
-                        this.settingsCache
-                                .put(splitSettings[0].trim().toLowerCase(), new StringOnLine(splitSettings[1].trim(), lineNumber));
-                    }
-                } else if (thisLine.contains("="))
+                    // ( is first, so it's a resource
+                    this.configFunctions.add(new StringOnLine(line, lineNumber));
+                }
+                else if(i >= 0 || (i = line.indexOf('=')) >= 0)
                 {
+                    // : is first, so it's a setting
+                    // or
                     // Setting (old style), split it and add it
-                    String[] splitSettings = thisLine.split("=", 2);
-                    this.settingsCache.put(splitSettings[0].trim().toLowerCase(), new StringOnLine(splitSettings[1].trim(), lineNumber));
+                    this.settingsCache.put(line.substring(0, i).trim().toLowerCase(), new StringOnLine(line.substring(i + 1).trim(), lineNumber));
                 }
             }
         }
-        catch (IOException e)
+        catch(IOException e)
         {
             OTG.printStackTrace(LogMarker.FATAL, e);
-        } finally {
-            if (settingsReader != null)
-            {
-                try
-                {
-                    settingsReader.close();
-                } catch (IOException localIOException2)
-                {
-                    OTG.printStackTrace(LogMarker.FATAL, localIOException2);
-                }
-            }
         }
-
     }
 
     @Override
