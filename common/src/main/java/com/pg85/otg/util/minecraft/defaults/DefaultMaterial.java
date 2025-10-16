@@ -268,7 +268,6 @@ public enum DefaultMaterial
     BLACK_GLAZED_TERRACOTTA(250),
     CONCRETE(251),
     CONCRETE_POWDER(252),
-    UNKNOWN_BLOCK(254),
     STRUCTURE_BLOCK(255, false);
 	
     /**
