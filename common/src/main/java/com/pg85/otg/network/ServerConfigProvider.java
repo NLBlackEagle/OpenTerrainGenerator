@@ -480,7 +480,7 @@ public final class ServerConfigProvider implements ConfigProvider
         //boolean isLegacyWorld = (!hasWorldData || (worldSaveData != null && worldSaveData.version == 6));
         if(worldSaveData == null)
         {
-        	worldSaveData = new WorldSaveData(isLegacyWorld ? 6 : 8);
+        	worldSaveData = new WorldSaveData(isLegacyWorld ? 6 : 9);
             WorldSaveData.saveWorldSaveData(worldSaveFolder, worldSaveData);
         }
         
