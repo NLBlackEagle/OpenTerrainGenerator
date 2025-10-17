@@ -16,6 +16,7 @@ dependencies {
     implementation project(':common')
     compileOnly "com.sk89q.worldedit:worldedit-bukkit:${worldedit_bukkit_version}"
     compileOnly "com.sk89q.worldedit:worldedit-core:${worldedit_core_version}"
+    implementation 'it.unimi.dsi:fastutil:7.1.0'
 }
 
 processResources {
