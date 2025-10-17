@@ -191,7 +191,7 @@ public abstract class StringHelper
             j = i + 1;
             i = indexOf(line, ',', i + 1);
         }
-        list.add(line.substring(i + 1, line.length()).trim());
+        list.add(line.substring(j, line.length()).trim());
         return list;
     }
 
