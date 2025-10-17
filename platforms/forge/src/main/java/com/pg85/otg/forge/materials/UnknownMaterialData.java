@@ -39,7 +39,12 @@ class UnknownMaterialData extends ForgeMaterialData
         LocalMaterialData result;
         if((result = this.replacement) == null)
         {
-            this.replacement = result = world.getConfigs().getWorldConfig().parseFallback(this.raw);
+            result = world.getConfigs().getWorldConfig().parseFallback(this.raw);
+            if(result == null)
+            {
+                result = this;
+            }
+            this.replacement = result;
         }
         return result;
     }
