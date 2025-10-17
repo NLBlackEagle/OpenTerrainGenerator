@@ -203,11 +203,7 @@ public class BO3Creator extends BOCreator
 
                                 tileEntityCount++;
                                 try {
-                                    tileEntityFile.createNewFile();
-                                    FileOutputStream fos = new FileOutputStream(tileEntityFile);
-                                    tag.writeTo(fos);
-                                    fos.flush();
-                                    fos.close();
+                                    tag.writeTo(tileEntityFile.toPath());
                                     blockFunction.metaDataTag = tag;
                                     blockFunction.metaDataName = name + "/" + tileEntityName;
                                 } catch (IOException e) {

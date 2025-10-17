@@ -9,6 +9,8 @@ import com.pg85.otg.util.bo3.NamedBinaryTag;
 import com.pg85.otg.util.minecraft.defaults.EntityNames;
 
 import java.io.*;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -74,17 +76,18 @@ public abstract class EntityFunction<T extends CustomObjectConfigFile> extends C
             if (namedBinaryTag == null) {
                 // load NBT data from .nbt file
                 try {
-                    FileInputStream stream = new FileInputStream(nameTagOrNBTFileName);
-                    namedBinaryTag = NamedBinaryTag.readFrom(stream, true);
-                } catch (FileNotFoundException e) {
+                    namedBinaryTag = NamedBinaryTag.readFrom(Paths.get(nameTagOrNBTFileName));
+                } catch (NoSuchFileException e) {
                     if(OTG.getPluginConfig().spawnLog)
                     {
                         OTG.log(LogMarker.WARN, "Could not find file: "+nameTagOrNBTFileName);
                     }
                     // Set it to null so we don't go looking for this later
                     nameTagOrNBTFileName = null;
-                } catch (IOException e) {
+                } catch (IOException | InvalidConfigException e) {
                     e.printStackTrace();
+                    // Set it to null so we don't go looking for this later
+                    nameTagOrNBTFileName = null;
                 }
 
             }

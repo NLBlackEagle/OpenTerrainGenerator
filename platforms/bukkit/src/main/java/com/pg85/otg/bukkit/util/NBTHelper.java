@@ -21,6 +21,7 @@ import net.minecraft.server.v1_12_R1.NBTTagInt;
 import net.minecraft.server.v1_12_R1.NBTTagIntArray;
 import net.minecraft.server.v1_12_R1.NBTTagList;
 import net.minecraft.server.v1_12_R1.NBTTagLong;
+import net.minecraft.server.v1_12_R1.NBTTagLongArray;
 import net.minecraft.server.v1_12_R1.NBTTagShort;
 import net.minecraft.server.v1_12_R1.NBTTagString;
 import net.minecraft.server.v1_12_R1.TileEntity;
@@ -75,6 +76,7 @@ public class NBTHelper {
 			case TAG_Byte_Array:
 			case TAG_String:
 			case TAG_Int_Array:
+			case TAG_Long_Array:
 				compoundTag.addTag(new NamedBinaryTag(type, entry.getKey(), getValueFromNms(nmsChildTag)));
 				break;
 			case TAG_List:
@@ -177,6 +179,9 @@ public class NBTHelper {
 		case TAG_Int_Array:
 			int[] theIntArray = ((NBTTagIntArray) nmsTag).d();
 			return theIntArray;
+		case TAG_Long_Array:
+			long[] theLongArray = new long[0];
+			return theLongArray;
 		default:
 			// Cannot read this from a tag
 			throw new IllegalArgumentException(type + "doesn't have a simple value!");
@@ -206,6 +211,7 @@ public class NBTHelper {
 			case TAG_Byte_Array:
 			case TAG_String:
 			case TAG_Int_Array:
+			case TAG_Long_Array:
 				nmsTag.set(tag.getName(), createTagNms(tag.getType(), tag.getValue()));
 				break;
 			case TAG_List:
@@ -244,6 +250,7 @@ public class NBTHelper {
 			case TAG_Byte_Array:
 			case TAG_String:
 			case TAG_Int_Array:
+			case TAG_Long_Array:
 				nmsTag.add(createTagNms(tag.getType(), tag.getValue()));
 				break;
 			case TAG_List:
@@ -323,6 +330,8 @@ public class NBTHelper {
 			return new NBTTagString((String) value);
 		case TAG_Int_Array:
 			return new NBTTagIntArray((int[]) value);
+		case TAG_Long_Array:
+			return new NBTTagLongArray((long[]) value);
 		default:
 			// Cannot make this into a tag
 			throw new IllegalArgumentException(type + "doesn't have a simple value!");

@@ -17,6 +17,7 @@ import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.nbt.NBTTagIntArray;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagLong;
+import net.minecraft.nbt.NBTTagLongArray;
 import net.minecraft.nbt.NBTTagShort;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.tileentity.TileEntity;
@@ -69,6 +70,7 @@ public class NBTHelper
                 case TAG_Byte_Array:
                 case TAG_String:
                 case TAG_Int_Array:
+                case TAG_Long_Array:
                     compoundTag.addTag(new NamedBinaryTag(type, entry.getKey(), getValueFromNms(nmsChildTag)));
                     break;
                 case TAG_List:
@@ -125,6 +127,7 @@ public class NBTHelper
                 case TAG_Byte_Array:
                 case TAG_String:
                 case TAG_Int_Array:
+                case TAG_Long_Array:
                     listTag.addTag(new NamedBinaryTag(listType, null, getValueFromNms(nmsChildTag)));
                     break;
                 case TAG_List:
@@ -177,6 +180,8 @@ public class NBTHelper
                 return ((NBTTagString) nmsTag).getString();
             case TAG_Int_Array:
                 return ((NBTTagIntArray) nmsTag).getIntArray();
+            case TAG_Long_Array:
+                return new long[0];
             default:
                 // Cannot read this from a tag
                 throw new IllegalArgumentException(type + "doesn't have a simple value!");
@@ -209,6 +214,7 @@ public class NBTHelper
                 case TAG_Byte_Array:
                 case TAG_String:
                 case TAG_Int_Array:
+                case TAG_Long_Array:
                     nmsTag.setTag(tag.getName(), createTagNms(tag.getType(), tag.getValue()));
                     break;
                 case TAG_List:
@@ -250,6 +256,7 @@ public class NBTHelper
                 case TAG_Byte_Array:
                 case TAG_String:
                 case TAG_Int_Array:
+                case TAG_Long_Array:
                     nmsTag.appendTag(createTagNms(tag.getType(), tag.getValue()));
                     break;
                 case TAG_List:
@@ -295,6 +302,8 @@ public class NBTHelper
                 return new NBTTagString((String) value);
             case TAG_Int_Array:
                 return new NBTTagIntArray((int[]) value);
+            case TAG_Long_Array:
+                return new NBTTagLongArray((long[]) value);
             default:
                 // Cannot make this into a tag
                 throw new IllegalArgumentException(type + "doesn't have a simple value!");

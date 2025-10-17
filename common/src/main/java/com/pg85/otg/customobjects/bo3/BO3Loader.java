@@ -18,10 +18,13 @@ import com.pg85.otg.customobjects.bo3.checks.BlockCheckNot;
 import com.pg85.otg.customobjects.bo3.checks.LightCheck;
 import com.pg85.otg.customobjects.bo3.checks.ModCheck;
 import com.pg85.otg.customobjects.bo3.checks.ModCheckNot;
+import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.logging.LogMarker;
 import com.pg85.otg.util.bo3.NamedBinaryTag;
 
 import java.io.*;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,7 +35,7 @@ public class BO3Loader implements CustomObjectLoader
     /** A list of already loaded meta Tags. The path is the key, a NBT Tag is
      * the value.
      */
-    private static Map<String, NamedBinaryTag> LoadedTags = new HashMap<String, NamedBinaryTag>();
+    private static final Map<String, NamedBinaryTag> LoadedTags = new HashMap<>();
 
     public BO3Loader()
     {
@@ -76,75 +79,34 @@ public class BO3Loader implements CustomObjectLoader
 
     public static NamedBinaryTag loadMetadata(String name, File bo3Folder)
     {
-        String path = bo3Folder.getParent() + File.separator + name;
-
-        if (LoadedTags.containsKey(path))
-        {
-            // Found a cached one
-            return LoadedTags.get(path);
-        }
-
-        NamedBinaryTag tag = loadTileEntityFromNBT(path);
-        registerMetadata(path, tag);
-        return tag;
+        return LoadedTags.computeIfAbsent(bo3Folder.getParent() + File.separator + name, BO3Loader::loadTileEntityFromNBT);
     }
 
     private static NamedBinaryTag loadTileEntityFromNBT(String path)
     {
         // Load from file
         NamedBinaryTag metadata;
-        FileInputStream stream = null;
         try
         {
-            // Read it from a file next to the BO3
-            stream = new FileInputStream(path);
-            // Get the tag
-            metadata = NamedBinaryTag.readFrom(stream, true);
-        } catch (FileNotFoundException e)
+            metadata = NamedBinaryTag.readFrom(Paths.get(path));
+        }
+        catch(NoSuchFileException e)
         {
             // File not found
-        	if(OTG.getPluginConfig().spawnLog)
-        	{
-        		OTG.log(LogMarker.WARN, "NBT file {} not found", (Object) path);
-        	}
+            if(OTG.getPluginConfig().spawnLog)
+            {
+                OTG.log(LogMarker.WARN, "NBT file {} not found", (Object) path);
+            }
             return null;
-        } catch (IOException e)
+        }
+        catch(IOException | InvalidConfigException e)
         {
-            tryToClose(stream);
-
-            // Not a compressed NBT file, try uncompressed
-            FileInputStream streamForUncompressed = null;
-            try
+            if(OTG.getPluginConfig().spawnLog)
             {
-                // Read it from a file next to the BO3
-                streamForUncompressed = new FileInputStream(path);
-                // Get the tag
-                metadata = NamedBinaryTag.readFrom(streamForUncompressed, false);
-            }             
-            catch (java.lang.ArrayIndexOutOfBoundsException corruptFile)
-            {
-            	if(OTG.getPluginConfig().spawnLog)
-            	{
-	                OTG.log(LogMarker.ERROR, "Failed to read NBT meta file: ", e.getMessage());
-	                OTG.printStackTrace(LogMarker.ERROR, corruptFile);
-            	}
-                return null;
+                OTG.log(LogMarker.ERROR, "Failed to read NBT meta file: ", e.getMessage());
+                OTG.printStackTrace(LogMarker.ERROR, e);
             }
-            catch (IOException corruptFile)
-            {
-            	if(OTG.getPluginConfig().spawnLog)
-            	{
-	                OTG.log(LogMarker.ERROR, "Failed to read NBT meta file: ", e.getMessage());
-	                OTG.printStackTrace(LogMarker.ERROR, corruptFile);
-            	}
-                return null;
-            } finally
-            {
-                tryToClose(streamForUncompressed);
-            }
-        } finally
-        {
-            tryToClose(stream);
+            return null;
         }
 
         if(metadata != null)
@@ -173,34 +135,6 @@ public class BO3Loader implements CustomObjectLoader
         // Unknown/bad structure
         OTG.log(LogMarker.WARN, "Structure of NBT file is incorrect: " + path);
         return null;
-    }
-
-    /**
-     * Caches and returns the provided Meta data
-     * @param pathOnDisk The path of the meta data
-     * @param metadata   The Tag object to be cached
-     * @return the meta data that was cached
-     */
-    private static NamedBinaryTag registerMetadata(String pathOnDisk, NamedBinaryTag metadata)
-    {
-        // Add it to the cache
-        LoadedTags.put(pathOnDisk, metadata);
-        // Return it
-        return metadata;
-    }
-
-    private static void tryToClose(InputStream stream)
-    {
-        if (stream != null)
-        {
-            try
-            {
-                stream.close();
-            } catch (IOException ignored)
-            {
-                // Ignore
-            }
-        }
     }
 
     @Override
