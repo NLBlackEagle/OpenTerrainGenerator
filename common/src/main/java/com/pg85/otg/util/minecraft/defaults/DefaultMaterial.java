@@ -273,7 +273,7 @@ public enum DefaultMaterial
     /**
      * A DefaultMaterial lookup table with the material ID as the index
      */
-    private static final DefaultMaterial[] LookupID = new DefaultMaterial[Arrays.stream(DefaultMaterial.values()).mapToInt(m -> m.id).max().orElse(0)];
+    private static final DefaultMaterial[] LookupID = new DefaultMaterial[Arrays.stream(DefaultMaterial.values()).mapToInt(m -> m.id + 1).max().orElse(0)];
     static
     {
         for(DefaultMaterial m : DefaultMaterial.values())
