@@ -133,8 +133,7 @@ public abstract class ForgeMaterialData extends LocalMaterialData
     @Override
     public boolean isSolid()
     {
-        // TODO is this correct?
-        return this.getBlockState().getMaterial().isSolid();
+        return this.getBlockState().getMaterial().isSolid() && this.getBlockState().causesSuffocation();
     }
 
     @Override

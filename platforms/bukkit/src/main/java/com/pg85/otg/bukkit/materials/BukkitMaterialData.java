@@ -143,8 +143,7 @@ public abstract class BukkitMaterialData extends LocalMaterialData
     @Override
     public boolean isSolid()
     {
-        // TODO is this correct?
-        return this.getBlockState().getMaterial().isSolid();
+        return this.getBlockState().getMaterial().isSolid() && this.getBlockState().r();
     }
 
     @Override
