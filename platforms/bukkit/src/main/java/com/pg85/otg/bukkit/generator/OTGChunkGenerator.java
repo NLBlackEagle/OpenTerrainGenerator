@@ -313,7 +313,6 @@ public class OTGChunkGenerator extends ChunkGenerator
     	}
     	   	
 		cachedColumn = new LocalMaterialData[256];
-    	LocalMaterialData[] blocksInColumn = new LocalMaterialData[256];
 		
     	Chunk chunk = this.world.getWorld().getChunkProvider().getLoadedChunkAt(chunkX, chunkZ);
     	if(chunk == null)
@@ -329,7 +328,7 @@ public class OTGChunkGenerator extends ChunkGenerator
 	        	MaterialData blockInChunk = chunkData.getTypeAndData(blockX, y, blockZ);
 	        	if(blockInChunk != null)
 	        	{
-	        		blocksInColumn[y] = BukkitMaterialData.ofMinecraftBlockState(blockInChunk.getItemTypeId(), blockInChunk.getData());
+	        		cachedColumn[y] = BukkitMaterialData.ofMinecraftBlockState(blockInChunk.getItemTypeId(), blockInChunk.getData());
 	        	} else {       		
 	        		break;
 	        	}
@@ -341,14 +340,14 @@ public class OTGChunkGenerator extends ChunkGenerator
 	        	IBlockData blockInChunk = chunk.getBlockData(new BlockPosition(blockX, y, blockZ));
 	        	if(blockInChunk != null)
 	        	{
-	        		blocksInColumn[y] = BukkitMaterialData.ofMinecraftBlockState(blockInChunk);
+	        		cachedColumn[y] = BukkitMaterialData.ofMinecraftBlockState(blockInChunk);
 	        	} else {       		
 	        		break;
 	        	}
 	        }    		
     	}    	
         unloadedBlockColumnsCache.put(blockPos, cachedColumn);		
-        return blocksInColumn;
+        return cachedColumn;
     }
     
     public double getBiomeBlocksNoiseValue(int blockX, int blockZ)

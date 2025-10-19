@@ -249,21 +249,20 @@ public class OTGChunkGenerator implements IChunkGenerator
 		
 		cachedColumn = new LocalMaterialData[256];
 
-    	LocalMaterialData[] blocksInColumn = new LocalMaterialData[256];
     	IBlockState blockInChunk;
     	for(short y = 0; y < 256; y++)
         {
         	blockInChunk = chunk.getBlockState(new BlockPos(blockX, y, blockZ));
         	if(blockInChunk != null)
         	{
-	        	blocksInColumn[y] = ForgeMaterialData.ofMinecraftBlockState(blockInChunk);
+	        	cachedColumn[y] = ForgeMaterialData.ofMinecraftBlockState(blockInChunk);
         	} else {
         		break;
         	}
         }
 		unloadedBlockColumnsCache.put(blockPos, cachedColumn);
 		
-        return blocksInColumn;
+        return cachedColumn;
     }
     
     public double getBiomeBlocksNoiseValue(int blockX, int blockZ)
