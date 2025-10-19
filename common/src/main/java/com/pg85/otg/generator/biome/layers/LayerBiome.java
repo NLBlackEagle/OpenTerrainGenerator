@@ -5,6 +5,7 @@ import com.pg85.otg.common.LocalWorld;
 import com.pg85.otg.configuration.biome.BiomeGroup;
 import com.pg85.otg.configuration.biome.BiomeGroupManager;
 import com.pg85.otg.generator.biome.ArraysCache;
+import com.pg85.otg.util.WeightedList;
 
 public class LayerBiome extends Layer
 {
@@ -39,14 +40,18 @@ public class LayerBiome extends Layer
                 if ((currentPiece & BiomeGroupBits) != 0 && ((currentPiece & BiomeBitsAreSetBit) == 0 || (currentPiece & BiomeBits) == this.defaultOceanId))    // has biomegroup bits but not biome bits
                 {
                     BiomeGroup group = manager.getGroupById((currentPiece & BiomeGroupBits) >> BiomeGroupShift);
-                    LocalBiome biome = group.getDepthMapOrHigher(depth).getRandom(this::nextInt);
-                    if (biome != null) {
-                        currentPiece |= biome.getIds().getOTGBiomeId() |
-                            // Set IceBit based on Biome Temperature
-                            (biome.getBiomeConfig().biomeTemperature <= freezeTemp ? IceBit : 0) |
-                            // Set BiomeBitsAreSetBit
-                            BiomeBitsAreSetBit
-                            ;
+                    WeightedList<LocalBiome> weightedBiomes = group.getDepthMapOrHigher(depth);
+                    if(!weightedBiomes.isEmpty())
+                    {
+                        LocalBiome biome = weightedBiomes.getRandom(this::nextInt);
+                        if (biome != null) {
+                            currentPiece |= biome.getIds().getOTGBiomeId() |
+                                // Set IceBit based on Biome Temperature
+                                (biome.getBiomeConfig().biomeTemperature <= freezeTemp ? IceBit : 0) |
+                                // Set BiomeBitsAreSetBit
+                                BiomeBitsAreSetBit
+                                ;
+                        }
                     }
                 }
                 thisInts[(j + i * xSize)] = currentPiece;

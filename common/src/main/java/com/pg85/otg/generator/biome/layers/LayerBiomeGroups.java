@@ -4,6 +4,7 @@ import com.pg85.otg.common.LocalWorld;
 import com.pg85.otg.configuration.biome.BiomeGroup;
 import com.pg85.otg.configuration.biome.BiomeGroupManager;
 import com.pg85.otg.generator.biome.ArraysCache;
+import com.pg85.otg.util.WeightedList;
 
 import java.util.function.IntUnaryOperator;
 
@@ -49,12 +50,16 @@ public class LayerBiomeGroups extends Layer
                 {
                 	// TODO: even with rarity 1 this always spawns the biome
 
-                    BiomeGroup group = biomeGroupManager.getGroupDepthMap(depth).getRandom(rng);
-                    if(group != null)
+                    WeightedList<BiomeGroup> weightedGroups = biomeGroupManager.getGroupDepthMap(depth);
+                    if(!weightedGroups.isEmpty())
                     {
-                        currentPiece |= (group.getGroupId() << BiomeGroupShift) |
-                        //>>    If the average temp of the group is cold
-                        ((group.isColdGroup() && freezeGroups) ? IceBit : 0);
+                        BiomeGroup group = weightedGroups.getRandom(rng);
+                        if(group != null)
+                        {
+                            currentPiece |= (group.getGroupId() << BiomeGroupShift) |
+                            //>>    If the average temp of the group is cold
+                            ((group.isColdGroup() && freezeGroups) ? IceBit : 0);
+                        }
                     }
                 }
                 thisInts[(j + i * x_size)] = currentPiece;
