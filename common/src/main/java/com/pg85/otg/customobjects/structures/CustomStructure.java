@@ -1,6 +1,9 @@
 package com.pg85.otg.customobjects.structures;
 
 import com.pg85.otg.customobjects.CustomObject;
+import com.pg85.otg.customobjects.bofunctions.ModDataFunction;
+import com.pg85.otg.customobjects.bofunctions.ParticleFunction;
+import com.pg85.otg.customobjects.bofunctions.SpawnerFunction;
 import com.pg85.otg.util.ChunkCoordinate;
 import java.util.*;
 
@@ -47,9 +50,24 @@ public abstract class CustomStructure
     {
         int result = 1;
         result = 31 * result + Objects.hash(this.start.bo3Name);
-        result = 31 * result + (this.start.getX() ^ (this.start.getX() >>> 32));
-        result = 31 * result + (this.start.getY() ^ (this.start.getY() >>> 32));
-        result = 31 * result + (this.start.getZ() ^ (this.start.getZ() >>> 32));
+        result = 31 * result + this.start.getX();
+        result = 31 * result + this.start.getY();
+        result = 31 * result + this.start.getZ();
         return result;
+    }
+
+    public HashSet<ModDataFunction<?>> getModData()
+    {
+        return modDataManager.modData;
+    }
+
+    public HashSet<SpawnerFunction<?>> getSpawnerData()
+    {
+        return spawnerManager.spawnerData;
+    }
+
+    public HashSet<ParticleFunction<?>> getParticleData()
+    {
+        return particlesManager.particleData;
     }
 }
