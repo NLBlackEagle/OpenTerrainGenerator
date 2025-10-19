@@ -73,13 +73,7 @@ public class BO4CustomStructureCoordinate extends CustomStructureCoordinate
     {
     	return (StructuredCustomObject)getObject();
     }
-        
-    @Override
-    public int hashCode()
-    {
-        return (x >> 13) ^ (y >> 7) ^ z ^ object.getName().hashCode() ^ rotation.toString().hashCode();
-    }
-    
+
     @Override
     public boolean equals(Object otherObject)
     {

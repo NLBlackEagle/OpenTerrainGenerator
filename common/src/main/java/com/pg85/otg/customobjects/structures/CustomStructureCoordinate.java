@@ -83,7 +83,13 @@ public abstract class CustomStructureCoordinate
     @Override
     public int hashCode()
     {
-        return (x >> 13) ^ (y >> 7) ^ z ^ object.getName().hashCode() ^ rotation.toString().hashCode();
+        int result = 1;
+        result = 31 * result + object.getName().hashCode();
+        result = 31 * result + rotation.hashCode();
+        result = 31 * result + x;
+        result = 31 * result + y;
+        result = 31 * result + z;
+        return result;
     }
     
     @Override
