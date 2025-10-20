@@ -27,6 +27,8 @@ import com.pg85.otg.util.minecraft.defaults.DefaultBiome;
 import com.pg85.otg.worldsave.BiomeIdData;
 import com.pg85.otg.worldsave.WorldSaveData;
 
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+
 /**
  * Holds the WorldConfig and all BiomeConfigs.
  *
@@ -732,11 +734,11 @@ public final class ServerConfigProvider implements ConfigProvider
         // Indexing BiomeColor
         if (this.worldConfig.biomeMode == OTG.getBiomeModeManager().FROM_IMAGE) {
             if (this.worldConfig.biomeColorMap == null) {
-                this.worldConfig.biomeColorMap = new HashMap<Integer, Integer>();
+                this.worldConfig.biomeColorMap = new Int2IntOpenHashMap();
+                this.worldConfig.biomeColorMap.defaultReturnValue(-1);
             }
 
-            int color = biomeConfig.biomeColor;
-            this.worldConfig.biomeColorMap.put(color, biome.getIds().getOTGBiomeId());
+            this.worldConfig.biomeColorMap.put(biomeConfig.biomeColor, biome.getIds().getOTGBiomeId());
         }
     }
 	/** Recursive method to get saved ID from ReplaceToBiomeName, allows chain replacing to virtual biomes.

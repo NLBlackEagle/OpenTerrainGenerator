@@ -75,6 +75,13 @@ public class MathHelper
         return x - floorDiv(x, y) * y;
     }
     
+    public static int transformMirror(int x, int y)
+    {
+        int i = floorDiv(x, y);
+        int r = x - i * y;
+        return (i & 1) == 1 ? y - r : r;
+    }
+    
     public static boolean tryParseInt(String value)
     {  
         try {  

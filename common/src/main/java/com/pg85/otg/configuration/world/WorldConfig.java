@@ -35,6 +35,8 @@ import com.pg85.otg.logging.LogMarker;
 import com.pg85.otg.util.materials.MaterialHelper;
 import com.pg85.otg.util.minecraft.defaults.DefaultBiome;
 
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+
 public class WorldConfig extends ConfigFile
 {
     public final File settingsDir;
@@ -109,7 +111,7 @@ public class WorldConfig extends ConfigFile
     public int imageXOffset;
     public int imageZOffset;
 
-    public HashMap<Integer, Integer> biomeColorMap;
+    public Int2IntMap biomeColorMap;
 
     // Look settings
     public int worldFog;
