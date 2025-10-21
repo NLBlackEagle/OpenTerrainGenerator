@@ -137,13 +137,7 @@ public abstract class ConfigFunction<T>
      */
     protected final MaterialSet readMaterials(List<String> strings, int start) throws InvalidConfigException
     {
-        MaterialSet materials = new MaterialSet();
-        for (int i = start; i < strings.size(); i++)
-        {
-            materials.parseAndAdd(strings.get(i));
-        }
-
-        return materials;
+        return MaterialSet.create(strings.subList(start, strings.size()));
     }
 
     /**

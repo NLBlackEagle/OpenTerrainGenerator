@@ -1,17 +1,22 @@
 package com.pg85.otg.util.materials;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.pg85.otg.OTG;
+import com.pg85.otg.OTGEngine;
 import com.pg85.otg.common.LocalMaterialData;
 import com.pg85.otg.common.LocalWorld;
 import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.util.helpers.StringHelper;
+import com.pg85.otg.util.minecraft.defaults.DefaultMaterial;
 
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 
@@ -105,9 +110,61 @@ public class MaterialSet
      */
     private static final String NON_SOLID_MATERIALS = "NonSolid";
 
+    private static final Object2ObjectMap<List<String>, MaterialSet> INSTANCES = new Object2ObjectOpenHashMap<>();
     private Mode mode = Mode.DEFAULT;
     private final Set<LocalMaterialData> materials = new LinkedHashSet<>();
     private final Reference2IntMap<LocalMaterialData> map = new Reference2IntOpenHashMap<>();
+
+    private MaterialSet()
+    {
+
+    }
+
+    public static MaterialSet create(DefaultMaterial... materials)
+    {
+        if(materials.length == 0)
+        {
+            return _create(Collections.emptyList());
+        }
+        return _create(Arrays.stream(materials).map(DefaultMaterial::toString).collect(Collectors.toList()));
+    }
+
+    public static MaterialSet create(String... materials)
+    {
+        if(materials.length == 0)
+        {
+            return _create(Collections.emptyList());
+        }
+        return _create(Arrays.asList(materials.clone()));
+    }
+
+    public static MaterialSet create(List<String> materials)
+    {
+        if(materials.isEmpty())
+        {
+            return _create(Collections.emptyList());
+        }
+        return _create(Arrays.asList(materials.toArray(new String[materials.size()])));
+    }
+
+    private static MaterialSet _create(List<String> materials)
+    {
+        return INSTANCES.computeIfAbsent(materials, k -> {
+            MaterialSet v = new MaterialSet();
+            try
+            {
+                for(String material : k)
+                {
+                    v.parseAndAdd(material);
+                }
+            }
+            catch(InvalidConfigException e)
+            {
+                throw new RuntimeException(e);
+            }
+            return v;
+        });
+    }
 
     /**
      * Adds the given material to the list.
@@ -126,7 +183,7 @@ public class MaterialSet
      * @param input The name of the material to add.
      * @throws InvalidConfigException If the name is invalid.
      */
-    public void parseAndAdd(String input) throws InvalidConfigException
+    private void parseAndAdd(String input) throws InvalidConfigException
     {
         if(this.mode == Mode.ALL)
         {
@@ -294,10 +351,23 @@ public class MaterialSet
      */
     public MaterialSet rotate()
     {
-        MaterialSet rotated = new MaterialSet();
-        rotated.mode = this.mode;
-        this.materials.stream().map(LocalMaterialData::rotate).forEach(rotated.materials::add);
-        rotated.recomputeMap();
-        return rotated;
+        MaterialSet rotatedSet = new MaterialSet();
+        rotatedSet.mode = this.mode;
+        boolean rotatedEqualsThis = true;
+        for(LocalMaterialData material : this.materials)
+        {
+            LocalMaterialData rotatedMaterial = material.rotate();
+            rotatedSet.materials.add(rotatedMaterial);
+            if(rotatedMaterial != material)
+            {
+                rotatedEqualsThis = false;
+            }
+        }
+        if(rotatedEqualsThis)
+        {
+            return this;
+        }
+        rotatedSet.recomputeMap();
+        return rotatedSet;
     }
 }
