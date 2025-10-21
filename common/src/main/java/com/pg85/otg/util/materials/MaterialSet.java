@@ -78,7 +78,7 @@ public class MaterialSet
             @Override
             boolean contains(MaterialSet set, LocalMaterialData material)
             {
-                return (set.map.getInt(material.withoutBlockData()) & material.getBlockData()) != 0;
+                return (set.map.getInt(material.withoutBlockData()) & (1 << material.getBlockData())) != 0;
             }
         };
 
