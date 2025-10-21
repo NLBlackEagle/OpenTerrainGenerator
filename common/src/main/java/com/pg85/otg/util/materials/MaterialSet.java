@@ -115,7 +115,7 @@ public class MaterialSet
      * <p>If the material is "All", all
      * materials in existence are added to the list. If the material is
      * "Solid", all solid materials are added to the list. Otherwise,
-     * {@link OTG#readMaterial(String)} is used to read the
+     * {@link OTGEngine#readMaterial(String)} is used to read the
      * material.
      *
      * <p>If the material {@link StringHelper#specifiesBlockData(String)
