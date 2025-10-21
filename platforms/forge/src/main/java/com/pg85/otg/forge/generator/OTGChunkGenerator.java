@@ -5,6 +5,7 @@ import static com.pg85.otg.util.ChunkCoordinate.CHUNK_SIZE;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Map.Entry;
 
 import com.pg85.otg.OTG;
@@ -42,6 +43,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome.SpawnListEntry;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.IChunkGenerator;
+import net.minecraftforge.common.util.Constants.BlockFlags;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
 
 public class OTGChunkGenerator implements IChunkGenerator
@@ -304,82 +306,43 @@ public class OTGChunkGenerator implements IChunkGenerator
         }
     	return height;
     }
-    
+
     public void setBlock(int x, int y, int z, LocalMaterialData material, NamedBinaryTag metaDataTag)
     {
-        if (y < PluginStandardValues.WORLD_DEPTH || y >= PluginStandardValues.WORLD_HEIGHT)
+        if(y < PluginStandardValues.WORLD_DEPTH || y >= PluginStandardValues.WORLD_HEIGHT)
         {
             return;
         }
-        
-        IBlockState newState = ((ForgeMaterialData) material).getBlockState();
-        
+
         BlockPos pos = new BlockPos(x, y, z);
 
-        // Get chunk from (faster) custom cache
-        Chunk chunk = this.getChunk(x, z);
-        if (chunk == null)
-        {
-        	throw new RuntimeException("Could not provide chunk.");
-        }
-        
-        // Disable nearby block physics
-        //IBlockState iblockstate = setBlockState(chunk, pos, newState);
-        
-        // Disable nearby block physics (except for tile entities) and set block
-        boolean oldCaptureBlockStates = this.world.getWorld().captureBlockSnapshots;
-        IBlockState iblockstate;
-        try
-        {
-            this.world.getWorld().captureBlockSnapshots = !(newState.getBlock().hasTileEntity(newState));
-            iblockstate = chunk.setBlockState(pos, newState);
-        }
-        finally
-        {
-            this.world.getWorld().captureBlockSnapshots = oldCaptureBlockStates;
-        }
-        
-        if (iblockstate == null)
-        {
-        	return; // Happens when block to place is the same as block being placed? TODO: Is that the only time this happens?
-        }
+        this.world.getWorld().setBlockState(pos, ((ForgeMaterialData) material).getBlockState(), BlockFlags.SEND_TO_CLIENTS | BlockFlags.NO_OBSERVERS);
 
-	    if (metaDataTag != null)
-	    {
-	    	attachMetadata(x, y, z, metaDataTag);
-	    }
-
-	    // Notify world: (2 | 16) == update client, don't update observers
-    	this.world.getWorld().markAndNotifyBlock(pos, chunk, iblockstate, newState, 2 | 16);
+        if(metaDataTag != null)
+        {
+            TileEntity tileEntity = this.world.getWorld().getTileEntity(pos);
+            if(tileEntity != null)
+            {
+                NBTTagCompound nbtTag = NBTHelper.getNMSFromNBTTagCompound(metaDataTag);
+                nbtTag.setInteger("x", x);
+                nbtTag.setInteger("y", y);
+                nbtTag.setInteger("z", z);
+                // Update to current Minecraft format (maybe we want to do this at
+                // server startup instead, and then save the result?)
+                // TODO: Use datawalker instead
+                nbtTag = this.dataFixer.process(FixTypes.BLOCK_ENTITY, nbtTag);
+                tileEntity.readFromNBT(nbtTag);
+            }
+            else
+            {
+                if(OTG.getPluginConfig().spawnLog)
+                {
+                    OTG.log(LogMarker.WARN, "Skipping tile entity with id {}, cannot be placed at {},{},{}", Optional.ofNullable(metaDataTag.getTag("id")).map(NamedBinaryTag::getValue).orElse(null), x, y, z);
+                }
+            }
+        }
     }
 
-    private void attachMetadata(int x, int y, int z, NamedBinaryTag tag)
-    {
-        // Convert Tag to a native nms tag
-        NBTTagCompound nmsTag = NBTHelper.getNMSFromNBTTagCompound(tag);
-        // Add the x, y and z position to it
-        nmsTag.setInteger("x", x);
-        nmsTag.setInteger("y", y);
-        nmsTag.setInteger("z", z);
-        // Update to current Minecraft format (maybe we want to do this at
-        // server startup instead, and then save the result?)
-        // TODO: Use datawalker instead
-        //nmsTag = this.dataFixer.process(FixTypes.BLOCK_ENTITY, nmsTag, -1);
-        nmsTag = this.dataFixer.process(FixTypes.BLOCK_ENTITY, nmsTag);
-
-        // Add that data to the current tile entity in the world
-        TileEntity tileEntity = this.world.getWorld().getTileEntity(new BlockPos(x, y, z));
-        if (tileEntity != null)
-        {
-            tileEntity.readFromNBT(nmsTag);
-        } else {
-        	if(OTG.getPluginConfig().spawnLog)
-        	{
-        		OTG.log(LogMarker.WARN, "Skipping tile entity with id {}, cannot be placed at {},{},{}", nmsTag.getString("id"), x, y, z);
-        	}
-        }
-    }    
-    
     // Structures
 
     @Override

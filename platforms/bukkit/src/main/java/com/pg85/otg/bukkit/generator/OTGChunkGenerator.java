@@ -24,9 +24,9 @@ import net.minecraft.server.v1_12_R1.DataConverter;
 import net.minecraft.server.v1_12_R1.DataConverterRegistry;
 import net.minecraft.server.v1_12_R1.DataConverterTypes;
 import net.minecraft.server.v1_12_R1.IBlockData;
-import net.minecraft.server.v1_12_R1.ITileEntity;
 import net.minecraft.server.v1_12_R1.NBTTagCompound;
 import net.minecraft.server.v1_12_R1.TileEntity;
+
 import org.bukkit.World;
 import org.bukkit.generator.BlockPopulator;
 import org.bukkit.generator.ChunkGenerator;
@@ -34,6 +34,7 @@ import org.bukkit.material.MaterialData;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 public class OTGChunkGenerator extends ChunkGenerator
@@ -154,146 +155,42 @@ public class OTGChunkGenerator extends ChunkGenerator
     {
         return this.world.getWorld().getChunkAt(x >> 4, z >> 4);
     }
-    
+
     public void setBlock(int x, int y, int z, LocalMaterialData material, NamedBinaryTag metaDataTag, BiomeConfig biomeConfig)
     {
-        if (y < PluginStandardValues.WORLD_DEPTH || y >= PluginStandardValues.WORLD_HEIGHT)
+        if(y < PluginStandardValues.WORLD_DEPTH || y >= PluginStandardValues.WORLD_HEIGHT)
         {
             return;
-        }     
-    	
-        try
-        {
-            IBlockData blockData = ((BukkitMaterialData) material).getBlockState();
-
-            // Get chunk from (faster) custom cache
-            Chunk chunk = this.getChunk(x, z);
-
-            if (chunk == null)
-            {
-            	throw new RuntimeException("Could not provide chunk.");
-            }
-
-            BlockPosition blockPos = new BlockPosition(x, y, z);
-
-            // Disable nearby block physics (except for tile entities) and set block
-            boolean oldCaptureBlockStates = this.world.getWorld().captureBlockStates;
-            IBlockData oldBlockData;
-            try
-            {
-                this.world.getWorld().captureBlockStates = !(blockData.getBlock() instanceof ITileEntity);
-                oldBlockData = chunk.a(blockPos, blockData);
-            }
-            finally
-            {
-                this.world.getWorld().captureBlockStates = oldCaptureBlockStates;
-            }
-
-            if (oldBlockData == null)
-            {
-            	return; // Happens when block to place is the same as block being placed? TODO: Is that the only time this happens?
-            }
-
-            //if (blockData.c() != oldBlockData.c() || blockData.d() != oldBlockData.d())
-            //{
-                //if (isSafeForLightUpdates(chunk, x, z))
-                //{
-                    // Relight
-                	//this.world.getWorld().methodProfiler.a("checkLight");
-                	//this.world.getWorld().w(blockPos);
-                	//this.world.getWorld().methodProfiler.b();
-                //}
-            //}
-
-    	    if (metaDataTag != null)
-    	    {
-    	    	attachMetadata(x, y, z, metaDataTag);
-    	    }
-
-            // Notify world: (2 | 16) == update client, don't update observers
-    	    //notifyAndUpdatePhysics(this.world.getWorld(), blockPos, chunk, oldBlockData, blockData, 2 | 16); TODO: Is this no longer needed?
-    	    world.getWorld().notifyAndUpdatePhysics(blockPos, chunk, oldBlockData, blockData, 2 | 16);
-        } catch (Throwable t) {
-        	// TODO: What is this? remove?
-        	/*
-            String populatingChunkInfo = this.chunkCache == null? "(no chunk)" :
-                    this.chunkCache[0].locX + "," + this.chunkCache[0].locZ;
-            // Add location info to error
-            RuntimeException runtimeException = new RuntimeException("Error setting "
-                    + material + " block at " + x + "," + y + "," + z
-                    + " while populating chunk " + populatingChunkInfo, t);
-            runtimeException.setStackTrace(new StackTraceElement[0]);
-            throw runtimeException;
-            */
-        }
-    }
-    
-    // CraftBukkit start - Split off from above in order to directly send client and physic updates
-    public void notifyAndUpdatePhysics(net.minecraft.server.v1_12_R1.World _this, BlockPosition blockposition, Chunk chunk, IBlockData oldBlock, IBlockData newBlock, int i)
-    {
-    	net.minecraft.server.v1_12_R1.Block block = newBlock.getBlock();
-        if (
-    		(i & 2) != 0 && 
-    		(
-				!_this.isClientSide || 
-				(i & 4) == 0
-			) && (
-				chunk == null || 
-				//chunk.isReady()
-		    	// Replace isReady with Forge's isPopulated to prevent 
-				// updates that would cause cascading chunkgen:
-		    	// return this.ticked && this.isTerrainPopulated && this.isLightPopulated;				
-				(chunk.j() && chunk.isDone() && chunk.v())
-			)
-		) // allow chunk to be null here as chunk.isReady() is false when we send our notification during block placement
-        {
-        	_this.notify(blockposition, oldBlock, newBlock, i);
         }
 
-        if (
-    		!_this.isClientSide && 
-    		(i & 1) != 0
-		)
+        BlockPosition pos = new BlockPosition(x, y, z);
+
+        this.world.getWorld().setTypeAndData(pos, ((BukkitMaterialData) material).getBlockState(), 2 | 16);
+
+        if(metaDataTag != null)
         {
-        	_this.update(blockposition, oldBlock.getBlock(), true);
-            if (newBlock.n())
+            TileEntity tileEntity = this.world.getWorld().getTileEntity(pos);
+            if(tileEntity != null)
             {
-            	_this.updateAdjacentComparators(blockposition, block);
+                NBTTagCompound nbtTag = NBTHelper.getNMSFromNBTTagCompound(metaDataTag);
+                nbtTag.setInt("x", x);
+                nbtTag.setInt("y", y);
+                nbtTag.setInt("z", z);
+                // Update to current Minecraft format (maybe we want to do this at
+                // server startup instead, and then save the result?)
+                nbtTag = this.dataConverter.a(DataConverterTypes.BLOCK_ENTITY, nbtTag, -1);
+                tileEntity.load(nbtTag);
             }
-        }
-        else if (
-    		!_this.isClientSide && 
-    		(i & 16) == 0
-		)
-        {
-        	_this.c(blockposition, block);
+            else
+            {
+                if(OTG.getPluginConfig().spawnLog)
+                {
+                    OTG.log(LogMarker.WARN, "Skipping tile entity with id {}, cannot be placed at {},{},{}", Optional.ofNullable(metaDataTag.getTag("id")).map(NamedBinaryTag::getValue).orElse(null), x, y, z);
+                }
+            }
         }
     }
 
-    private void attachMetadata(int x, int y, int z, NamedBinaryTag tag)
-    {
-        // Convert NamedBinaryTag to a native nms tag
-        NBTTagCompound nmsTag = NBTHelper.getNMSFromNBTTagCompound(tag);
-        // Add the x, y and z position to it
-        nmsTag.setInt("x", x);
-        nmsTag.setInt("y", y);
-        nmsTag.setInt("z", z);
-        // Update to current Minecraft format (maybe we want to do this at
-        // server startup instead, and then save the result?)
-        nmsTag = this.dataConverter.a(DataConverterTypes.BLOCK_ENTITY, nmsTag, -1);
-        // Add that data to the current tile entity in the world
-        TileEntity tileEntity = this.world.getWorld().getTileEntity(new BlockPosition(x, y, z));
-        if (tileEntity != null)
-        {
-            tileEntity.load(nmsTag);
-        } else {
-        	if(OTG.getPluginConfig().spawnLog)
-        	{
-        		OTG.log(LogMarker.WARN, "Skipping tile entity with id {}, cannot be placed at {},{},{}.", nmsTag.getString("id"), x, y, z);
-        	}
-        }
-    }
-    
     public LocalMaterialData[] getBlockColumnInUnloadedChunk(int x, int z)
     {
     	BlockPos2D blockPos = new BlockPos2D(x, z);
