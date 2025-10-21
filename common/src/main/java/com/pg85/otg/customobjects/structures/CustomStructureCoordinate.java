@@ -44,12 +44,12 @@ public abstract class CustomStructureCoordinate
     
     public final int getChunkX()
     {
-    	return (int)MathHelper.floor(x / (double)16); 
+    	return x >> 4; 
     }
     
     public final int getChunkZ()
     {
-    	return (int)MathHelper.floor(z / (double)16);
+    	return z >> 4;
     }
     
     /**
