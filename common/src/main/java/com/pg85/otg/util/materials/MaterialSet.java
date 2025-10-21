@@ -176,6 +176,10 @@ public class MaterialSet
 
     private void computeMapEntry(LocalMaterialData material)
     {
+        if(material == null || material.isEmpty())
+        {
+            return;
+        }
         LocalMaterialData k = material.withoutBlockData();
         int v = this.map.getInt(k);
         if((v & material.getBlockDataMask()) != material.getBlockDataMask())
@@ -248,6 +252,10 @@ public class MaterialSet
      */
     public boolean contains(LocalMaterialData material)
     {
+        if(material == null || material.isEmpty())
+        {
+            return false;
+        }
         return this.mode.contains(this, material);
     }
 
