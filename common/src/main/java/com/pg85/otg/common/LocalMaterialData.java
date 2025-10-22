@@ -1,5 +1,7 @@
 package com.pg85.otg.common;
 
+import java.nio.file.Path;
+
 import com.pg85.otg.OTGEngine;
 import com.pg85.otg.configuration.biome.BiomeConfig;
 import com.pg85.otg.util.minecraft.defaults.DefaultMaterial;
@@ -16,6 +18,7 @@ public abstract class LocalMaterialData
     protected static final String BLANK_NAME = "BLANK";
     protected final DefaultMaterial defaultMaterial;
     protected final int blockId;
+    private BlockContainer blockContainer;
 
     public LocalMaterialData(int blockId)
     {
@@ -42,6 +45,21 @@ public abstract class LocalMaterialData
      * @return An instance with the given block data.
      */
     public abstract LocalMaterialData withBlockData(int newData);
+
+    public BlockContainer blockContainer()
+    {
+        BlockContainer blockContainer;
+        if((blockContainer = this.blockContainer) == null)
+        {
+            this.blockContainer = blockContainer = BlockContainer.of(this);
+        }
+        return blockContainer;
+    }
+
+    public BlockContainer blockContainer(Path directory, String relativePath)
+    {
+        return BlockContainer.of(this, directory, relativePath);
+    }
 
     /**
      * Gets the default material belonging to this material. The block data will

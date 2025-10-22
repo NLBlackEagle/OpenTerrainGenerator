@@ -12,23 +12,42 @@ import com.pg85.otg.util.ChunkCoordinate;
  */
 public class BO3BlockFunction extends BlockFunction<BO3Config>
 {
-    public BO3BlockFunction rotate()
+    public BO3BlockFunction rotate(int rotation)
     {
-        BO3BlockFunction rotatedBlock = new BO3BlockFunction();
-        rotatedBlock.x(z());
-        rotatedBlock.y(y());
-        rotatedBlock.z(-x());
-        rotatedBlock.material = material.rotate();
-        rotatedBlock.metaDataTag = metaDataTag;
-        rotatedBlock.metaDataName = metaDataName;
+        int rotatedX;
+        int rotatedZ;
+        switch(rotation)
+        {
+            case 0:
+                return this;
+            case 1:
+                rotatedX = z();
+                rotatedZ = -x();
+                break;
+            case 2:
+                rotatedX = -x();
+                rotatedZ = -z();
+                break;
+            case 3:
+                rotatedX = -z();
+                rotatedZ = x();
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
 
+        BO3BlockFunction rotatedBlock = new BO3BlockFunction();
+        rotatedBlock.x(rotatedX);
+        rotatedBlock.y(y());
+        rotatedBlock.z(rotatedZ);
+        rotatedBlock.blockContainer = blockContainer.rotate(rotation);
         return rotatedBlock;
     }
 
     @Override
     public void spawn(LocalWorld world, Random random, int x, int y, int z, ChunkCoordinate chunkBeingPopulated, boolean replaceBlock)
     {
-        world.setBlock(x, y, z, material, metaDataTag, chunkBeingPopulated, replaceBlock);
+        world.setBlock(x, y, z, material(), tag(), chunkBeingPopulated, replaceBlock);
     }
     
     @Override

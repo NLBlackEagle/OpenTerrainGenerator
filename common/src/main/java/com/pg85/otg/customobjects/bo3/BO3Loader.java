@@ -1,5 +1,7 @@
 package com.pg85.otg.customobjects.bo3;
 
+import java.io.File;
+
 import com.pg85.otg.OTG;
 import com.pg85.otg.configuration.customobjects.CustomObjectResourcesManager;
 import com.pg85.otg.customobjects.CustomObject;
@@ -18,25 +20,9 @@ import com.pg85.otg.customobjects.bo3.checks.BlockCheckNot;
 import com.pg85.otg.customobjects.bo3.checks.LightCheck;
 import com.pg85.otg.customobjects.bo3.checks.ModCheck;
 import com.pg85.otg.customobjects.bo3.checks.ModCheckNot;
-import com.pg85.otg.exception.InvalidConfigException;
-import com.pg85.otg.logging.LogMarker;
-import com.pg85.otg.util.bo3.NamedBinaryTag;
-
-import java.io.*;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 
 public class BO3Loader implements CustomObjectLoader
 {
-
-	// TOOD: Update this
-    /** A list of already loaded meta Tags. The path is the key, a NBT Tag is
-     * the value.
-     */
-    private static final Map<String, NamedBinaryTag> LoadedTags = new HashMap<>();
-
     public BO3Loader()
     {
         // Register BO3 ConfigFunctions
@@ -74,74 +60,12 @@ public class BO3Loader implements CustomObjectLoader
     @Override
     public CustomObject loadFromFile(String objectName, File file)
     {
-   		return new BO3(objectName, file);
-    }
-
-    public static NamedBinaryTag loadMetadata(String name, File bo3Folder)
-    {
-        return LoadedTags.computeIfAbsent(bo3Folder.getParent() + File.separator + name, BO3Loader::loadTileEntityFromNBT);
-    }
-
-    private static NamedBinaryTag loadTileEntityFromNBT(String path)
-    {
-        // Load from file
-        NamedBinaryTag metadata;
-        try
-        {
-            metadata = NamedBinaryTag.readFrom(Paths.get(path));
-        }
-        catch(NoSuchFileException e)
-        {
-            // File not found
-            if(OTG.getPluginConfig().spawnLog)
-            {
-                OTG.log(LogMarker.WARN, "NBT file {} not found", (Object) path);
-            }
-            return null;
-        }
-        catch(IOException | InvalidConfigException e)
-        {
-            if(OTG.getPluginConfig().spawnLog)
-            {
-                OTG.log(LogMarker.ERROR, "Failed to read NBT meta file: ", e.getMessage());
-                OTG.printStackTrace(LogMarker.ERROR, e);
-            }
-            return null;
-        }
-
-        if(metadata != null)
-        {
-	        // The file can be structured in two ways:
-	        // 1. chest.nbt with all the contents directly in it
-	        // 2. chest.nbt with a Compound tag in it with all the data
-	
-	        // Check for type 1 by searching for an id tag
-	        NamedBinaryTag idTag = metadata.getTag("id");
-	        if (idTag != null)
-	        {
-	            // Found id tag, so return the root tag
-	            return metadata;
-	        }
-	        // No id tag found, so check for type 2
-	        if (metadata.getValue() instanceof NamedBinaryTag[])
-	        {
-	            NamedBinaryTag[] subtag = (NamedBinaryTag[]) metadata.getValue();
-	            if (subtag.length != 0)
-	            {
-	                return subtag[0];
-	            }
-	        }
-        }
-        // Unknown/bad structure
-        OTG.log(LogMarker.WARN, "Structure of NBT file is incorrect: " + path);
-        return null;
+        return new BO3(objectName, file);
     }
 
     @Override
     public void onShutdown()
     {
-        // Clean up the cache
-        LoadedTags.clear();
-    }
 
+    }
 }

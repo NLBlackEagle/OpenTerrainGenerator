@@ -2,13 +2,11 @@ package com.pg85.otg.customobjects.bo4.bo4function;
 
 import java.io.DataInput;
 import java.io.DataOutput;
-import java.io.File;
 import java.io.IOException;
 import java.util.Random;
 
 import com.pg85.otg.common.LocalMaterialData;
 import com.pg85.otg.common.LocalWorld;
-import com.pg85.otg.customobjects.bo3.BO3Loader;
 import com.pg85.otg.customobjects.bo4.BO4Config;
 import com.pg85.otg.customobjects.bofunctions.BlockFunction;
 import com.pg85.otg.customobjects.structures.bo4.BO4CustomStructureCoordinate;
@@ -23,42 +21,20 @@ public class BO4BlockFunction extends BlockFunction<BO4Config>
     @Override
     public void spawn(LocalWorld world, Random random, int x, int y, int z, ChunkCoordinate chunkBeingPopulated, boolean replaceBlock)
     {
-        world.setBlock(x, y, z, material, metaDataTag, chunkBeingPopulated, true);
+        world.setBlock(x, y, z, material(), tag(), chunkBeingPopulated, true);
     }
     
     public BO4BlockFunction rotate(Rotation rotation)
     {
         BO4BlockFunction rotatedBlock = new BO4BlockFunction();
 
-        rotatedBlock.material = material; // TODO: Make sure this won't cause problems
-
         BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedBO3CoordsJustified(x(), y(), z(), rotation);
-
         rotatedBlock.x(rotatedCoords.getX());
         rotatedBlock.y(rotatedCoords.getY());
         rotatedBlock.z(rotatedCoords.getZ());
-
-    	// TODO: This makes no sense, why is rotation inverted??? Should be: NORTH:0,WEST:1,SOUTH:2,EAST:3
-
-        // Apply rotation
-    	if(rotation.getRotationId() == 3)
-    	{
-    		rotatedBlock.material = rotatedBlock.material.rotate(1);
-    	}
-    	if(rotation.getRotationId() == 2)
-    	{
-    		rotatedBlock.material = rotatedBlock.material.rotate(2);
-    	}
-    	if(rotation.getRotationId() == 1)
-    	{
-    		rotatedBlock.material = rotatedBlock.material.rotate(3);
-    	}
-
-        rotatedBlock.metaDataTag = metaDataTag;
-        rotatedBlock.metaDataName = metaDataName;
-
+        rotatedBlock.blockContainer = blockContainer.rotate(4 - rotation.getRotationId());
         return rotatedBlock;
-    }   
+    }
     
     @Override
     public Class<BO4Config> getHolderType()
@@ -70,11 +46,11 @@ public class BO4BlockFunction extends BlockFunction<BO4Config>
     {
         stream.writeShort(this.y());
         boolean bFound = false;
-        if(this.material != null)
+        if(this.material() != null)
         {
 	        for(int i = 0; i < materials.length; i++)
 	        {
-	        	if(materials[i].equals(this.material))
+	        	if(materials[i].equals(this.material()))
 	        	{
 	        		stream.writeShort(i);
 	        		bFound = true;
@@ -87,11 +63,11 @@ public class BO4BlockFunction extends BlockFunction<BO4Config>
         	stream.writeShort(-1);
         }
         bFound = false;
-        if(this.metaDataName != null)
+        if(this.hasTag())
         {
 	        for(int i = 0; i < metaDataNames.length; i++)
 	        {        	
-	        	if(metaDataNames[i].equals(this.metaDataName))
+	        	if(metaDataNames[i].equals(this.tagPath()))
 	        	{
 	        		stream.writeShort(i);
 	        		bFound = true;
@@ -108,33 +84,20 @@ public class BO4BlockFunction extends BlockFunction<BO4Config>
     public static BO4BlockFunction fromStream(int x, int z, String[] metaDataNames, LocalMaterialData[] materials, BO4Config holder, DataInput in) throws IOException
     {
     	BO4BlockFunction rbf = new BO4BlockFunction();
-    	
-    	File file = holder.getFile();
     	   	
     	rbf.x(x);
     	rbf.y(in.readShort());
     	rbf.z(z);
     	
-    	short materialId = in.readShort();
-    	if(materialId != -1)
-    	{
-    		rbf.material = materials[materialId];
-    	}
-    	
-    	short metaDataNameId = in.readShort();
-    	if(metaDataNameId != -1)
-    	{
-    		rbf.metaDataName = metaDataNames[metaDataNameId];
-    	}
-    	
-    	if(rbf.metaDataName != null)
-    	{
-	        // Get the file
-        	rbf.metaDataTag = BO3Loader.loadMetadata(rbf.metaDataName, file);
-        	if(rbf.metaDataTag == null)
-        	{
-        		rbf.metaDataName = null;
-        	}
+        short materialId = in.readShort();
+        short metaDataNameId = in.readShort();
+        if(metaDataNameId != -1)
+        {
+            rbf.blockContainer = materials[materialId].blockContainer(holder.getFile().getParentFile().toPath(), metaDataNames[metaDataNameId]);
+        }
+        else
+        {
+            rbf.blockContainer = materials[materialId].blockContainer();
         }
     	
     	return rbf;

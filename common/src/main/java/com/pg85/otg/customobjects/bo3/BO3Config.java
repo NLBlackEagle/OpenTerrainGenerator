@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.pg85.otg.common.BlockContainer;
 import com.pg85.otg.common.LocalMaterialData;
 import com.pg85.otg.configuration.customobjects.CustomObjectConfigFile;
 import com.pg85.otg.configuration.customobjects.CustomObjectConfigFunction;
@@ -67,14 +68,10 @@ public class BO3Config extends CustomObjectConfigFile
 	private byte[][] blocksX;
 	private short[][] blocksY;
 	private byte[][] blocksZ;
-	private LocalMaterialData[][] blocksMaterial;
-	private String[] blocksMetaDataName;
-	private NamedBinaryTag[] blocksMetaDataTag;
+	private BlockContainer[][] blocksMaterial;
 
-	private LocalMaterialData[][][] randomBlocksBlocks;
+	private BlockContainer[][][] randomBlocksBlocks;
 	private byte[][] randomBlocksBlockChances;
-	private String[][] randomBlocksMetaDataNames;
-	private NamedBinaryTag[][] randomBlocksMetaDataTags;
 	private byte[] randomBlocksBlockCount;
 	//
 
@@ -184,14 +181,10 @@ public class BO3Config extends CustomObjectConfigFile
 		this.blocksX = new byte[4][tempBlocksList.size()];
 		this.blocksY = new short[4][tempBlocksList.size()];
 		this.blocksZ = new byte[4][tempBlocksList.size()];
-		this.blocksMaterial = new LocalMaterialData[4][tempBlocksList.size()];
-		this.blocksMetaDataName = new String[tempBlocksList.size()];
-		this.blocksMetaDataTag = new NamedBinaryTag[tempBlocksList.size()];
+		this.blocksMaterial = new BlockContainer[4][tempBlocksList.size()];
 
-		this.randomBlocksBlocks = new LocalMaterialData[4][tempBlocksList.size()][];
+		this.randomBlocksBlocks = new BlockContainer[4][tempBlocksList.size()][];
 		this.randomBlocksBlockChances = new byte[tempBlocksList.size()][];
-		this.randomBlocksMetaDataNames = new String[tempBlocksList.size()][];
-		this.randomBlocksMetaDataTags = new NamedBinaryTag[tempBlocksList.size()][];
 		this.randomBlocksBlockCount = new byte[tempBlocksList.size()];
 
 		for (int i = 0; i < tempBlocksList.size(); i++)
@@ -203,16 +196,12 @@ public class BO3Config extends CustomObjectConfigFile
 				this.blocksX[0][i] = (byte) block.x();
 				this.blocksY[0][i] = (short) block.y();
 				this.blocksZ[0][i] = (byte) block.z();
-				this.blocksMaterial[0][i] = block.material;
-				this.blocksMetaDataName[i] = block.metaDataName;
-				this.blocksMetaDataTag[i] = block.metaDataTag;
+				this.blocksMaterial[0][i] = block.blockContainer;
 
 				if (block instanceof BO3RandomBlockFunction)
 				{
-					this.randomBlocksBlocks[0][i] = ((BO3RandomBlockFunction) block).blocks;
+					this.randomBlocksBlocks[0][i] = ((BO3RandomBlockFunction) block).blockContainers;
 					this.randomBlocksBlockChances[i] = ((BO3RandomBlockFunction) block).blockChances;
-					this.randomBlocksMetaDataNames[i] = ((BO3RandomBlockFunction) block).metaDataNames;
-					this.randomBlocksMetaDataTags[i] = ((BO3RandomBlockFunction) block).metaDataTags;
 					this.randomBlocksBlockCount[i] = ((BO3RandomBlockFunction) block).blockCount;
 				}
 			}
@@ -240,10 +229,8 @@ public class BO3Config extends CustomObjectConfigFile
 			if (this.randomBlocksBlocks[rotation][i] != null)
 			{
 				block = new BO3RandomBlockFunction();
-				((BO3RandomBlockFunction) block).blocks = this.randomBlocksBlocks[rotation][i];
+				((BO3RandomBlockFunction) block).blockContainers = this.randomBlocksBlocks[rotation][i];
 				((BO3RandomBlockFunction) block).blockChances = this.randomBlocksBlockChances[i];
-				((BO3RandomBlockFunction) block).metaDataNames = this.randomBlocksMetaDataNames[i];
-				((BO3RandomBlockFunction) block).metaDataTags = this.randomBlocksMetaDataTags[i];
 				((BO3RandomBlockFunction) block).blockCount = this.randomBlocksBlockCount[i];
 			} else {
 				block = new BO3BlockFunction();
@@ -252,9 +239,7 @@ public class BO3Config extends CustomObjectConfigFile
 			block.x(this.blocksX[rotation][i]);
 			block.y(this.blocksY[rotation][i]);
 			block.z(this.blocksZ[rotation][i]);
-			block.material = this.blocksMaterial[rotation][i];
-			block.metaDataName = this.blocksMetaDataName[i];
-			block.metaDataTag = this.blocksMetaDataTag[i];
+			block.blockContainer = this.blocksMaterial[rotation][i];
 
 			blocksOTGPlus[i] = block;
 		}
@@ -463,10 +448,8 @@ public class BO3Config extends CustomObjectConfigFile
 			if (this.randomBlocksBlocks[0][i] != null)
 			{
 				blockFunction = new BO3RandomBlockFunction();
-				((BO3RandomBlockFunction) blockFunction).blocks = this.randomBlocksBlocks[0][i];
+				((BO3RandomBlockFunction) blockFunction).blockContainers = this.randomBlocksBlocks[0][i];
 				((BO3RandomBlockFunction) blockFunction).blockChances = this.randomBlocksBlockChances[i];
-				((BO3RandomBlockFunction) blockFunction).metaDataNames = this.randomBlocksMetaDataNames[i];
-				((BO3RandomBlockFunction) blockFunction).metaDataTags = this.randomBlocksMetaDataTags[i];
 				((BO3RandomBlockFunction) blockFunction).blockCount = this.randomBlocksBlockCount[i];
 			} else {
 				blockFunction = new BO3BlockFunction();
@@ -475,9 +458,7 @@ public class BO3Config extends CustomObjectConfigFile
 			blockFunction.x(this.blocksX[0][i]);
 			blockFunction.y(this.blocksY[0][i]);
 			blockFunction.z(this.blocksZ[0][i]);
-			blockFunction.material = this.blocksMaterial[0][i];
-			blockFunction.metaDataTag = this.blocksMetaDataTag[i];
-			blockFunction.metaDataName = this.blocksMetaDataName[i];
+			blockFunction.blockContainer = this.blocksMaterial[0][i];
 
 			writer.function(blockFunction);
 		}
@@ -707,9 +688,9 @@ public class BO3Config extends CustomObjectConfigFile
 			this.blocksX[i] = new byte[this.blocksX[i - 1].length];
 			this.blocksY[i] = new short[this.blocksX[i - 1].length];
 			this.blocksZ[i] = new byte[this.blocksX[i - 1].length];
-			this.blocksMaterial[i] = new LocalMaterialData[this.blocksX[i - 1].length];
+			this.blocksMaterial[i] = new BlockContainer[this.blocksX[i - 1].length];
 
-			this.randomBlocksBlocks[i] = new LocalMaterialData[this.blocksX[i - 1].length][];
+			this.randomBlocksBlocks[i] = new BlockContainer[this.blocksX[i - 1].length][];
 
 			for (int j = 0; j < blocks.length; j++)
 			{
@@ -721,11 +702,11 @@ public class BO3Config extends CustomObjectConfigFile
 				this.blocksX[i][h] = (byte) block.x();
 				this.blocksY[i][h] = (short) block.y();
 				this.blocksZ[i][h] = (byte) block.z();
-				this.blocksMaterial[i][h] = block.material;
+				this.blocksMaterial[i][h] = block.blockContainer;
 
 				if (block instanceof BO3RandomBlockFunction)
 				{
-					this.randomBlocksBlocks[i][h] = ((BO3RandomBlockFunction) block).blocks;
+					this.randomBlocksBlocks[i][h] = ((BO3RandomBlockFunction) block).blockContainers;
 				}
 			}
 

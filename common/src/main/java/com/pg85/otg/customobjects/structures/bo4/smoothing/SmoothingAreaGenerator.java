@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.Map.Entry;
 
+import com.pg85.otg.common.BlockContainer;
 import com.pg85.otg.common.LocalMaterialData;
 import com.pg85.otg.common.LocalWorld;
 import com.pg85.otg.customobjects.bo4.BO4;
@@ -378,8 +379,9 @@ public class SmoothingAreaGenerator
 		boolean isSmoothAreaAnchor = false;
 		if(blockToCheck instanceof BO4RandomBlockFunction)
 		{
-			for(LocalMaterialData material : ((BO4RandomBlockFunction)blockToCheck).blocks)
+			for(BlockContainer blockContainer : ((BO4RandomBlockFunction)blockToCheck).blockContainers)
 			{
+                LocalMaterialData material = blockContainer.material();
 				// TODO: Material should never be null, fix the code in RandomBlockFunction.load() that causes this.
 				if(material == null)
 				{
@@ -408,7 +410,7 @@ public class SmoothingAreaGenerator
 				!(
 					blockToCheck instanceof BO4RandomBlockFunction
 				) && 
-				blockToCheck.material.isSmoothAreaAnchor(
+				blockToCheck.material().isSmoothAreaAnchor(
 					((BO4)start.getObject()).getConfig().overrideChildSettings && 
 					((BO4)bO3ToCheck.getObject()).getConfig().overrideChildSettings ? 
 						((BO4)start.getObject()).getConfig().smoothStartWood : 

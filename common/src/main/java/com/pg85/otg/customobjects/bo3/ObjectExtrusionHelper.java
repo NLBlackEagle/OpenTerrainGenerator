@@ -95,7 +95,7 @@ class ObjectExtrusionHelper
                      yi > extrudeMode.getEndingHeight() && extrudeThroughBlocks.contains(world.getMaterial(x + block.x(), yi, z + block.z(), chunkBeingPopulated));
                      --yi)
                 {
-                	world.setBlock(x + block.x(), yi, z + block.z(), block.material, block.metaDataTag, chunkBeingPopulated, replaceBlock);
+                	world.setBlock(x + block.x(), yi, z + block.z(), block.material(), block.tag(), chunkBeingPopulated, replaceBlock);
                 }
             } else if (extrudeMode == BO3Settings.ExtrudeMode.TopUp)
             {
@@ -103,7 +103,7 @@ class ObjectExtrusionHelper
                      yi < extrudeMode.getEndingHeight() && extrudeThroughBlocks.contains(world.getMaterial(x + block.x(), yi, z + block.z(), chunkBeingPopulated));
                      ++yi)
                 {
-                	world.setBlock(x + block.x(), yi, z + block.z(), block.material, block.metaDataTag, chunkBeingPopulated, replaceBlock);
+                	world.setBlock(x + block.x(), yi, z + block.z(), block.material(), block.tag(), chunkBeingPopulated, replaceBlock);
                 }
             }
         }

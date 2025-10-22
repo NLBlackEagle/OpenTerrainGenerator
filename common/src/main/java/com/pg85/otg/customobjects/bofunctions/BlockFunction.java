@@ -3,11 +3,11 @@ package com.pg85.otg.customobjects.bofunctions;
 import java.util.List;
 import java.util.Random;
 
+import com.pg85.otg.common.BlockContainer;
 import com.pg85.otg.common.LocalMaterialData;
 import com.pg85.otg.common.LocalWorld;
 import com.pg85.otg.configuration.customobjects.CustomObjectConfigFile;
 import com.pg85.otg.configuration.customobjects.CustomObjectConfigFunction;
-import com.pg85.otg.customobjects.bo3.BO3Loader;
 import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.util.ChunkCoordinate;
 import com.pg85.otg.util.bo3.NamedBinaryTag;
@@ -17,9 +17,7 @@ import com.pg85.otg.util.bo3.NamedBinaryTag;
  */
 public abstract class BlockFunction<T extends CustomObjectConfigFile> extends CustomObjectConfigFunction<T>
 {
-    public LocalMaterialData material;
-    public NamedBinaryTag metaDataTag;
-    public String metaDataName;
+    public BlockContainer blockContainer;
 
     @Override
     public void load(T holder, List<String> args) throws InvalidConfigException
@@ -31,30 +29,30 @@ public abstract class BlockFunction<T extends CustomObjectConfigFile> extends Cu
         y((short) readInt(args.get(1), -1000, 1000));
         z(readInt(args.get(2), -100, 100));
 
-        material = readMaterial(args.get(3));
+        LocalMaterialData material = readMaterial(args.get(3));
        
         if(material == null)
         {
         	throw new InvalidConfigException("Material \"" + args.get(3) + "\" could not be read.");
         }
         
-        if (args.size() == 5)
+        if(args.size() >= 5)
         {
-            metaDataTag = BO3Loader.loadMetadata(args.get(4), holder.getFile());
-            if (metaDataTag != null)
-            {
-                metaDataName = args.get(4);
-            }
+            blockContainer = material.blockContainer(holder.getFile().getParentFile().toPath(), args.get(4));
+        }
+        else
+        {
+            blockContainer = material.blockContainer();
         }
     }
 
     @Override
     public String makeString()
     {
-        String start = "Block(" + x() + ',' + y() + ',' + z() + ',' + material;
-        if (metaDataTag != null)
+        String start = "Block(" + x() + ',' + y() + ',' + z() + ',' + blockContainer.material();
+        if (blockContainer.hasTag())
         {
-            start += ',' + metaDataName;
+            start += ',' + blockContainer.tagPath();
         }
         return start + ')';
     }
@@ -83,5 +81,25 @@ public abstract class BlockFunction<T extends CustomObjectConfigFile> extends Cu
         }
         BlockFunction<T> block = (BlockFunction<T>) other;
         return block.x() == x() && block.y() == y() && block.z() == z();
+    }
+
+    public LocalMaterialData material()
+    {
+        return blockContainer.material();
+    }
+
+    public boolean hasTag()
+    {
+        return blockContainer.hasTag();
+    }
+
+    public NamedBinaryTag tag()
+    {
+        return blockContainer.tag();
+    }
+
+    public String tagPath()
+    {
+        return blockContainer.tagPath();
     }
 }

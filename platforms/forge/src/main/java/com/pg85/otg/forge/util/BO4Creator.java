@@ -1,7 +1,6 @@
 package com.pg85.otg.forge.util;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -117,7 +116,6 @@ public class BO4Creator extends BOCreator
         NamedBinaryTag tag;
         String tileEntityName;
         File tileEntityFile;
-        FileOutputStream fos;
         // Loops through all blocks in selection
         for (int x = start.getBlockX(); x <= end.getBlockX(); x++)
         {
@@ -179,8 +177,7 @@ public class BO4Creator extends BOCreator
                             tileEntityCount++;
                             try {
                                 tag.writeTo(tileEntityFile.toPath());
-                                blockFunction.metaDataTag = tag;
-                                blockFunction.metaDataName = name + "/" + tileEntityName;
+                                blockFunction.blockContainer = material.blockContainer(tileEntitiesFolder.getParentFile().toPath(), name + "/" + tileEntityName);
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }

@@ -1,6 +1,7 @@
 package com.pg85.otg.customobjects.bo4;
 
 import com.pg85.otg.OTG;
+import com.pg85.otg.common.BlockContainer;
 import com.pg85.otg.common.LocalMaterialData;
 import com.pg85.otg.configuration.customobjects.CustomObjectConfigFile;
 import com.pg85.otg.configuration.customobjects.CustomObjectConfigFunction;
@@ -27,7 +28,6 @@ import com.pg85.otg.customobjects.bo3.BO3Settings.SpawnHeightEnum;
 import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.logging.LogMarker;
 import com.pg85.otg.util.CompressionUtils;
-import com.pg85.otg.util.bo3.NamedBinaryTag;
 import com.pg85.otg.util.bo3.Rotation;
 import com.pg85.otg.util.helpers.StreamHelper;
 import com.pg85.otg.util.materials.MaterialHelper;
@@ -153,14 +153,10 @@ public class BO4Config extends CustomObjectConfigFile
     // since that gives way too much overhead memory wise.
     // We may have tens of millions of blocks, java doesn't handle lots of small classes well.
     private short[][][]blocks;
-    private LocalMaterialData[]blocksMaterial;
-    private String[]blocksMetaDataName;
-    private NamedBinaryTag[]blocksMetaDataTag;
+    private BlockContainer[]blocksMaterial;
 
-    private LocalMaterialData[][] randomBlocksBlocks;
+    private BlockContainer[][] randomBlocksBlocks;
     private byte[][] randomBlocksBlockChances;
-    private String[][] randomBlocksMetaDataNames;
-    private NamedBinaryTag[][] randomBlocksMetaDataTags;
     private byte[] randomBlocksBlockCount;    
     //
     
@@ -312,7 +308,7 @@ public class BO4Config extends CustomObjectConfigFile
 
 	        // make heightmap containing the highest or lowest blocks in this chunk
     		int blockIndex = 0;
-    		LocalMaterialData material;
+    		BlockContainer material;
     		boolean isSmoothAreaAnchor;
     		boolean isRandomBlock;
     		int y;
@@ -330,8 +326,9 @@ public class BO4Config extends CustomObjectConfigFile
 	    					
 				    		if(isRandomBlock)
 				    		{
-	        					for(LocalMaterialData randomMaterial : this.randomBlocksBlocks[blockIndex])
+	        					for(BlockContainer randomBlockContainer : this.randomBlocksBlocks[blockIndex])
 		            			{
+	        						LocalMaterialData randomMaterial = randomBlockContainer.material();
 	        						// TODO: Material should never be null, fix the code in RandomBlockFunction.load() that causes this.
 	        						if(randomMaterial == null)
 	        						{
@@ -350,7 +347,7 @@ public class BO4Config extends CustomObjectConfigFile
 	            					isSmoothAreaAnchor ||
 	        						(
 	    								!isRandomBlock &&
-	    								material.isSmoothAreaAnchor(start.getConfig().overrideChildSettings && this.overrideChildSettings ? start.getConfig().smoothStartWood : this.smoothStartWood, start.getConfig().spawnUnderWater)
+	    								material.material().isSmoothAreaAnchor(start.getConfig().overrideChildSettings && this.overrideChildSettings ? start.getConfig().smoothStartWood : this.smoothStartWood, start.getConfig().spawnUnderWater)
 	    							)
 	        					)
 	                			{
@@ -363,20 +360,16 @@ public class BO4Config extends CustomObjectConfigFile
 	    	            				if(isRandomBlock)
 	    	            				{
 	    	            					blockFunction = new BO4RandomBlockFunction();
-	    	    			    			((BO4RandomBlockFunction)blockFunction).blocks = this.randomBlocksBlocks[blockIndex];
+	    	    			    			((BO4RandomBlockFunction)blockFunction).blockContainers = this.randomBlocksBlocks[blockIndex];
 	    	    			    			((BO4RandomBlockFunction)blockFunction).blockChances = this.randomBlocksBlockChances[blockIndex];
-	    	    			    			((BO4RandomBlockFunction)blockFunction).metaDataNames = this.randomBlocksMetaDataNames[blockIndex];
-	    	    			    			((BO4RandomBlockFunction)blockFunction).metaDataTags = this.randomBlocksMetaDataTags[blockIndex];
 	    	    			    			((BO4RandomBlockFunction)blockFunction).blockCount = this.randomBlocksBlockCount[blockIndex];
 	    	            				} else {
 	    	            					blockFunction = new BO4BlockFunction();
 	    	            				}
-	    	            				blockFunction.material = material;
+	    	            				blockFunction.blockContainer = material;
 	    	            				blockFunction.x(x);
 	    	            				blockFunction.y((short) y);
 	    	            				blockFunction.z(z);	    	            				
-	    	            				blockFunction.metaDataName = this.blocksMetaDataName[blockIndex];
-	    	            				blockFunction.metaDataTag = this.blocksMetaDataTag[blockIndex];
 	    	            				
 	    	            				this.heightMap[x][z] = blockFunction;
 	    	            			}
@@ -436,10 +429,8 @@ public class BO4Config extends CustomObjectConfigFile
 			    		if(this.randomBlocksBlocks[blockIndex] != null)
 			    		{
 			    			block = new BO4RandomBlockFunction();
-			    			((BO4RandomBlockFunction)block).blocks = this.randomBlocksBlocks[blockIndex];
+			    			((BO4RandomBlockFunction)block).blockContainers = this.randomBlocksBlocks[blockIndex];
 			    			((BO4RandomBlockFunction)block).blockChances = this.randomBlocksBlockChances[blockIndex];
-			    			((BO4RandomBlockFunction)block).metaDataNames = this.randomBlocksMetaDataNames[blockIndex];
-			    			((BO4RandomBlockFunction)block).metaDataTags = this.randomBlocksMetaDataTags[blockIndex];
 			    			((BO4RandomBlockFunction)block).blockCount = this.randomBlocksBlockCount[blockIndex];
 			    		} else {
 			    			block = new BO4BlockFunction();
@@ -448,9 +439,7 @@ public class BO4Config extends CustomObjectConfigFile
 			    		block.x(x);
 			    		block.y(this.blocks[x][z][i]);
 			    		block.z(z);
-			    		block.material = this.blocksMaterial[blockIndex];
-			    		block.metaDataName = this.blocksMetaDataName[blockIndex];
-			    		block.metaDataTag = this.blocksMetaDataTag[blockIndex];
+			    		block.blockContainer = this.blocksMaterial[blockIndex];
 			    					    		
 			    		blocksOTGPlus[blockIndex] = block;
 						blockIndex++;
@@ -749,7 +738,7 @@ public class BO4Config extends CustomObjectConfigFile
                 	tempBlocksList.add((BO4RandomBlockFunction)res);
                 	columnSizes[res.x() + (this.xSize / 2)][res.z() + (this.zSize / 2) - 1]++;
         		} else {
-        			if(!this.removeAir || !((BO4BlockFunction)res).material.isAir())
+        			if(!this.removeAir || !((BO4BlockFunction)res).material().isAir())
         			{
                     	tempBlocksList.add((BO4BlockFunction)res);
                 		columnSizes[res.x() + (this.xSize / 2)][res.z() + (this.zSize / 2) - 1]++;
@@ -853,14 +842,10 @@ public class BO4Config extends CustomObjectConfigFile
         }
         
         this.blocks = new short[this.xSize][this.zSize][];
-    	this.blocksMaterial = new LocalMaterialData[tempBlocksList.size()];
-    	this.blocksMetaDataName = new String[tempBlocksList.size()];
-    	this.blocksMetaDataTag = new NamedBinaryTag[tempBlocksList.size()];
+    	this.blocksMaterial = new BlockContainer[tempBlocksList.size()];
     	
-        this.randomBlocksBlocks = new LocalMaterialData[tempBlocksList.size()][];
+        this.randomBlocksBlocks = new BlockContainer[tempBlocksList.size()][];
         this.randomBlocksBlockChances = new byte[tempBlocksList.size()][];
-        this.randomBlocksMetaDataNames = new String[tempBlocksList.size()][];
-        this.randomBlocksMetaDataTags = new NamedBinaryTag[tempBlocksList.size()][];
         this.randomBlocksBlockCount = new byte[tempBlocksList.size()]; 
         
         short[][] columnBlockIndex = new short[this.xSize][this.zSize];
@@ -890,16 +875,12 @@ public class BO4Config extends CustomObjectConfigFile
         	}
        		this.blocks[block.x()][block.z()][columnBlockIndex[block.x()][block.z()]] = (short) block.y();
         	
-        	this.blocksMaterial[blockIndex] = block.material;
-        	this.blocksMetaDataName[blockIndex] = block.metaDataName;
-        	this.blocksMetaDataTag[blockIndex] = block.metaDataTag;
+        	this.blocksMaterial[blockIndex] = block.blockContainer;
         	
         	if(block instanceof BO4RandomBlockFunction)
         	{
-	            this.randomBlocksBlocks[blockIndex] = ((BO4RandomBlockFunction)block).blocks;
+	            this.randomBlocksBlocks[blockIndex] = ((BO4RandomBlockFunction)block).blockContainers;
 	            this.randomBlocksBlockChances[blockIndex] = ((BO4RandomBlockFunction)block).blockChances;
-	            this.randomBlocksMetaDataNames[blockIndex] = ((BO4RandomBlockFunction)block).metaDataNames;
-	            this.randomBlocksMetaDataTags[blockIndex] = ((BO4RandomBlockFunction)block).metaDataTags;
 	            this.randomBlocksBlockCount[blockIndex] = ((BO4RandomBlockFunction)block).blockCount;
         	}
         	columnBlockIndex[block.x()][block.z()]++;
@@ -1666,8 +1647,9 @@ public class BO4Config extends CustomObjectConfigFile
         	if(block instanceof BO4RandomBlockFunction)
         	{
         		randomBlockCount++;
-        		for(LocalMaterialData material : ((BO4RandomBlockFunction)block).blocks)
+        		for(BlockContainer blockContainer : ((BO4RandomBlockFunction)block).blockContainers)
         		{
+                    LocalMaterialData material = blockContainer.material();
                 	if(!materials.contains(material))
                 	{
                 		materials.add(material);
@@ -1677,13 +1659,13 @@ public class BO4Config extends CustomObjectConfigFile
         		nonRandomBlockCount++;
         	}
         	       	
-        	if(block.material != null && !materials.contains(block.material))
+        	if(block.material() != null && !materials.contains(block.material()))
         	{
-        		materials.add(block.material);
+        		materials.add(block.material());
         	}        	
-        	if(block.metaDataName != null && !metaDataNames.contains(block.metaDataName))
+        	if(block.hasTag() && !metaDataNames.contains(block.tagPath()))
         	{
-        		metaDataNames.add(block.metaDataName);
+        		metaDataNames.add(block.tagPath());
         	}
         }
         
@@ -2188,14 +2170,10 @@ public class BO4Config extends CustomObjectConfigFile
         // since that gives way too much overhead memory wise.
         // We may have tens of millions of blocks, java doesn't handle lots of small classes well.
 		this.blocks = new short[xSize][zSize][];
-		this.blocksMaterial = new LocalMaterialData[newBlocks.size()];
-		this.blocksMetaDataName = new String[newBlocks.size()];
-		this.blocksMetaDataTag = new NamedBinaryTag[newBlocks.size()];
+		this.blocksMaterial = new BlockContainer[newBlocks.size()];
 		
-		this.randomBlocksBlocks = new LocalMaterialData[newBlocks.size()][];
+		this.randomBlocksBlocks = new BlockContainer[newBlocks.size()][];
 		this.randomBlocksBlockChances = new byte[newBlocks.size()][];
-		this.randomBlocksMetaDataNames = new String[newBlocks.size()][];
-		this.randomBlocksMetaDataTags = new NamedBinaryTag[newBlocks.size()][];
 		this.randomBlocksBlockCount = new byte[newBlocks.size()]; 
 		
 		BO4BlockFunction block;
@@ -2218,16 +2196,12 @@ public class BO4Config extends CustomObjectConfigFile
 
 			int blockIndex = columnBlockIndex[block.x()][block.z()] + getColumnBlockIndex(columnSizes, block.x(), block.z());
 
-			this.blocksMaterial[blockIndex] = block.material;
-			this.blocksMetaDataName[blockIndex] = block.metaDataName;
-			this.blocksMetaDataTag[blockIndex] = block.metaDataTag;
+			this.blocksMaterial[blockIndex] = block.blockContainer;
 			
 			if(block instanceof BO4RandomBlockFunction)
 			{
-		        this.randomBlocksBlocks[blockIndex] = ((BO4RandomBlockFunction)block).blocks;
+		        this.randomBlocksBlocks[blockIndex] = ((BO4RandomBlockFunction)block).blockContainers;
 		        this.randomBlocksBlockChances[blockIndex] = ((BO4RandomBlockFunction)block).blockChances;
-		        this.randomBlocksMetaDataNames[blockIndex] = ((BO4RandomBlockFunction)block).metaDataNames;
-		        this.randomBlocksMetaDataTags[blockIndex] = ((BO4RandomBlockFunction)block).metaDataTags;
 		        this.randomBlocksBlockCount[blockIndex] = ((BO4RandomBlockFunction)block).blockCount;
 			}
 			columnBlockIndex[block.x()][block.z()]++;

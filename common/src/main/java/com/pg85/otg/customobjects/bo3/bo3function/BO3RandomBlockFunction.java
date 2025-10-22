@@ -3,40 +3,56 @@ package com.pg85.otg.customobjects.bo3.bo3function;
 import java.util.List;
 import java.util.Random;
 
+import com.pg85.otg.common.BlockContainer;
 import com.pg85.otg.common.LocalMaterialData;
 import com.pg85.otg.common.LocalWorld;
 import com.pg85.otg.customobjects.bo3.BO3Config;
-import com.pg85.otg.customobjects.bo3.BO3Loader;
 import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.util.ChunkCoordinate;
-import com.pg85.otg.util.bo3.NamedBinaryTag;
 import com.pg85.otg.util.materials.MaterialHelper;
 
 public class BO3RandomBlockFunction extends BO3BlockFunction
 {
-    public LocalMaterialData[] blocks;
+    public BlockContainer[] blockContainers;
     public byte[] blockChances;
-    public String[] metaDataNames;
-    public NamedBinaryTag[] metaDataTags;
 
     public byte blockCount = 0;
 	
-    public BO3RandomBlockFunction rotate()
+    public BO3RandomBlockFunction rotate(int rotation)
     {
-        BO3RandomBlockFunction rotatedBlock = new BO3RandomBlockFunction();
-        rotatedBlock.x(z());
-        rotatedBlock.y(y());
-        rotatedBlock.z(-x());
-        rotatedBlock.blockCount = blockCount;
-        rotatedBlock.blocks = new LocalMaterialData[blockCount];
-        for (int i = 0; i < blockCount; i++)
+        int rotatedX;
+        int rotatedZ;
+        switch(rotation)
         {
-            rotatedBlock.blocks[i] = blocks[i].rotate();
+            case 0:
+                return this;
+            case 1:
+                rotatedX = z();
+                rotatedZ = -x();
+                break;
+            case 2:
+                rotatedX = -x();
+                rotatedZ = -z();
+                break;
+            case 3:
+                rotatedX = -z();
+                rotatedZ = x();
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
+
+        BO3RandomBlockFunction rotatedBlock = new BO3RandomBlockFunction();
+        rotatedBlock.x(rotatedX);
+        rotatedBlock.y(y());
+        rotatedBlock.z(rotatedZ);
+        rotatedBlock.blockCount = blockCount;
+        rotatedBlock.blockContainers = new BlockContainer[blockCount];
+        for(int i = 0; i < blockCount; i++)
+        {
+            rotatedBlock.blockContainers[i] = blockContainers[i].rotate(rotation);
         }
         rotatedBlock.blockChances = blockChances;
-        rotatedBlock.metaDataTags = metaDataTags;
-        rotatedBlock.metaDataNames = metaDataNames;
-
         return rotatedBlock;
     }
     
@@ -78,17 +94,15 @@ public class BO3RandomBlockFunction extends BO3BlockFunction
             blockCount++;
         }
         
-        this.blocks = new LocalMaterialData[blockCount];
+        this.blockContainers = new BlockContainer[blockCount];
         this.blockChances = new byte[blockCount];
-        this.metaDataNames = new String[blockCount];
-        this.metaDataTags = new NamedBinaryTag[blockCount];
         
         i = 3;
         blockCount = 0;
         while (i < size)
         {
             // Parse chance and metadata
-        	this.blocks[blockCount] = MaterialHelper.readMaterial(args.get(i));
+        	LocalMaterialData material = MaterialHelper.readMaterial(args.get(i));
             i++;
             if (i >= size)
             {
@@ -97,18 +111,14 @@ public class BO3RandomBlockFunction extends BO3BlockFunction
             try
             {
                 blockChances[blockCount] = (byte) readInt(args.get(i), 1, 100);
+                blockContainers[blockCount] = material.blockContainer();
             }
             catch (InvalidConfigException e)
             {
                 // Maybe it's a NBT file?
 
                 // Get the file
-                NamedBinaryTag metaData = BO3Loader.loadMetadata(args.get(i), holder.getFile());
-                if (metaData != null)
-                {
-                    metaDataNames[blockCount] = args.get(i);
-                    metaDataTags[blockCount] = metaData;
-                }
+                blockContainers[blockCount] = material.blockContainer(holder.getFile().getParentFile().toPath(), args.get(i));
 
                 // Get the chance
                 i++;
@@ -130,12 +140,12 @@ public class BO3RandomBlockFunction extends BO3BlockFunction
         String text = "RandomBlock(" + x() + "," + y() + "," + z();
         for (int i = 0; i < blockCount; i++)
         {
-            if (metaDataTags[i] == null)
+            if (blockContainers[i].hasTag())
             {
-                text += "," + blocks[i] + "," + blockChances[i];
+                text += "," + blockContainers[i].material() + "," + blockChances[i];
             } else
             {
-                text += "," + blocks[i] + "," + metaDataNames[i] + "," + blockChances[i];
+                text += "," + blockContainers[i].material() + "," + blockContainers[i].tagPath() + "," + blockChances[i];
             }
         }
         return text + ")";
@@ -148,7 +158,7 @@ public class BO3RandomBlockFunction extends BO3BlockFunction
         {
             if (random.nextInt(100) < blockChances[i])
             {
-                world.setBlock(x, y, z, blocks[i], metaDataTags[i], chunkBeingPopulated, replaceBlock);
+                world.setBlock(x, y, z, blockContainers[i].material(), blockContainers[i].tag(), chunkBeingPopulated, replaceBlock);
                 break;
             }
         }

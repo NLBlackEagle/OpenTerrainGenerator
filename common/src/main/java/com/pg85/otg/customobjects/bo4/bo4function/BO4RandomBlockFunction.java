@@ -2,28 +2,24 @@ package com.pg85.otg.customobjects.bo4.bo4function;
 
 import java.io.DataInput;
 import java.io.DataOutput;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
 
+import com.pg85.otg.common.BlockContainer;
 import com.pg85.otg.common.LocalMaterialData;
 import com.pg85.otg.common.LocalWorld;
-import com.pg85.otg.customobjects.bo3.BO3Loader;
 import com.pg85.otg.customobjects.bo4.BO4Config;
 import com.pg85.otg.customobjects.structures.bo4.BO4CustomStructureCoordinate;
 import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.util.ChunkCoordinate;
-import com.pg85.otg.util.bo3.NamedBinaryTag;
 import com.pg85.otg.util.bo3.Rotation;
 import com.pg85.otg.util.materials.MaterialHelper;
 
 public class BO4RandomBlockFunction extends BO4BlockFunction
 {
-    public LocalMaterialData[] blocks;
+    public BlockContainer[] blockContainers;
     public byte[] blockChances;
-    public String[] metaDataNames;
-    public NamedBinaryTag[] metaDataTags;
 
     public byte blockCount = 0;   
 
@@ -65,17 +61,15 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
             blockCount++;
         }
         
-        this.blocks = new LocalMaterialData[blockCount];
+        this.blockContainers = new BlockContainer[blockCount];
         this.blockChances = new byte[blockCount];
-        this.metaDataNames = new String[blockCount];
-        this.metaDataTags = new NamedBinaryTag[blockCount];
         
         i = 3;
         blockCount = 0;
         while (i < size)
         {
             // Parse chance and metadata
-        	this.blocks[blockCount] = MaterialHelper.readMaterial(args.get(i));
+        	LocalMaterialData material = MaterialHelper.readMaterial(args.get(i));
             i++;
             if (i >= size)
             {
@@ -84,18 +78,14 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
             try
             {
                 blockChances[blockCount] = (byte) readInt(args.get(i), 1, 100);
+                blockContainers[blockCount] = material.blockContainer();
             }
             catch (InvalidConfigException e)
             {
                 // Maybe it's a NBT file?
 
                 // Get the file
-                NamedBinaryTag metaData = BO3Loader.loadMetadata(args.get(i), holder.getFile());
-                if (metaData != null)
-                {
-                    metaDataNames[blockCount] = args.get(i);
-                    metaDataTags[blockCount] = metaData;
-                }
+                blockContainers[blockCount] = material.blockContainer(holder.getFile().getParentFile().toPath(), args.get(i));
 
                 // Get the chance
                 i++;
@@ -113,45 +103,19 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
     
     public BO4RandomBlockFunction rotate(Rotation rotation)
     {
-    	BO4RandomBlockFunction rotatedBlock = new BO4RandomBlockFunction();
+        BO4RandomBlockFunction rotatedBlock = new BO4RandomBlockFunction();
 
         BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedBO3CoordsJustified(x(), y(), z(), rotation);
-
         rotatedBlock.x(rotatedCoords.getX());
         rotatedBlock.y(rotatedCoords.getY());
         rotatedBlock.z(rotatedCoords.getZ());
-
-        rotatedBlock.blocks = blocks;
-        
-    	// TODO: This makes no sense, why is rotation inverted??? Should be: NORTH:0,WEST:1,SOUTH:2,EAST:3
-        LocalMaterialData[] rotatedBlockBlocks = new LocalMaterialData[blockCount];
-        for (int a = 0; a < blockCount; a++)
+        rotatedBlock.blockContainers = new BlockContainer[blockCount];
+        for(int i = 0; i < blockCount; i++)
         {
-        	rotatedBlockBlocks[a] = rotatedBlock.blocks[a];
-
-		    // Apply rotation
-			if(rotation.getRotationId() == 3)
-			{
-				rotatedBlockBlocks[a] = rotatedBlockBlocks[a].rotate(1);
-			}
-			if(rotation.getRotationId() == 2)
-			{
-				rotatedBlockBlocks[a] = rotatedBlockBlocks[a].rotate(2);
-			}
-			if(rotation.getRotationId() == 1)
-			{
-				rotatedBlockBlocks[a] = rotatedBlockBlocks[a].rotate(3);
-			}
+            rotatedBlock.blockContainers[i] = blockContainers[i].rotate(4 - rotation.getRotationId());
         }
-        rotatedBlock.blocks = rotatedBlockBlocks;
-
-    	rotatedBlock.blockCount = blockCount;
-    	rotatedBlock.blockChances = blockChances;
-        rotatedBlock.metaDataTag = metaDataTag;
-        rotatedBlock.metaDataTags = metaDataTags;
-        rotatedBlock.metaDataName = metaDataName;
-        rotatedBlock.metaDataNames = metaDataNames;
-
+        rotatedBlock.blockCount = blockCount;
+        rotatedBlock.blockChances = blockChances;
         return rotatedBlock;
     }
 
@@ -162,7 +126,7 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
         {
             if (random.nextInt(100) < blockChances[i])
             {
-                world.setBlock(x, y, z, blocks[i], metaDataTags[i], chunkBeingPopulated, true);
+                world.setBlock(x, y, z, blockContainers[i].material(), blockContainers[i].tag(), chunkBeingPopulated, true);
                 break;
             }
         }
@@ -174,12 +138,12 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
         String text = "RandomBlock(" + x() + "," + y() + "," + z();
         for (int i = 0; i < blockCount; i++)
         {
-            if (metaDataTags[i] == null)
+            if (blockContainers[i].hasTag())
             {
-                text += "," + blocks[i] + "," + blockChances[i];
+                text += "," + blockContainers[i].material() + "," + blockChances[i];
             } else
             {
-                text += "," + blocks[i] + "," + metaDataNames[i] + "," + blockChances[i];
+                text += "," + blockContainers[i].material() + "," + blockContainers[i].tagPath() + "," + blockChances[i];
             }
         }
         return text + ")";
@@ -196,20 +160,20 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
     {
         stream.writeShort(this.y());
         
-        stream.writeByte(this.blocks.length);
+        stream.writeByte(this.blockContainers.length);
         
         boolean bFound;
-        for(int i = 0; i < this.blocks.length; i++)
+        for(int i = 0; i < this.blockContainers.length; i++)
         {
         	byte blockChance = this.blockChances[i];
         	stream.writeByte(blockChance);
         	
         	bFound = false;
-        	if(this.blocks[i] != null)
+        	if(this.blockContainers[i] != null)
         	{
 		        for(int j = 0; j < materials.length; j++)
 		        {
-		        	if(materials[j].equals(this.blocks[i]))
+		        	if(materials[j].equals(this.blockContainers[i].material()))
 		        	{
 		        		stream.writeShort(j);
 		        		bFound = true;
@@ -224,9 +188,9 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
 	    }
         
         boolean metaDataFound = false;
-        for(int i = 0; i < this.metaDataNames.length; i++)
+        for(int i = 0; i < this.blockContainers.length; i++)
         {
-        	if(this.metaDataNames[i] != null)
+        	if(this.blockContainers[i].hasTag())
         	{
         		metaDataFound = true;
         		break;
@@ -235,15 +199,15 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
         
         if(metaDataFound)
         {
-        	stream.writeByte(this.blocks.length);
-	        for(int i = 0; i < this.metaDataNames.length; i++)
+        	stream.writeByte(this.blockContainers.length);
+	        for(int i = 0; i < this.blockContainers.length; i++)
 	        {
 	        	bFound = false;
-	        	if(this.metaDataNames[i] != null)
+	        	if(this.blockContainers[i].hasTag())
 	        	{
 		            for(int j = 0; j < metaDataNames.length; j++)
 		            {
-		            	if(metaDataNames[j].equals(this.metaDataNames[i]))
+		            	if(metaDataNames[j].equals(this.blockContainers[i].tagPath()))
 		            	{
 		            		stream.writeShort(i);
 		            		bFound = true;
@@ -265,8 +229,6 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
     {    	
     	BO4RandomBlockFunction rbf = new BO4RandomBlockFunction();
     	
-    	File file = holder.getFile();
-    	
     	rbf.x(x);
     	rbf.y(in.readShort());
     	rbf.z(z);
@@ -274,42 +236,34 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
     	byte blocksLength = in.readByte();
     	
     	rbf.blockCount = blocksLength;
-    	rbf.blocks = new LocalMaterialData[blocksLength];
+    	rbf.blockContainers = new BlockContainer[blocksLength];
     	rbf.blockChances = new byte[blocksLength];
-    	rbf.metaDataNames = new String[blocksLength];
-    	rbf.metaDataTags = new NamedBinaryTag[blocksLength];
 
+    	LocalMaterialData[] blocks = new LocalMaterialData[blocksLength];
     	for(int i = 0; i < blocksLength; i++)
     	{
     		rbf.blockChances[i] = in.readByte();
         	short materialId = in.readShort();
         	if(materialId != -1)
         	{
-        		rbf.blocks[i] = materials[materialId];
+        		blocks[i] = materials[materialId];
         	}
     	}
     	
-    	blocksLength = in.readByte();
-    	for(int i = 0; i < blocksLength; i++)
-    	{
-        	short metaDataNameId = in.readShort();
-        	if(metaDataNameId != -1)
-        	{
-        		rbf.metaDataNames[i] = metaDataNames[metaDataNameId];
-        	}
-    		if(rbf.metaDataNames[i] != null)
-    		{
-	            // Get the file
-	            NamedBinaryTag metaData = BO3Loader.loadMetadata(rbf.metaDataNames[i], file);
-	       	   	
-	            if (metaData != null)
-	            {
-	            	rbf.metaDataTags[i] = metaData;
-	            } else {
-	            	rbf.metaDataNames[i] = null;
-	            }
-    		}
-    	}    	
+        boolean hasMetaDataTags = in.readByte() != -1;
+        for(int i = 0; i < blocksLength; i++)
+        {
+            short metaDataNameId;
+            String metaDataName;
+            if(hasMetaDataTags && (metaDataNameId = in.readShort()) != -1 && (metaDataName = metaDataNames[metaDataNameId]) != null)
+            {
+                rbf.blockContainers[i] = materials[i].blockContainer(holder.getFile().getParentFile().toPath(), metaDataName);
+            }
+            else
+            {
+                rbf.blockContainers[i] = materials[i].blockContainer();
+            }
+        }
     	
     	return rbf;
     }
