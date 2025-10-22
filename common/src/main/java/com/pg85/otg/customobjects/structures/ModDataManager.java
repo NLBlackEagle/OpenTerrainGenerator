@@ -36,51 +36,51 @@ public class ModDataManager
                 // Apply rotation
             	if(rotations == 0)
             	{
-            		newModData.x = blockDataInObject[i].x;
-            		newModData.z = blockDataInObject[i].z;
+            		newModData.x(blockDataInObject[i].x());
+            		newModData.z(blockDataInObject[i].z());
             	}
             	if(rotations == 1)
             	{
-            		newModData.x = blockDataInObject[i].z;
-            		newModData.z = -blockDataInObject[i].x + 15;
+            		newModData.x(blockDataInObject[i].z());
+            		newModData.z(-blockDataInObject[i].x() + 15);
             	}
             	if(rotations == 2)
             	{
-            		newModData.x = -blockDataInObject[i].x + 15;
-            		newModData.z = -blockDataInObject[i].z + 15;
+            		newModData.x(-blockDataInObject[i].x() + 15);
+            		newModData.z(-blockDataInObject[i].z() + 15);
             	}
             	if(rotations == 3)
             	{
-            		newModData.x = -blockDataInObject[i].z + 15;
-            		newModData.z = blockDataInObject[i].x;
+            		newModData.x(-blockDataInObject[i].z() + 15);
+            		newModData.z(blockDataInObject[i].x());
             	}
-            	newModData.y = coordObject.getY() + blockDataInObject[i].y;
+            	newModData.y(coordObject.getY() + blockDataInObject[i].y());
 
-            	newModData.x = coordObject.getX() + newModData.x;
-            	newModData.z = coordObject.getZ() + newModData.z;
+            	newModData.x(coordObject.getX() + newModData.x());
+            	newModData.z(coordObject.getZ() + newModData.z());
 
             	newModData.modData = blockDataInObject[i].modData;
             	newModData.modId = blockDataInObject[i].modId;
 
         		modData.add(newModData);
 
-        		if(!ChunkCoordinate.fromBlockCoords(newModData.x, newModData.z).equals(chunkCoordinate))
+        		if(!ChunkCoordinate.fromBlockCoords(newModData.x(), newModData.z()).equals(chunkCoordinate))
         		{
         			throw new RuntimeException(); // TODO: Remove this after testing
         		}
         	} else {
 
-            	newModData.y = coordObject.getY() + blockDataInObject[i].y;
+            	newModData.y(coordObject.getY() + blockDataInObject[i].y());
 
-            	newModData.x = coordObject.getX() + blockDataInObject[i].x;
-            	newModData.z = coordObject.getZ() + blockDataInObject[i].z;
+            	newModData.x(coordObject.getX() + blockDataInObject[i].x());
+            	newModData.z(coordObject.getZ() + blockDataInObject[i].z());
 
             	newModData.modData = blockDataInObject[i].modData;
             	newModData.modId = blockDataInObject[i].modId;
 
         		modData.add(newModData);
 
-        		if(!ChunkCoordinate.fromBlockCoords(newModData.x, newModData.z).equals(chunkCoordinate))
+        		if(!ChunkCoordinate.fromBlockCoords(newModData.x(), newModData.z()).equals(chunkCoordinate))
         		{
         			throw new RuntimeException(); // TODO: Remove this after testing
         		}

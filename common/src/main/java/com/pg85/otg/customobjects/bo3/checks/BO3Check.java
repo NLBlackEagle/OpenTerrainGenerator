@@ -13,11 +13,6 @@ import com.pg85.otg.util.ChunkCoordinate;
 public abstract class BO3Check extends CustomObjectConfigFunction<BO3Config>
 {
     /**
-     * Y position relative to the object origin.
-     */
-    public int y;
-
-    /**
      * Returns whether this check would prevent spawning at the given position.
      * The given x, y and z positions are simply the relative coords in this
      * object added to the coords of the origin of the BO3. The internal
@@ -43,7 +38,7 @@ public abstract class BO3Check extends CustomObjectConfigFunction<BO3Config>
             return false;
         }
         BO3Check check = (BO3Check) other;
-        return check.x == x && check.y == y && check.z == z;
+        return check.x() == x() && check.y() == y() && check.z() == z();
     }
 
     public abstract BO3Check rotate();

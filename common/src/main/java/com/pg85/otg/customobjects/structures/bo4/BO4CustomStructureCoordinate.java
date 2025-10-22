@@ -25,7 +25,7 @@ public class BO4CustomStructureCoordinate extends CustomStructureCoordinate
 	boolean isWeightedBranch;
 	String branchGroup;
 	   
-    public BO4CustomStructureCoordinate(LocalWorld world, StructuredCustomObject object, String customObjectName, Rotation rotation, int x, short y, int z, int branchDepth, boolean isRequiredBranch, boolean isWeightedBranch, String branchGroup)
+    public BO4CustomStructureCoordinate(LocalWorld world, StructuredCustomObject object, String customObjectName, Rotation rotation, int x, int y, int z, int branchDepth, boolean isRequiredBranch, boolean isWeightedBranch, String branchGroup)
     {
     	this.worldName = world != null ? world.getName() : null;
     	this.bo3Name = object != null ? object.getName() : customObjectName != null && customObjectName.length() > 0 ? customObjectName : null;
@@ -224,12 +224,12 @@ public class BO4CustomStructureCoordinate extends CustomStructureCoordinate
     }
     
     // TODO: Why is this necessary for smoothing areas?
-    public static BO4CustomStructureCoordinate getRotatedSmoothingCoords(int x, short y, int z, Rotation newRotation)
+    public static BO4CustomStructureCoordinate getRotatedSmoothingCoords(int x, int y, int z, Rotation newRotation)
     {
         // Assuming initial rotation is always north
 
         int newX = 0;
-        short newY = 0;
+        int newY = 0;
         int newZ = 0;
         int rotations = 0;
 

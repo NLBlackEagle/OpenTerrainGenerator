@@ -26,9 +26,9 @@ public class BO4SpawnerFunction extends SpawnerFunction<BO4Config>
     {
         BO4SpawnerFunction spawnerFunction = new BO4SpawnerFunction();
 
-        spawnerFunction.x = in.readInt();
-        spawnerFunction.y = in.readInt();
-        spawnerFunction.z = in.readInt();
+        spawnerFunction.x(in.readInt());
+        spawnerFunction.y(in.readInt());
+        spawnerFunction.z(in.readInt());
         spawnerFunction.mobName = StreamHelper.readStringFromStream(in);
         spawnerFunction.originalnbtFileName = StreamHelper.readStringFromStream(in);
         spawnerFunction.nbtFileName = StreamHelper.readStringFromStream(in);
@@ -53,11 +53,11 @@ public class BO4SpawnerFunction extends SpawnerFunction<BO4Config>
     {
     	BO4SpawnerFunction rotatedBlock = new BO4SpawnerFunction(this.getHolder());
 
-        BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedBO3CoordsJustified(x, y, z, rotation);
+        BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedBO3CoordsJustified(x(), y(), z(), rotation);
 
-        rotatedBlock.x = rotatedCoords.getX();
-        rotatedBlock.y = rotatedCoords.getY();
-        rotatedBlock.z = rotatedCoords.getZ();
+        rotatedBlock.x(rotatedCoords.getX());
+        rotatedBlock.y(rotatedCoords.getY());
+        rotatedBlock.z(rotatedCoords.getZ());
 
         rotatedBlock.velocityX = velocityX;
         rotatedBlock.velocityY = velocityY;
@@ -121,9 +121,9 @@ public class BO4SpawnerFunction extends SpawnerFunction<BO4Config>
 	
     public void writeToStream(DataOutput stream) throws IOException
     {
-        stream.writeInt(this.x);
-        stream.writeInt(this.y);
-        stream.writeInt(this.z);
+        stream.writeInt(this.x());
+        stream.writeInt(this.y());
+        stream.writeInt(this.z());
 
         stream.writeBoolean(this.firstSpawn);
 
@@ -160,9 +160,9 @@ public class BO4SpawnerFunction extends SpawnerFunction<BO4Config>
     {
     	BO4SpawnerFunction spawnerFunction = new BO4SpawnerFunction(holder);
     	
-    	spawnerFunction.x = in.readInt();
-    	spawnerFunction.y = in.readInt();
-    	spawnerFunction.z = in.readInt();
+    	spawnerFunction.x(in.readInt());
+    	spawnerFunction.y(in.readInt());
+    	spawnerFunction.z(in.readInt());
     	
     	spawnerFunction.firstSpawn = in.readByte() != 0;
 

@@ -36,44 +36,44 @@ public class SpawnerManager
                 // Apply rotation
             	if(rotations == 0)
             	{
-            		newSpawnerData.x = spawnerDataInObject[i].x;
+            		newSpawnerData.x(spawnerDataInObject[i].x());
             		newSpawnerData.velocityX = spawnerDataInObject[i].velocityX;
-            		newSpawnerData.z = spawnerDataInObject[i].z;
+            		newSpawnerData.z(spawnerDataInObject[i].z());
             		newSpawnerData.velocityZ = spawnerDataInObject[i].velocityZ;
             		newSpawnerData.velocityXSet = spawnerDataInObject[i].velocityXSet;
             		newSpawnerData.velocityZSet = spawnerDataInObject[i].velocityZSet;
             	}
             	if(rotations == 1)
             	{
-            		newSpawnerData.x = spawnerDataInObject[i].z;
+            		newSpawnerData.x(spawnerDataInObject[i].z());
             		newSpawnerData.velocityX = spawnerDataInObject[i].velocityZ;
-            		newSpawnerData.z = -spawnerDataInObject[i].x + 15;
+            		newSpawnerData.z(-spawnerDataInObject[i].x() + 15);
             		newSpawnerData.velocityZ = -spawnerDataInObject[i].velocityX;
             		newSpawnerData.velocityXSet = spawnerDataInObject[i].velocityZSet;
             		newSpawnerData.velocityZSet = spawnerDataInObject[i].velocityXSet;
             	}
             	if(rotations == 2)
             	{
-            		newSpawnerData.x = -spawnerDataInObject[i].x + 15;
+            		newSpawnerData.x(-spawnerDataInObject[i].x() + 15);
             		newSpawnerData.velocityX = -spawnerDataInObject[i].velocityX;
-            		newSpawnerData.z = -spawnerDataInObject[i].z + 15;
+            		newSpawnerData.z(-spawnerDataInObject[i].z() + 15);
             		newSpawnerData.velocityZ = -spawnerDataInObject[i].velocityZ;
             		newSpawnerData.velocityXSet = spawnerDataInObject[i].velocityXSet;
             		newSpawnerData.velocityZSet = spawnerDataInObject[i].velocityZSet;
             	}
             	if(rotations == 3)
             	{
-            		newSpawnerData.x = -spawnerDataInObject[i].z + 15;
+            		newSpawnerData.x(-spawnerDataInObject[i].z() + 15);
             		newSpawnerData.velocityX = -spawnerDataInObject[i].velocityZ;
-            		newSpawnerData.z = spawnerDataInObject[i].x;
+            		newSpawnerData.z(spawnerDataInObject[i].x());
             		newSpawnerData.velocityZ = spawnerDataInObject[i].velocityX;
             		newSpawnerData.velocityXSet = spawnerDataInObject[i].velocityZSet;
             		newSpawnerData.velocityZSet = spawnerDataInObject[i].velocityXSet;
             	}
-            	newSpawnerData.y = coordObject.getY() + spawnerDataInObject[i].y;
+            	newSpawnerData.y(coordObject.getY() + spawnerDataInObject[i].y());
 
-            	newSpawnerData.x = coordObject.getX() + newSpawnerData.x;
-            	newSpawnerData.z = coordObject.getZ() + newSpawnerData.z;
+            	newSpawnerData.x(coordObject.getX() + newSpawnerData.x());
+            	newSpawnerData.z(coordObject.getZ() + newSpawnerData.z());
 
             	newSpawnerData.mobName = spawnerDataInObject[i].mobName;
             	newSpawnerData.originalnbtFileName = spawnerDataInObject[i].originalnbtFileName;
@@ -93,16 +93,16 @@ public class SpawnerManager
 
         		spawnerData.add(newSpawnerData);
 
-        		if(!ChunkCoordinate.fromBlockCoords(newSpawnerData.x, newSpawnerData.z).equals(chunkCoordinate))
+        		if(!ChunkCoordinate.fromBlockCoords(newSpawnerData.x(), newSpawnerData.z()).equals(chunkCoordinate))
         		{
         			throw new RuntimeException(); // TODO: Remove after testing
         		}
         	} else {
 
-            	newSpawnerData.y = coordObject.getY() + spawnerDataInObject[i].y;
+            	newSpawnerData.y(coordObject.getY() + spawnerDataInObject[i].y());
 
-            	newSpawnerData.x = coordObject.getX() + spawnerDataInObject[i].x;
-            	newSpawnerData.z = coordObject.getZ() + spawnerDataInObject[i].z;
+            	newSpawnerData.x(coordObject.getX() + spawnerDataInObject[i].x());
+            	newSpawnerData.z(coordObject.getZ() + spawnerDataInObject[i].z());
 
             	newSpawnerData.mobName = spawnerDataInObject[i].mobName;
             	newSpawnerData.originalnbtFileName = spawnerDataInObject[i].originalnbtFileName;
@@ -127,7 +127,7 @@ public class SpawnerManager
 
         		spawnerData.add(newSpawnerData);
 
-        		if(!ChunkCoordinate.fromBlockCoords(newSpawnerData.x, newSpawnerData.z).equals(chunkCoordinate))
+        		if(!ChunkCoordinate.fromBlockCoords(newSpawnerData.x(), newSpawnerData.z()).equals(chunkCoordinate))
         		{
         			throw new RuntimeException(); // TODO: Remove after testing
         		}

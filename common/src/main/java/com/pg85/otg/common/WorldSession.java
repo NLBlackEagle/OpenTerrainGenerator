@@ -68,7 +68,7 @@ public abstract class WorldSession
 		{
 			for(ModDataFunction<?> modData : worldInfoChunk.modDataManager.modData)
 			{
-				if(ChunkCoordinate.fromBlockCoords(modData.x, modData.z).equals(chunkCoord)) // modData for all branches of the structure is stored, make sure the modData is in this chunk
+				if(ChunkCoordinate.fromBlockCoords(modData.x(), modData.z()).equals(chunkCoord)) // modData for all branches of the structure is stored, make sure the modData is in this chunk
 				{
     				if(!result.containsKey(modData.modId))
     				{
@@ -90,7 +90,7 @@ public abstract class WorldSession
 		{
 			for(SpawnerFunction<?> spawnerData : worldInfoChunk.spawnerManager.spawnerData)
 			{
-				if(ChunkCoordinate.fromBlockCoords(spawnerData.x, spawnerData.z).equals(chunkCoord)) // spawnerData for all branches of the structure is stored, make sure the modData is in this chunk
+				if(ChunkCoordinate.fromBlockCoords(spawnerData.x(), spawnerData.z()).equals(chunkCoord)) // spawnerData for all branches of the structure is stored, make sure the modData is in this chunk
 				{
 					result.add(spawnerData);
 				}
@@ -108,7 +108,7 @@ public abstract class WorldSession
 		{
 			for(ParticleFunction<?> particleData : worldInfoChunk.particlesManager.particleData)
 			{
-				if(ChunkCoordinate.fromBlockCoords(particleData.x, particleData.z).equals(chunkCoord)) // paticleData for all branches of the structure is stored, make sure the modData is in this chunk
+				if(ChunkCoordinate.fromBlockCoords(particleData.x(), particleData.z()).equals(chunkCoord)) // paticleData for all branches of the structure is stored, make sure the modData is in this chunk
 				{
 					result.add(particleData);
 				}

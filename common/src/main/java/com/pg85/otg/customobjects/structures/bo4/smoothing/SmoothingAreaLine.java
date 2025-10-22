@@ -7,24 +7,24 @@ import java.io.IOException;
 public class SmoothingAreaLine
 {
 	public int beginPointX;
-	public short beginPointY = -1;
+	public int beginPointY = -1;
 	public int beginPointZ;
 
 	public int endPointX;
-	public short endPointY = -1;
+	public int endPointY = -1;
 	public int endPointZ;
 
 	public int originPointX;
-	public short originPointY = -1;
+	public int originPointY = -1;
 	public int originPointZ;
 
 	public int finalDestinationPointX;
-    public short finalDestinationPointY = -1;
+    public int finalDestinationPointY = -1;
     public int finalDestinationPointZ;
     
     public SmoothingAreaLine() {}
     
-    public SmoothingAreaLine(int beginPointX, short beginPointY, int beginPointZ, int endPointX, short endPointY, int endPointZ, int originPointX, short originPointY, int originPointZ, int finalDestinationPointX, short finalDestinationPointY, int finalDestinationPointZ)
+    public SmoothingAreaLine(int beginPointX, int beginPointY, int beginPointZ, int endPointX, int endPointY, int endPointZ, int originPointX, int originPointY, int originPointZ, int finalDestinationPointX, int finalDestinationPointY, int finalDestinationPointZ)
     {
     	this(beginPointX, beginPointZ, endPointX, endPointZ, originPointX, originPointY, originPointZ, finalDestinationPointX, finalDestinationPointZ);
     	this.beginPointY = beginPointY;
@@ -32,7 +32,7 @@ public class SmoothingAreaLine
     	this.finalDestinationPointY = finalDestinationPointY;
     }
     
-    public SmoothingAreaLine(int beginPointX, int beginPointZ, int endPointX, int endPointZ, int originPointX, short originPointY, int originPointZ, int finalDestinationPointX, int finalDestinationPointZ)
+    public SmoothingAreaLine(int beginPointX, int beginPointZ, int endPointX, int endPointZ, int originPointX, int originPointY, int originPointZ, int finalDestinationPointX, int finalDestinationPointZ)
     {
     	this.beginPointX = beginPointX;
     	this.beginPointZ = beginPointZ;

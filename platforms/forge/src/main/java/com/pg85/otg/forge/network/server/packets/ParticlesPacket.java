@@ -119,9 +119,9 @@ public class ParticlesPacket extends OTGPacket
 			            			} else {
 			            				particle = new BO3ParticleFunction();
 			            			}
-		            				particle.x = Integer.parseInt(parameters[0]);
-		            				particle.y = Integer.parseInt(parameters[1]);
-		            				particle.z = Integer.parseInt(parameters[2]);
+		            				particle.x(Integer.parseInt(parameters[0]));
+		            				particle.y(Integer.parseInt(parameters[1]));
+		            				particle.z(Integer.parseInt(parameters[2]));
 		            				particle.particleName = parameters[3];
 		            				particle.interval = Double.parseDouble(parameters[4]);
 		            				particle.velocityX = Double.parseDouble(parameters[5]);
@@ -150,9 +150,9 @@ public class ParticlesPacket extends OTGPacket
 	                		for(ParticleFunction<?> existingParticleFunction : existingParticleFunctions)
 	                		{
 	                			if(
-	            					particleFunction.x == existingParticleFunction.x &&
-	            					particleFunction.y == existingParticleFunction.y &&
-	            					particleFunction.z == existingParticleFunction.z
+	            					particleFunction.x() == existingParticleFunction.x() &&
+	            					particleFunction.y() == existingParticleFunction.y() &&
+	            					particleFunction.z() == existingParticleFunction.z()
 	        					)
 	                			{
 	                				bFound = true;

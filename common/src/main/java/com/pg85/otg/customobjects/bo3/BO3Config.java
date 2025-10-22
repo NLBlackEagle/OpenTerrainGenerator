@@ -128,7 +128,7 @@ public class BO3Config extends CustomObjectConfigFile
 				if (res instanceof BO3BlockFunction)
 				{
 					BO3BlockFunction block = (BO3BlockFunction) res;
-					box.expandToFit(block.x, block.y, block.z);
+					box.expandToFit(block.x(), block.y(), block.z());
 					tempBlocksList.add(block);
 				} else {
 					if (res instanceof BO3Check)
@@ -200,9 +200,9 @@ public class BO3Config extends CustomObjectConfigFile
 			// We can probably just break if null?
 			if (block != null)
 			{
-				this.blocksX[0][i] = (byte) block.x;
-				this.blocksY[0][i] = (short) block.y;
-				this.blocksZ[0][i] = (byte) block.z;
+				this.blocksX[0][i] = (byte) block.x();
+				this.blocksY[0][i] = (short) block.y();
+				this.blocksZ[0][i] = (byte) block.z();
 				this.blocksMaterial[0][i] = block.material;
 				this.blocksMetaDataName[i] = block.metaDataName;
 				this.blocksMetaDataTag[i] = block.metaDataTag;
@@ -249,9 +249,9 @@ public class BO3Config extends CustomObjectConfigFile
 				block = new BO3BlockFunction(this);
 			}
 
-			block.x = this.blocksX[rotation][i];
-			block.y = this.blocksY[rotation][i];
-			block.z = this.blocksZ[rotation][i];
+			block.x(this.blocksX[rotation][i]);
+			block.y(this.blocksY[rotation][i]);
+			block.z(this.blocksZ[rotation][i]);
 			block.material = this.blocksMaterial[rotation][i];
 			block.metaDataName = this.blocksMetaDataName[i];
 			block.metaDataTag = this.blocksMetaDataTag[i];
@@ -472,9 +472,9 @@ public class BO3Config extends CustomObjectConfigFile
 				blockFunction = new BO3BlockFunction(this);
 			}
 
-			blockFunction.x = this.blocksX[0][i];
-			blockFunction.y = this.blocksY[0][i];
-			blockFunction.z = this.blocksZ[0][i];
+			blockFunction.x(this.blocksX[0][i]);
+			blockFunction.y(this.blocksY[0][i]);
+			blockFunction.z(this.blocksZ[0][i]);
 			blockFunction.material = this.blocksMaterial[0][i];
 			blockFunction.metaDataTag = this.blocksMetaDataTag[i];
 			blockFunction.metaDataName = this.blocksMetaDataName[i];
@@ -718,9 +718,9 @@ public class BO3Config extends CustomObjectConfigFile
 			for (int h = 0; h < blocks.length; h++)
 			{
 				BO3BlockFunction block = blocks[h];
-				this.blocksX[i][h] = (byte) block.x;
-				this.blocksY[i][h] = (short) block.y;
-				this.blocksZ[i][h] = (byte) block.z;
+				this.blocksX[i][h] = (byte) block.x();
+				this.blocksY[i][h] = (short) block.y();
+				this.blocksZ[i][h] = (byte) block.z();
 				this.blocksMaterial[i][h] = block.material;
 
 				if (block instanceof BO3RandomBlockFunction)

@@ -25,11 +25,11 @@ public class BO4EntityFunction extends EntityFunction<BO4Config>
     {
     	BO4EntityFunction rotatedBlock = new BO4EntityFunction(this.getHolder());
 
-        BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedBO3CoordsJustified(x, y, z, rotation);
+        BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedBO3CoordsJustified(x(), y(), z(), rotation);
 
-        rotatedBlock.x = rotatedCoords.getX();
-        rotatedBlock.y = rotatedCoords.getY();
-        rotatedBlock.z = rotatedCoords.getZ();
+        rotatedBlock.x(rotatedCoords.getX());
+        rotatedBlock.y(rotatedCoords.getY());
+        rotatedBlock.z(rotatedCoords.getZ());
 
         rotatedBlock.name = name;
         rotatedBlock.resourceLocation = resourceLocation;
@@ -56,9 +56,9 @@ public class BO4EntityFunction extends EntityFunction<BO4Config>
 	
     public void writeToStream(DataOutput stream) throws IOException
     {    	
-        stream.writeInt(this.x);
-        stream.writeInt(this.y);
-        stream.writeInt(this.z);       
+        stream.writeInt(this.x());
+        stream.writeInt(this.y());
+        stream.writeInt(this.z());       
 
         StreamHelper.writeStringToStream(stream, this.resourceLocation);
         stream.writeInt(this.groupSize);
@@ -70,9 +70,9 @@ public class BO4EntityFunction extends EntityFunction<BO4Config>
     {
     	BO4EntityFunction entityFunction = new BO4EntityFunction(holder);
     	   	
-    	entityFunction.x = in.readInt();
-    	entityFunction.y = in.readInt();
-    	entityFunction.z = in.readInt();
+    	entityFunction.x(in.readInt());
+    	entityFunction.y(in.readInt());
+    	entityFunction.z(in.readInt());
 
     	entityFunction.processEntityName(StreamHelper.readStringFromStream(in));
     	entityFunction.groupSize = in.readInt();

@@ -13,8 +13,19 @@ import java.util.List;
 
 public abstract class CustomObjectConfigFunction<T>
 {
-    public int x;
-    public int z;
+    private static final int X_BITS = 11;
+    private static final int Y_BITS = 10;
+    private static final int Z_BITS = 11;
+    private static final int X_SHIFT = 0;
+    private static final int Y_SHIFT = X_SHIFT + X_BITS;
+    private static final int Z_SHIFT = Y_SHIFT + Y_BITS;
+    private static final int X_MASK = ((1 << X_BITS) - 1) << X_SHIFT;
+    private static final int Y_MASK = ((1 << Y_BITS) - 1) << Y_SHIFT;
+    private static final int Z_MASK = ((1 << Z_BITS) - 1) << Z_SHIFT;
+    /**
+     * layout: z = 11 bits [-1024,1023], y = 10 bits [-512,511], x = 11 bits [-1024,1023]
+     */
+    private int coords;
 	
     protected T holder;
 	
@@ -308,4 +319,49 @@ public abstract class CustomObjectConfigFunction<T>
         }
     }
 
+    /**
+     * @see #coords
+     */
+    public void xyz(int xyz)
+    {
+        coords = xyz;
+    }
+
+    /**
+     * @see #coords
+     */
+    public int xyz()
+    {
+        return coords;
+    }
+
+    public void x(int x)
+    {
+        coords = (coords & ~X_MASK) | ((x << X_SHIFT) & X_MASK);
+    }
+
+    public int x()
+    {
+        return coords << (Integer.SIZE - (X_SHIFT + X_BITS)) >> (Integer.SIZE - X_BITS);
+    }
+
+    public void y(int y)
+    {
+        coords = (coords & ~Y_MASK) | ((y << Y_SHIFT) & Y_MASK);
+    }
+
+    public int y()
+    {
+        return coords << (Integer.SIZE - (Y_SHIFT + Y_BITS)) >> (Integer.SIZE - Y_BITS);
+    }
+
+    public void z(int z)
+    {
+        coords = (coords & ~Z_MASK) | ((z << Z_SHIFT) & Z_MASK);
+    }
+
+    public int z()
+    {
+        return coords << (Integer.SIZE - (Z_SHIFT + Z_BITS)) >> (Integer.SIZE - Z_BITS);
+    }
 }

@@ -1243,9 +1243,9 @@ public class BukkitWorld implements LocalWorld
 	{
         if(OTG.getPluginConfig().spawnLog)
         {
-            OTG.log(LogMarker.DEBUG, "Attempting to spawn BO3 Entity() " + entityData.groupSize + " x " + entityData.name + " at " + entityData.x + " " + entityData.y + " " + entityData.z);
+            OTG.log(LogMarker.DEBUG, "Attempting to spawn BO3 Entity() " + entityData.groupSize + " x " + entityData.name + " at " + entityData.x() + " " + entityData.y() + " " + entityData.z());
         }
-        if (chunkBeingPopulated != null && !OTG.IsInAreaBeingPopulated((int) Math.floor(entityData.x), (int) Math.floor(entityData.z), chunkBeingPopulated)) {
+        if (chunkBeingPopulated != null && !OTG.IsInAreaBeingPopulated((int) Math.floor(entityData.x()), (int) Math.floor(entityData.z()), chunkBeingPopulated)) {
             // If outside area being populated, abort and remove entity
             if(OTG.getPluginConfig().spawnLog)
             {
@@ -1253,7 +1253,7 @@ public class BukkitWorld implements LocalWorld
             }
             return;
         }
-        if (entityData.y < 0 || entityData.y >= 256) {
+        if (entityData.y() < 0 || entityData.y() >= 256) {
             if(OTG.getPluginConfig().spawnLog)
             {
                 OTG.log(LogMarker.ERROR, "Failed to spawn mob "+entityData.name +", spawn position out of bounds");
@@ -1267,7 +1267,7 @@ public class BukkitWorld implements LocalWorld
         if(entity == null) return;
 
         // If either the block is a full block, or entity is a fish out of water, then we cancel
-        org.bukkit.Material material = world.getWorld().getBlockAt(new Location(world.getWorld(), entityData.x, entityData.y, entityData.z)).getType();
+        org.bukkit.Material material = world.getWorld().getBlockAt(new Location(world.getWorld(), entityData.x(), entityData.y(), entityData.z())).getType();
         if (!material.isTransparent() || material.isSolid() ||
                 ((entity.getBukkitEntity() instanceof CraftGuardian || EnumCreatureType.WATER_CREATURE.a().isAssignableFrom(entity.getClass())
                         && (material != org.bukkit.Material.WATER && material != org.bukkit.Material.STATIONARY_WATER))))
@@ -1352,12 +1352,12 @@ public class BukkitWorld implements LocalWorld
                 list.a(0, new NBTTagFloat((f+ ((2 - entityData.rotation) % 4)*90) % 360));
             }
             // Spawn entity, with potential passengers
-            entity = ChunkRegionLoader.spawnEntity(nbttagcompound, world, entityData.x+0.5, entityData.y, entityData.z+0.5, true, CreatureSpawnEvent.SpawnReason.CUSTOM);
+            entity = ChunkRegionLoader.spawnEntity(nbttagcompound, world, entityData.x()+0.5, entityData.y(), entityData.z()+0.5, true, CreatureSpawnEvent.SpawnReason.CUSTOM);
             if (entity == null) return null;
         } else {
             try
             {
-                org.bukkit.entity.Entity e = world.getWorld().spawn(new Location(world.getWorld(), entityData.x+0.5, entityData.y+0.0, entityData.z+0.5), EntityType.fromName(entityData.name).getEntityClass());
+                org.bukkit.entity.Entity e = world.getWorld().spawn(new Location(world.getWorld(), entityData.x()+0.5, entityData.y()+0.0, entityData.z()+0.5), EntityType.fromName(entityData.name).getEntityClass());
                 //entity = (Entity) EntityType.fromName(entityData.name).getEntityClass().getConstructor(new Class[] {World.class}).newInstance(world);
                 entity = world.getEntity( e.getUniqueId());
             } catch (Exception e) {

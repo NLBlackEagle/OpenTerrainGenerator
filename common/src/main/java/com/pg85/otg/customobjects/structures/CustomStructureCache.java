@@ -311,17 +311,17 @@ public class CustomStructureCache
 	
 				for(ModDataFunction<?> modDataFunc : loadedStructure.getKey().modDataManager.modData)
 				{
-					addToWorldInfoChunks(loadedStructure.getKey(), ChunkCoordinate.fromBlockCoords(modDataFunc.x, modDataFunc.z), false);
+					addToWorldInfoChunks(loadedStructure.getKey(), ChunkCoordinate.fromBlockCoords(modDataFunc.x(), modDataFunc.z()), false);
 				}
 	
 				for(SpawnerFunction<?> spawnerFunc : loadedStructure.getKey().spawnerManager.spawnerData)
 				{
-					addToWorldInfoChunks(loadedStructure.getKey(), ChunkCoordinate.fromBlockCoords(spawnerFunc.x, spawnerFunc.z), false);
+					addToWorldInfoChunks(loadedStructure.getKey(), ChunkCoordinate.fromBlockCoords(spawnerFunc.x(), spawnerFunc.z()), false);
 				}
 	
 				for(ParticleFunction<?> particleFunc : loadedStructure.getKey().particlesManager.particleData)
 				{
-					addToWorldInfoChunks(loadedStructure.getKey(), ChunkCoordinate.fromBlockCoords(particleFunc.x, particleFunc.z), false);
+					addToWorldInfoChunks(loadedStructure.getKey(), ChunkCoordinate.fromBlockCoords(particleFunc.x(), particleFunc.z()), false);
 				}
 			}
 		}

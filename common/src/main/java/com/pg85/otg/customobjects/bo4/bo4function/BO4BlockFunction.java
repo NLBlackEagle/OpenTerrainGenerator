@@ -39,11 +39,11 @@ public class BO4BlockFunction extends BlockFunction<BO4Config>
 
         rotatedBlock.material = material; // TODO: Make sure this won't cause problems
 
-        BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedBO3CoordsJustified(x, y, z, rotation);
+        BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedBO3CoordsJustified(x(), y(), z(), rotation);
 
-        rotatedBlock.x = rotatedCoords.getX();
-        rotatedBlock.y = rotatedCoords.getY();
-        rotatedBlock.z = rotatedCoords.getZ();
+        rotatedBlock.x(rotatedCoords.getX());
+        rotatedBlock.y(rotatedCoords.getY());
+        rotatedBlock.z(rotatedCoords.getZ());
 
     	// TODO: This makes no sense, why is rotation inverted??? Should be: NORTH:0,WEST:1,SOUTH:2,EAST:3
 
@@ -75,7 +75,7 @@ public class BO4BlockFunction extends BlockFunction<BO4Config>
         
     public void writeToStream(String[] metaDataNames, LocalMaterialData[] materials, DataOutput stream) throws IOException
     {
-        stream.writeShort(this.y);
+        stream.writeShort(this.y());
         boolean bFound = false;
         if(this.material != null)
         {
@@ -118,9 +118,9 @@ public class BO4BlockFunction extends BlockFunction<BO4Config>
     	
     	File file = holder.getFile();
     	   	
-    	rbf.x = x;
-    	rbf.y = in.readShort();
-    	rbf.z = z;
+    	rbf.x(x);
+    	rbf.y(in.readShort());
+    	rbf.z(z);
     	
     	short materialId = in.readShort();
     	if(materialId != -1)

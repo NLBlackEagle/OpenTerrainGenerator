@@ -24,9 +24,9 @@ public class BlockCheck extends BO3Check
     public void load(List<String> args) throws InvalidConfigException
     {
         assureSize(4, args);
-        x = readInt(args.get(0), -100, 100);
-		y = readInt(args.get(1), -100, 100);
-		z = readInt(args.get(2), -100, 100);
+        x(readInt(args.get(0), -100, 100));
+		y(readInt(args.get(1), -100, 100));
+		z(readInt(args.get(2), -100, 100));
         toCheck = readMaterials(args, 3);
     }
 
@@ -44,16 +44,16 @@ public class BlockCheck extends BO3Check
      */
     protected String makeString(String name)
     {
-        return name + '(' + x + ',' + y + ',' + z + makeMaterials(toCheck) + ')';
+        return name + '(' + x() + ',' + y() + ',' + z() + makeMaterials(toCheck) + ')';
     }
 
     @Override
     public BO3Check rotate()
     {
         BlockCheck rotatedCheck = new BlockCheck();
-        rotatedCheck.x = z;
-        rotatedCheck.y = y;
-        rotatedCheck.z = -x;
+        rotatedCheck.x(z());
+        rotatedCheck.y(y());
+        rotatedCheck.z(-x());
         rotatedCheck.toCheck = this.toCheck.rotate();
         return rotatedCheck;
     }

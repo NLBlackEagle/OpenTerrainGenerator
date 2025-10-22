@@ -14,8 +14,6 @@ import com.pg85.otg.util.helpers.StreamHelper;
  */
 public abstract class ParticleFunction<T extends CustomObjectConfigFile> extends CustomObjectConfigFunction<T>
 {
-    public int y;
-
 	public Boolean firstSpawn = true;
 
     public String particleName = "";
@@ -33,9 +31,9 @@ public abstract class ParticleFunction<T extends CustomObjectConfigFile> extends
 
     public static void write(DataOutput out, ParticleFunction<?> particleFunction) throws IOException
     {
-        out.writeInt(particleFunction.x);
-        out.writeInt(particleFunction.y);
-        out.writeInt(particleFunction.z);
+        out.writeInt(particleFunction.x());
+        out.writeInt(particleFunction.y());
+        out.writeInt(particleFunction.z());
         StreamHelper.writeStringToStream(out, particleFunction.particleName.replace(":", "&#58;").replace(" ", "&nbsp;"));
         out.writeDouble(particleFunction.interval);
         out.writeDouble(particleFunction.velocityX);
@@ -52,9 +50,9 @@ public abstract class ParticleFunction<T extends CustomObjectConfigFile> extends
         assureSize(5, args);
         // Those limits are arbitrary, LocalWorld.setBlock will limit it
         // correctly based on what chunks can be accessed
-    	x = readInt(args.get(0), -100, 100);
-		y = readInt(args.get(1), -1000, 1000);
-        z = readInt(args.get(2), -100, 100);
+    	x(readInt(args.get(0), -100, 100));
+		y(readInt(args.get(1), -1000, 1000));
+        z(readInt(args.get(2), -100, 100));
         particleName = args.get(3);
 
         interval = readDouble(args.get(4), 0, Integer.MAX_VALUE);
@@ -79,12 +77,12 @@ public abstract class ParticleFunction<T extends CustomObjectConfigFile> extends
     @Override
     public String makeString()
     {
-    	return "Particle(" + x + ',' + y + ',' + z + ',' + particleName + ',' + interval + ',' + velocityX + ',' + velocityY + ',' + velocityZ + ')';
+    	return "Particle(" + x() + ',' + y() + ',' + z() + ',' + particleName + ',' + interval + ',' + velocityX + ',' + velocityY + ',' + velocityZ + ')';
     }
 
     public String makeStringForPacket()
     {
-    	return "Particle(" + x + ',' + y + ',' + z + ',' + particleName + ',' + interval + ',' + velocityX + ',' + velocityY + ',' + velocityZ + ',' + velocityXSet + ',' + velocityYSet + ',' + velocityZSet + ')';
+    	return "Particle(" + x() + ',' + y() + ',' + z() + ',' + particleName + ',' + interval + ',' + velocityX + ',' + velocityY + ',' + velocityZ + ',' + velocityXSet + ',' + velocityYSet + ',' + velocityZSet + ')';
     }
 
     @Override
@@ -95,7 +93,7 @@ public abstract class ParticleFunction<T extends CustomObjectConfigFile> extends
             return false;
         }
         ParticleFunction<T> block = (ParticleFunction<T>) other;
-        return block.x == x && block.y == y && block.z == z && block.particleName.equalsIgnoreCase(particleName) && block.interval == interval && block.velocityX == velocityX && block.velocityY == velocityY && block.velocityZ == velocityZ;
+        return block.x() == x() && block.y() == y() && block.z() == z() && block.particleName.equalsIgnoreCase(particleName) && block.interval == interval && block.velocityX == velocityX && block.velocityY == velocityY && block.velocityZ == velocityZ;
     }
     
     public abstract ParticleFunction<T> getNewInstance();

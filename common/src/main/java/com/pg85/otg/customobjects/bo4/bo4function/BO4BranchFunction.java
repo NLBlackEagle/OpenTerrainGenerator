@@ -38,9 +38,9 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
     {
     	BO4BranchFunction rotatedBranch = new BO4BranchFunction(this.getHolder());
 
-    	rotatedBranch.x = x;
-    	rotatedBranch.y = y;
-    	rotatedBranch.z = z;
+    	rotatedBranch.x(x());
+    	rotatedBranch.y(y());
+    	rotatedBranch.z(z());
 
         rotatedBranch.totalChance = totalChance;
         rotatedBranch.totalChanceSet = totalChanceSet;
@@ -56,17 +56,17 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
         rotatedBranch.inputArgs = inputArgs;
         rotatedBranch.error = error;
 
-        int newX = rotatedBranch.x;
-        int newZ = rotatedBranch.z;
+        int newX = rotatedBranch.x();
+        int newZ = rotatedBranch.z();
 
     	for(int i = 0; i < rotation.getRotationId(); i++)
     	{
-            newX = rotatedBranch.z;
-            newZ = -rotatedBranch.x;
+            newX = rotatedBranch.z();
+            newZ = -rotatedBranch.x();
 
-            rotatedBranch.x = newX;
-            rotatedBranch.y = rotatedBranch.y;
-            rotatedBranch.z = newZ;
+            rotatedBranch.x(newX);
+            rotatedBranch.y(rotatedBranch.y());
+            rotatedBranch.z(newZ);
 
             ArrayList<BO4BranchNode> rotatedBranchBranches = new ArrayList<BO4BranchNode>();
             for (BO4BranchNode holder : rotatedBranch.branchesOTGPlus)
@@ -93,9 +93,9 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
 		// assureSize only returns false if size() < size
 		assureSize(8, args);
 
-        x = readInt(args.get(0), -10000, 10000);
-        y = readInt(args.get(1), -255, 255);
-        z = readInt(args.get(2), -10000, 10000);
+        x(readInt(args.get(0), -10000, 10000));
+        y(readInt(args.get(1), -255, 255));
+        z(readInt(args.get(2), -10000, 10000));
         isRequiredBranch = readBoolean(args.get(3));
 
         int i;
@@ -159,9 +159,9 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
     {
         StringBuilder output = new StringBuilder(getConfigName())
             .append('(')
-            .append(x).append(',')
-            .append(y).append(',')
-            .append(z).append(',');
+            .append(x()).append(',')
+            .append(y()).append(',')
+            .append(z()).append(',');
 
     	output.append(isRequiredBranch);
         for (Iterator<BO4BranchNode> it = branchesOTGPlus.iterator(); it.hasNext();)
@@ -194,7 +194,7 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
             double randomChance = random.nextDouble() * totalChance;
             if (randomChance <= branch.getChance())
             {
-                BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedCoord(this.x, this.y, this.z, rotation);
+                BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedCoord(this.x(), this.y(), this.z(), rotation);
                 Rotation newRotation = Rotation.getRotation((rotation.getRotationId() + branch.getRotation().getRotationId()) % 4);
                 return new BO4CustomStructureCoordinate(world, branch.getCustomObject(false, world), branch.customObjectName, newRotation, x + rotatedCoords.getX(), (short)(y + rotatedCoords.getY()), z + rotatedCoords.getZ(), branch.branchDepth, branch.isRequiredBranch, branch.isWeightedBranch, branch.branchGroup);
             }

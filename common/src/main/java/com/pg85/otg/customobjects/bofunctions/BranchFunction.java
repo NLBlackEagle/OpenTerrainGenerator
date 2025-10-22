@@ -13,10 +13,6 @@ import java.util.*;
 public abstract class BranchFunction<T extends CustomObjectConfigFile> extends CustomObjectConfigFunction<T> implements Branch
 {
     /**
-     * The base Y coordinate where this branch is expected to spawn
-     */
-    protected int y;
-    /**
      * holds each CustomObject, its spawn chance and its rotation as a node
      */
     protected SortedSet<BranchNode> branches; // Warning: Using SortedSet + BranchNode's compare method causes a bug where branches with the same rarity are seen as the same branch, this means only the first branch with the same rarity tries to spawn. This is fixed for OTG+.
@@ -41,9 +37,9 @@ public abstract class BranchFunction<T extends CustomObjectConfigFile> extends C
     {
         StringBuilder output = new StringBuilder(getConfigName())
             .append('(')
-            .append(x).append(',')
-            .append(y).append(',')
-            .append(z);
+            .append(x()).append(',')
+            .append(y()).append(',')
+            .append(z());
 
         for (Iterator<BranchNode> it = branches.iterator(); it.hasNext();)
         {
@@ -75,6 +71,6 @@ public abstract class BranchFunction<T extends CustomObjectConfigFile> extends C
             return false;
         }
         BranchFunction<T> branch = (BranchFunction<T>) other;
-        return branch.x == x && branch.y == y && branch.z == z;
+        return branch.x() == x() && branch.y() == y() && branch.z() == z();
     }
 }

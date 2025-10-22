@@ -124,10 +124,10 @@ public class BO3 implements StructuredCustomObject
         LocalMaterialData localMaterial;
         for (BO3BlockFunction block : blocks)
         {
-            localMaterial = world.getMaterial(x + block.x, y + block.y, z + block.z, null);
+            localMaterial = world.getMaterial(x + block.x(), y + block.y(), z + block.z(), null);
 
             // Ignore blocks in the ground when checking spawn conditions
-            if (block.y >= 0)
+            if (block.y() >= 0)
             {
                 // Do not spawn if non-tree blocks are in the way
                 if (
@@ -146,14 +146,14 @@ public class BO3 implements StructuredCustomObject
             // Only overwrite air
             if (localMaterial.isAir())
             {
-                chunks.add(ChunkCoordinate.fromBlockCoords(x + block.x, z + block.z));
+                chunks.add(ChunkCoordinate.fromBlockCoords(x + block.x(), z + block.z()));
                 blocksToSpawn.add(block);
             }
 
             oeh.addBlock((BO3BlockFunction) block);
         }
         for (BO3BlockFunction block : blocksToSpawn) {
-            block.spawn(world, random, x + block.x, y + block.y, z + block.z, null, false);
+            block.spawn(world, random, x + block.x(), y + block.y(), z + block.z(), null, false);
         }
         oeh.extrude(world, random, x, y, z, null, false);
         handleBO3Functions(null, world, random, rotation, x, y, z, chunks, null);
@@ -176,9 +176,9 @@ public class BO3 implements StructuredCustomObject
             if (this.settings.outsideSourceBlock == OutsideSourceBlock.placeAnyway
                     || this.settings.sourceBlocks.contains(block.material))
             {
-                block.spawn(world, random, x + block.x, y + block.y, z + block.z, null, this.doReplaceBlocks());
+                block.spawn(world, random, x + block.x(), y + block.y(), z + block.z(), null, this.doReplaceBlocks());
                 oeh.addBlock(block);
-                chunks.add(ChunkCoordinate.fromBlockCoords(x + block.x, z + block.z));
+                chunks.add(ChunkCoordinate.fromBlockCoords(x + block.x(), z + block.z()));
             }
         }
 
@@ -276,7 +276,7 @@ public class BO3 implements StructuredCustomObject
         	// Don't apply spawn height offset/variance to block checks,
         	// they should only be used with highestBlock/highestSolidBlock,
         	// and need to check for things like grass at the original spawn y.
-        	if (check.preventsSpawn(world, x + check.x, baseY + check.y, z + check.z, chunkBeingPopulated))
+        	if (check.preventsSpawn(world, x + check.x(), baseY + check.y(), z + check.z(), chunkBeingPopulated))
             {
                 // A check failed
                 return false;
@@ -288,15 +288,15 @@ public class BO3 implements StructuredCustomObject
         ChunkCoordinate chunkCoord;
         for (BO3BlockFunction block : blocks)
         {
-            if (y + block.y < PluginStandardValues.WORLD_DEPTH || y + block.y >= PluginStandardValues.WORLD_HEIGHT)
+            if (y + block.y() < PluginStandardValues.WORLD_DEPTH || y + block.y() >= PluginStandardValues.WORLD_HEIGHT)
             {
                 return false;
             }
 
-           	chunkCoord = ChunkCoordinate.fromBlockCoords(x + block.x, z + block.z);
+           	chunkCoord = ChunkCoordinate.fromBlockCoords(x + block.x(), z + block.z());
         	if(!loadedChunks.contains(chunkCoord))
     		{
-        		if(chunkBeingPopulated != null && !OTG.IsInAreaBeingPopulated(x + block.x, z + block.z, chunkBeingPopulated))
+        		if(chunkBeingPopulated != null && !OTG.IsInAreaBeingPopulated(x + block.x(), z + block.z(), chunkBeingPopulated))
         		//if(!world.chunkExists(x + block.x, y + block.y, z + block.z)) 
 	            {
                     // Cannot spawn BO3, part of world is not loaded
@@ -324,7 +324,7 @@ public class BO3 implements StructuredCustomObject
 					) || 
     				this.settings.outsideSourceBlock == OutsideSourceBlock.dontPlace
 				) && 
-    			!this.settings.sourceBlocks.contains(world.getMaterial(x + block.x, y + block.y, z + block.z, chunkBeingPopulated))
+    			!this.settings.sourceBlocks.contains(world.getMaterial(x + block.x(), y + block.y(), z + block.z(), chunkBeingPopulated))
     		)
             {
                 blocksOutsideSourceBlock++;
@@ -336,11 +336,11 @@ public class BO3 implements StructuredCustomObject
 
                 if (this.settings.outsideSourceBlock == OutsideSourceBlock.placeAnyway)
                 {
-                    chunks.add(ChunkCoordinate.fromBlockCoords(x + block.x, z + block.z));
+                    chunks.add(ChunkCoordinate.fromBlockCoords(x + block.x(), z + block.z()));
                     blocksToSpawn.add(block);
                 }
             } else {
-                chunks.add(ChunkCoordinate.fromBlockCoords(x + block.x, z + block.z));
+                chunks.add(ChunkCoordinate.fromBlockCoords(x + block.x(), z + block.z()));
                 blocksToSpawn.add(block);
             }
             if (block instanceof BO3BlockFunction)
@@ -360,7 +360,7 @@ public class BO3 implements StructuredCustomObject
 
         for (BO3BlockFunction block : blocksToSpawn)
         {
-            block.spawn(world, random, x + block.x, y + block.y, z + block.z, chunkBeingPopulated, replaceBlocks);
+            block.spawn(world, random, x + block.x(), y + block.y(), z + block.z(), chunkBeingPopulated, replaceBlocks);
         }
 
         oeh.extrude(world, random, x, y, z, chunkBeingPopulated, replaceBlocks);
@@ -379,16 +379,16 @@ public class BO3 implements StructuredCustomObject
         {
             BO3ModDataFunction newModData = new BO3ModDataFunction();
 
-            newModData.y = y + modData.y;
-            newModData.x = x + modData.x;
-            newModData.z = z + modData.z;
+            newModData.y(y + modData.y());
+            newModData.x(x + modData.x());
+            newModData.z(z + modData.z());
 
             newModData.modData = modData.modData;
             newModData.modId = modData.modId;
 
             newModDataInObject.add(newModData);
-            chunks.add(ChunkCoordinate.fromBlockCoords(newModData.x, newModData.z));
-            chunksCustomObject.add(ChunkCoordinate.fromBlockCoords(newModData.x, newModData.z));
+            chunks.add(ChunkCoordinate.fromBlockCoords(newModData.x(), newModData.z()));
+            chunksCustomObject.add(ChunkCoordinate.fromBlockCoords(newModData.x(), newModData.z()));
         }
 
         HashSet<BO3SpawnerFunction> newSpawnerDataInObject = new HashSet<BO3SpawnerFunction>();
@@ -397,9 +397,9 @@ public class BO3 implements StructuredCustomObject
         {
             BO3SpawnerFunction newSpawnerData = new BO3SpawnerFunction();
 
-            newSpawnerData.y = y + spawnerData.y;
-            newSpawnerData.x = x + spawnerData.x;
-            newSpawnerData.z = z + spawnerData.z;
+            newSpawnerData.y(y + spawnerData.y());
+            newSpawnerData.x(x + spawnerData.x());
+            newSpawnerData.z(z + spawnerData.z());
 
             newSpawnerData.mobName = spawnerData.mobName;
             newSpawnerData.originalnbtFileName = spawnerData.originalnbtFileName;
@@ -423,8 +423,8 @@ public class BO3 implements StructuredCustomObject
             newSpawnerData.pitch = spawnerData.pitch;
 
             newSpawnerDataInObject.add(newSpawnerData);
-            chunks.add(ChunkCoordinate.fromBlockCoords(newSpawnerData.x, newSpawnerData.z));
-            chunksCustomObject.add(ChunkCoordinate.fromBlockCoords(newSpawnerData.x, newSpawnerData.z));
+            chunks.add(ChunkCoordinate.fromBlockCoords(newSpawnerData.x(), newSpawnerData.z()));
+            chunksCustomObject.add(ChunkCoordinate.fromBlockCoords(newSpawnerData.x(), newSpawnerData.z()));
         }
 
         HashSet<BO3ParticleFunction> newParticleDataInObject = new HashSet<BO3ParticleFunction>();
@@ -433,9 +433,9 @@ public class BO3 implements StructuredCustomObject
         {
             BO3ParticleFunction newParticleData = new BO3ParticleFunction();
 
-            newParticleData.y = y + particleData.y;
-            newParticleData.x = x + particleData.x;
-            newParticleData.z = z + particleData.z;
+            newParticleData.y(y + particleData.y());
+            newParticleData.x(x + particleData.x());
+            newParticleData.z(z + particleData.z());
 
             newParticleData.particleName = particleData.particleName;
 
@@ -450,8 +450,8 @@ public class BO3 implements StructuredCustomObject
             newParticleData.velocityZSet = particleData.velocityZSet;
 
             newParticleDataInObject.add(newParticleData);
-            chunks.add(ChunkCoordinate.fromBlockCoords(newParticleData.x, newParticleData.z));
-            chunksCustomObject.add(ChunkCoordinate.fromBlockCoords(newParticleData.x, newParticleData.z));
+            chunks.add(ChunkCoordinate.fromBlockCoords(newParticleData.x(), newParticleData.z()));
+            chunksCustomObject.add(ChunkCoordinate.fromBlockCoords(newParticleData.x(), newParticleData.z()));
         }
 
         if (structure != null)
@@ -481,9 +481,9 @@ public class BO3 implements StructuredCustomObject
         {
             BO3EntityFunction newEntityData = new BO3EntityFunction();
 
-            newEntityData.y = y + entity.y;
-            newEntityData.x = x + entity.x;
-            newEntityData.z = z + entity.z;
+            newEntityData.y(y + entity.y());
+            newEntityData.x(x + entity.x());
+            newEntityData.z(z + entity.z());
 
             newEntityData.name = entity.name;
             newEntityData.resourceLocation = entity.resourceLocation;

@@ -121,7 +121,7 @@ public class OTGChunkGenerator implements IChunkGenerator
 								boolean autoSpawn = paramString2.length > 4 ? Boolean.parseBoolean(paramString2[4]) : false;
 	    	    				if(autoSpawn)
 	    	    				{
-	    	    					messageString += "[" + modData.x + "," + modData.y + "," + modData.z + "," + modData.modData + "]";
+	    	    					messageString += "[" + modData.x() + "," + modData.y() + "," + modData.z() + "," + modData.modData + "]";
 	    	    				}
 							}
 						}
@@ -129,7 +129,7 @@ public class OTGChunkGenerator implements IChunkGenerator
 				} else {
 	    			for(ModDataFunction<?> modData : modNameAndData.getValue())
 	    			{
-    					messageString += "[" + modData.x + "," + modData.y + "," + modData.z + "," + modData.modData + "]";
+    					messageString += "[" + modData.x() + "," + modData.y() + "," + modData.z() + "," + modData.modData + "]";
 	    			}
 				}
     			if(messageString.length() > 0)

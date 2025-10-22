@@ -39,9 +39,9 @@ public class LightCheck extends BO3Check
     public void load(List<String> args) throws InvalidConfigException
     {
         assureSize(5, args);
-		x = readInt(args.get(0), -100, 100);
-        y = readInt(args.get(1), -100, 100);
-        z = readInt(args.get(2), -100, 100);
+		x(readInt(args.get(0), -100, 100));
+        y(readInt(args.get(1), -100, 100));
+        z(readInt(args.get(2), -100, 100));
         minLightLevel = readInt(args.get(3), 0, 16);
         maxLightLevel = readInt(args.get(4), minLightLevel, 16);
     }
@@ -49,16 +49,16 @@ public class LightCheck extends BO3Check
     @Override
     public String makeString()
     {
-        return "LightCheck(" + x + ',' + y + ',' + z + ',' + minLightLevel + ',' + maxLightLevel + ')';
+        return "LightCheck(" + x() + ',' + y() + ',' + z() + ',' + minLightLevel + ',' + maxLightLevel + ')';
     }
 
     @Override
     public BO3Check rotate()
     {
         LightCheck rotatedCheck = new LightCheck();
-        rotatedCheck.x = z;
-        rotatedCheck.y = y;
-        rotatedCheck.z = -x;
+        rotatedCheck.x(z());
+        rotatedCheck.y(y());
+        rotatedCheck.z(-x());
         rotatedCheck.minLightLevel = minLightLevel;
         rotatedCheck.maxLightLevel = maxLightLevel;
 

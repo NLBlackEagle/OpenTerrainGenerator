@@ -1333,9 +1333,9 @@ public class ForgeWorld implements LocalWorld
     {
         if(OTG.getPluginConfig().spawnLog)
         {
-            OTG.log(LogMarker.DEBUG, "Attempting to spawn BO3 Entity() " + entityData.groupSize + " x " + entityData.name + " at " + entityData.x + " " + entityData.y + " " + entityData.z);
+            OTG.log(LogMarker.DEBUG, "Attempting to spawn BO3 Entity() " + entityData.groupSize + " x " + entityData.name + " at " + entityData.x() + " " + entityData.y() + " " + entityData.z());
         }
-        if (chunkBeingPopulated != null && !OTG.IsInAreaBeingPopulated((int) Math.floor(entityData.x), (int) Math.floor(entityData.z), chunkBeingPopulated)) {
+        if (chunkBeingPopulated != null && !OTG.IsInAreaBeingPopulated((int) Math.floor(entityData.x()), (int) Math.floor(entityData.z()), chunkBeingPopulated)) {
             // If outside area being populated, abort and remove entity
             if(OTG.getPluginConfig().spawnLog)
             {
@@ -1343,7 +1343,7 @@ public class ForgeWorld implements LocalWorld
             }
             return;
         }
-        if (entityData.y < 0 || entityData.y >= 256) {
+        if (entityData.y() < 0 || entityData.y() >= 256) {
             if(OTG.getPluginConfig().spawnLog)
             {
                 OTG.log(LogMarker.ERROR, "Failed to spawn mob "+entityData.name +", spawn position out of bounds");
@@ -1357,9 +1357,9 @@ public class ForgeWorld implements LocalWorld
         if (entity == null) return;
 
         // If either the block is a full block, or entity is a fish out of water, then we cancel
-        if (world.isBlockNormalCube(new BlockPos(entityData.x, entityData.y, entityData.z), false)
+        if (world.isBlockNormalCube(new BlockPos(entityData.x(), entityData.y(), entityData.z()), false)
                 || ((entity.isCreatureType(EnumCreatureType.WATER_CREATURE, false) || entity instanceof EntityGuardian)
-                    && world.getBlockState(new BlockPos(entityData.x, entityData.y, entityData.z)).getMaterial() != Material.WATER))
+                    && world.getBlockState(new BlockPos(entityData.x(), entityData.y(), entityData.z())).getMaterial() != Material.WATER))
         {
             world.removeEntity(entity);
             return;
@@ -1445,15 +1445,15 @@ public class ForgeWorld implements LocalWorld
             }
 
             // Spawn entity, with potential passengers
-            entity = AnvilChunkLoader.readWorldEntityPos(nbttagcompound, world, entityData.x+0.5, entityData.y, entityData.z+0.5, true);
+            entity = AnvilChunkLoader.readWorldEntityPos(nbttagcompound, world, entityData.x()+0.5, entityData.y(), entityData.z()+0.5, true);
             if (entity == null) return null;
         } else {
             // Create a default entity from the given mob type
             nbttagcompound.setString("id", entityData.resourceLocation);
-            entity = AnvilChunkLoader.readWorldEntityPos(nbttagcompound, world, entityData.x + 0.5, entityData.y, entityData.z + 0.5, true);
+            entity = AnvilChunkLoader.readWorldEntityPos(nbttagcompound, world, entityData.x() + 0.5, entityData.y(), entityData.z() + 0.5, true);
             if (entity instanceof EntityLiving) {
                 ((EntityLiving)entity).onInitialSpawn(world.getDifficultyForLocation(
-                                new BlockPos(entityData.x, entityData.y, entityData.z)),(IEntityLivingData)null);
+                                new BlockPos(entityData.x(), entityData.y(), entityData.z())),(IEntityLivingData)null);
             }
             if (entity == null)
                 return null;

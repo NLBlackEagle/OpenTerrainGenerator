@@ -11,9 +11,9 @@ public class BO3EntityFunction extends EntityFunction<BO3Config>
     public BO3EntityFunction rotate()
     {
     	BO3EntityFunction rotatedBlock = new BO3EntityFunction();
-        rotatedBlock.x = z;
-        rotatedBlock.y = y;
-        rotatedBlock.z = -x;
+        rotatedBlock.x(z());
+        rotatedBlock.y(y());
+        rotatedBlock.z(-x());
         rotatedBlock.name = name;
         rotatedBlock.resourceLocation = resourceLocation;
         rotatedBlock.groupSize = groupSize;

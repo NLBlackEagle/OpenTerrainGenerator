@@ -18,8 +18,6 @@ import java.util.List;
  */
 public abstract class EntityFunction<T extends CustomObjectConfigFile> extends CustomObjectConfigFunction<T>
 {
-    public int y;
-
     public String name = "";
     public int groupSize = 1;
     public String nameTagOrNBTFileName = "";
@@ -34,9 +32,9 @@ public abstract class EntityFunction<T extends CustomObjectConfigFile> extends C
         assureSize(5, args);
         // Those limits are arbitrary, LocalWorld.setBlock will limit it
         // correctly based on what chunks can be accessed
-		x = readInt(args.get(0), -100, 100);
-        y = readInt(args.get(1), -1000, 1000);
-        z = readInt(args.get(2), -100, 100);
+		x(readInt(args.get(0), -100, 100));
+        y(readInt(args.get(1), -1000, 1000));
+        z(readInt(args.get(2), -100, 100));
         processEntityName(args.get(3));
         groupSize = readInt(args.get(4), 0, Integer.MAX_VALUE);
 
@@ -102,7 +100,7 @@ public abstract class EntityFunction<T extends CustomObjectConfigFile> extends C
     @Override
     public String makeString()
     {
-        return "Entity(" + x + ',' + y + ',' + z + ',' + resourceLocation + ',' + groupSize + (originalNameTagOrNBTFileName != null && originalNameTagOrNBTFileName.length() > 0 ? ',' + originalNameTagOrNBTFileName : "") + ')';
+        return "Entity(" + x() + ',' + y() + ',' + z() + ',' + resourceLocation + ',' + groupSize + (originalNameTagOrNBTFileName != null && originalNameTagOrNBTFileName.length() > 0 ? ',' + originalNameTagOrNBTFileName : "") + ')';
     }
 
     private String metaDataTag;
@@ -148,7 +146,7 @@ public abstract class EntityFunction<T extends CustomObjectConfigFile> extends C
             return false;
         }
         EntityFunction<T> block = (EntityFunction<T>) other;
-        return block.x == x && block.y == y && block.z == z && block.resourceLocation.equalsIgnoreCase(resourceLocation) && block.groupSize == groupSize && block.originalNameTagOrNBTFileName.equalsIgnoreCase(originalNameTagOrNBTFileName);
+        return block.x() == x() && block.y() == y() && block.z() == z() && block.resourceLocation.equalsIgnoreCase(resourceLocation) && block.groupSize == groupSize && block.originalNameTagOrNBTFileName.equalsIgnoreCase(originalNameTagOrNBTFileName);
     }
 
 	public abstract EntityFunction<T> createNewInstance();

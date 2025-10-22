@@ -34,9 +34,9 @@ public class BO4WeightedBranchFunction extends BO4BranchFunction
 		// assureSize only returns false if size() < size
 		assureSize(8, args);
 
-        x = readInt(args.get(0), -32, 32);
-        y = readInt(args.get(1), -255, 255);
-        z = readInt(args.get(2), -32, 32);
+        x(readInt(args.get(0), -32, 32));
+        y(readInt(args.get(1), -255, 255));
+        z(readInt(args.get(2), -32, 32));
         isRequiredBranch = readBoolean(args.get(3));
 
         int i;
@@ -106,7 +106,7 @@ public class BO4WeightedBranchFunction extends BO4BranchFunction
         	double branchRarity = branch.getChance();
             if (branchRarity > 0 && branchRarity >= randomChance)
             {
-                BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedCoord(this.x, this.y, this.z, rotation);
+                BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedCoord(this.x(), this.y(), this.z(), rotation);
                 Rotation newRotation = Rotation.getRotation((rotation.getRotationId() + branch.getRotation().getRotationId()) % 4);
                 return new BO4CustomStructureCoordinate(world, branch.getCustomObject(false, world), branch.customObjectName, newRotation, x + rotatedCoords.getX(), (short)(y + rotatedCoords.getY()), z + rotatedCoords.getZ(), branch.branchDepth, branch.isRequiredBranch, true, branch.branchGroup);
             }
@@ -123,9 +123,9 @@ public class BO4WeightedBranchFunction extends BO4BranchFunction
     {
     	BO4WeightedBranchFunction rotatedBranch = new BO4WeightedBranchFunction(this.getHolder());
 
-    	rotatedBranch.x = x;
-    	rotatedBranch.y = y;
-    	rotatedBranch.z = z;
+    	rotatedBranch.x(x());
+    	rotatedBranch.y(y());
+    	rotatedBranch.z(z());
 
         rotatedBranch.totalChance = totalChance;
         rotatedBranch.totalChanceSet = totalChanceSet;
@@ -142,17 +142,17 @@ public class BO4WeightedBranchFunction extends BO4BranchFunction
 
         rotatedBranch.branchesOTGPlus = this.branchesOTGPlus; // TODO: Make sure this won't cause problems
 
-        int newX = rotatedBranch.x;
-        int newZ = rotatedBranch.z;
+        int newX = rotatedBranch.x();
+        int newZ = rotatedBranch.z();
 
     	for(int i = 0; i < rotation.getRotationId(); i++)
     	{
-            newX = rotatedBranch.z;
-            newZ = -rotatedBranch.x;
+            newX = rotatedBranch.z();
+            newZ = -rotatedBranch.x();
 
-    		rotatedBranch.x = newX;
-            rotatedBranch.y = rotatedBranch.y;
-            rotatedBranch.z = newZ;
+    		rotatedBranch.x(newX);
+            rotatedBranch.y(rotatedBranch.y());
+            rotatedBranch.z(newZ);
 
             ArrayList<BO4BranchNode> rotatedBranchBranches = new ArrayList<BO4BranchNode>();
             for (BO4BranchNode holder : rotatedBranch.branchesOTGPlus)

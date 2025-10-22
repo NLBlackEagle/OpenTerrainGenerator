@@ -20,9 +20,9 @@ public class BO3BranchFunction extends BranchFunction<BO3Config>
     public BO3BranchFunction rotate()
     {
         BO3BranchFunction rotatedBranch = new BO3BranchFunction();
-        rotatedBranch.x = z;
-        rotatedBranch.y = y;
-        rotatedBranch.z = -x;
+        rotatedBranch.x(z());
+        rotatedBranch.y(y());
+        rotatedBranch.z(-x());
         rotatedBranch.branches = new TreeSet<BranchNode>();
         rotatedBranch.totalChance = totalChance;
         rotatedBranch.totalChanceSet = totalChanceSet;
@@ -39,9 +39,9 @@ public class BO3BranchFunction extends BranchFunction<BO3Config>
     {
         double cumulativeChance = 0;
         assureSize(6, args);
-        x = readInt(args.get(0), -32, 32);
-        y = readInt(args.get(1), -64, 64);
-        z = readInt(args.get(2), -32, 32);
+        x(readInt(args.get(0), -32, 32));
+        y(readInt(args.get(1), -64, 64));
+        z(readInt(args.get(2), -32, 32));
         int i;
         for (i = 3; i < args.size() - 2; i += 3)
         {
@@ -78,7 +78,7 @@ public class BO3BranchFunction extends BranchFunction<BO3Config>
             double randomChance = random.nextDouble() * totalChance;
             if (randomChance < branch.getChance())
             {
-                return new BO3CustomStructureCoordinate(world, branch.getCustomObject(false, world), branch.customObjectName, branch.getRotation(), x + this.x, (short)(y + this.y), z + this.z);
+                return new BO3CustomStructureCoordinate(world, branch.getCustomObject(false, world), branch.customObjectName, branch.getRotation(), x + this.x(), (short)(y + this.y()), z + this.z());
             }
         }
         return null;

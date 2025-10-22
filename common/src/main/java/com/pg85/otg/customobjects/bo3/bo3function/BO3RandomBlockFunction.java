@@ -31,9 +31,9 @@ public class BO3RandomBlockFunction extends BO3BlockFunction
     public BO3RandomBlockFunction rotate()
     {
         BO3RandomBlockFunction rotatedBlock = new BO3RandomBlockFunction();
-        rotatedBlock.x = z;
-        rotatedBlock.y = y;
-        rotatedBlock.z = -x;
+        rotatedBlock.x(z());
+        rotatedBlock.y(y());
+        rotatedBlock.z(-x());
         rotatedBlock.blockCount = blockCount;
         rotatedBlock.blocks = new LocalMaterialData[blockCount];
         for (int i = 0; i < blockCount; i++)
@@ -51,9 +51,9 @@ public class BO3RandomBlockFunction extends BO3BlockFunction
     public void load(List<String> args) throws InvalidConfigException
     {
         assureSize(5, args);
-        x = readInt(args.get(0), -100, 100);
-        y = (short) readInt(args.get(1), -1000, 1000);
-        z = readInt(args.get(2), -100, 100);
+        x(readInt(args.get(0), -100, 100));
+        y((short) readInt(args.get(1), -1000, 1000));
+        z(readInt(args.get(2), -100, 100));
 
         // Now read the random parts
         int i = 3;
@@ -134,7 +134,7 @@ public class BO3RandomBlockFunction extends BO3BlockFunction
     @Override
     public String makeString()
     {
-        String text = "RandomBlock(" + x + "," + y + "," + z;
+        String text = "RandomBlock(" + x() + "," + y() + "," + z();
         for (int i = 0; i < blockCount; i++)
         {
             if (metaDataTags[i] == null)

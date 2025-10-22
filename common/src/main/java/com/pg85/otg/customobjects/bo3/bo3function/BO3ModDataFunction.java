@@ -16,9 +16,9 @@ public class BO3ModDataFunction extends ModDataFunction<BO3Config>
     {
         BO3ModDataFunction modDataFunction = new BO3ModDataFunction();
 
-        modDataFunction.x = in.readInt();
-        modDataFunction.y = in.readInt();
-        modDataFunction.z = in.readInt();
+        modDataFunction.x(in.readInt());
+        modDataFunction.y(in.readInt());
+        modDataFunction.z(in.readInt());
         modDataFunction.modId = StreamHelper.readStringFromStream(in);
         modDataFunction.modData = StreamHelper.readStringFromStream(in);
 
@@ -28,9 +28,9 @@ public class BO3ModDataFunction extends ModDataFunction<BO3Config>
     public BO3ModDataFunction rotate()
     {
         BO3ModDataFunction rotatedBlock = new BO3ModDataFunction();
-        rotatedBlock.x = z;
-        rotatedBlock.y = y;
-        rotatedBlock.z = -x;
+        rotatedBlock.x(z());
+        rotatedBlock.y(y());
+        rotatedBlock.z(-x());
         rotatedBlock.modId = modId;
         rotatedBlock.modData = modData;
 

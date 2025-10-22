@@ -16,9 +16,9 @@ public class BO3ParticleFunction extends ParticleFunction<BO3Config>
     {
         BO3ParticleFunction particleFunction = new BO3ParticleFunction();
 
-        particleFunction.x = in.readInt();
-        particleFunction.y = in.readInt();
-        particleFunction.z = in.readInt();
+        particleFunction.x(in.readInt());
+        particleFunction.y(in.readInt());
+        particleFunction.z(in.readInt());
         particleFunction.particleName = StreamHelper.readStringFromStream(in);
         particleFunction.interval = in.readDouble();
         particleFunction.velocityX = in.readDouble();
@@ -34,9 +34,9 @@ public class BO3ParticleFunction extends ParticleFunction<BO3Config>
     public BO3ParticleFunction rotate()
     {
     	BO3ParticleFunction rotatedBlock = new BO3ParticleFunction();
-        rotatedBlock.x = z;
-        rotatedBlock.y = y;
-        rotatedBlock.z = -x;
+        rotatedBlock.x(z());
+        rotatedBlock.y(y());
+        rotatedBlock.z(-x());
         rotatedBlock.particleName = particleName;
 
         rotatedBlock.interval = interval;

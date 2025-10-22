@@ -22,9 +22,9 @@ public final class BlockCheckNot extends BlockCheck
     public BO3Check rotate()
     {
         BlockCheckNot rotatedCheck = new BlockCheckNot();
-        rotatedCheck.x = z;
-        rotatedCheck.y = y;
-        rotatedCheck.z = -x;
+        rotatedCheck.x(z());
+        rotatedCheck.y(y());
+        rotatedCheck.z(-x());
         rotatedCheck.toCheck = toCheck.rotate();
         return rotatedCheck;
     }

@@ -356,7 +356,7 @@ public class BO4Config extends CustomObjectConfigFile
 	                			{
 	    	            			if(
 	    	            				(!(start.getConfig().overrideChildSettings && this.overrideChildSettings ? start.getConfig().smoothStartTop : this.smoothStartTop) && y == getminY()) ||
-	    		        				((start.getConfig().overrideChildSettings && this.overrideChildSettings ? start.getConfig().smoothStartTop : this.smoothStartTop) && (this.heightMap[x][z] == null || y > this.heightMap[x][z].y))
+	    		        				((start.getConfig().overrideChildSettings && this.overrideChildSettings ? start.getConfig().smoothStartTop : this.smoothStartTop) && (this.heightMap[x][z] == null || y > this.heightMap[x][z].y()))
 	    	    					)
 	    	            			{
 	    	            				BO4BlockFunction blockFunction = null;
@@ -372,9 +372,9 @@ public class BO4Config extends CustomObjectConfigFile
 	    	            					blockFunction = new BO4BlockFunction();
 	    	            				}
 	    	            				blockFunction.material = material;
-	    	            				blockFunction.x = x;
-	    	            				blockFunction.y = (short) y;
-	    	            				blockFunction.z = z;	    	            				
+	    	            				blockFunction.x(x);
+	    	            				blockFunction.y((short) y);
+	    	            				blockFunction.z(z);	    	            				
 	    	            				blockFunction.metaDataName = this.blocksMetaDataName[blockIndex];
 	    	            				blockFunction.metaDataTag = this.blocksMetaDataTag[blockIndex];
 	    	            				
@@ -445,9 +445,9 @@ public class BO4Config extends CustomObjectConfigFile
 			    			block = new BO4BlockFunction(this);
 			    		}
 			    		
-			    		block.x = x;
-			    		block.y = this.blocks[x][z][i];
-			    		block.z = z;
+			    		block.x(x);
+			    		block.y(this.blocks[x][z][i]);
+			    		block.z(z);
 			    		block.material = this.blocksMaterial[blockIndex];
 			    		block.metaDataName = this.blocksMetaDataName[blockIndex];
 			    		block.metaDataTag = this.blocksMetaDataTag[blockIndex];
@@ -562,7 +562,7 @@ public class BO4Config extends CustomObjectConfigFile
 				short[][] columnSizes = new short[16][16];
 				for(BO4BlockFunction block : newBlocks)
 				{
-					columnSizes[block.x][block.z]++;
+					columnSizes[block.x()][block.z()]++;
 				}
 				
 				loadBlockArrays(newBlocks, columnSizes);
@@ -678,21 +678,21 @@ public class BO4Config extends CustomObjectConfigFile
             		!(res instanceof CustomObjectErroredFunction)
     			)
             	{
-	        		if(res.x < minX)
+	        		if(res.x() < minX)
 	        		{
-	        			minX = res.x;
+	        			minX = res.x();
 	        		}
-	        		if(res.x > maxX)
+	        		if(res.x() > maxX)
 	        		{
-	        			maxX = res.x;
+	        			maxX = res.x();
 	        		}
-	        		if(res.z < minZ)
+	        		if(res.z() < minZ)
 	        		{
-	        			minZ = res.z;
+	        			minZ = res.z();
 	        		}
-	        		if(res.z > maxZ)
+	        		if(res.z() > maxZ)
 	        		{
-	        			maxZ = res.z;
+	        			maxZ = res.z();
 	        		}
             	}
             }
@@ -736,8 +736,8 @@ public class BO4Config extends CustomObjectConfigFile
         		!(res instanceof CustomObjectErroredFunction)
     			)
         	{
-	        	res.x += xOffset;
-	        	res.z += zOffset;
+	        	res.x(res.x() + xOffset);
+	        	res.z(res.z() + zOffset);
         	}
         	
             if (res instanceof BO4BlockFunction)
@@ -747,39 +747,39 @@ public class BO4Config extends CustomObjectConfigFile
         		if(res instanceof BO4RandomBlockFunction)
         		{
                 	tempBlocksList.add((BO4RandomBlockFunction)res);
-                	columnSizes[res.x + (this.xSize / 2)][res.z + (this.zSize / 2) - 1]++;
+                	columnSizes[res.x() + (this.xSize / 2)][res.z() + (this.zSize / 2) - 1]++;
         		} else {
         			if(!this.removeAir || !((BO4BlockFunction)res).material.isAir())
         			{
                     	tempBlocksList.add((BO4BlockFunction)res);
-                		columnSizes[res.x + (this.xSize / 2)][res.z + (this.zSize / 2) - 1]++;
+                		columnSizes[res.x() + (this.xSize / 2)][res.z() + (this.zSize / 2) - 1]++;
         			}
         		}
         		
             	// Get the real size of this BO3
-            	if(res.x < this.minX)
+            	if(res.x() < this.minX)
             	{
-            		this.minX = res.x;
+            		this.minX = res.x();
             	}
-            	if(res.x > this.maxX)
+            	if(res.x() > this.maxX)
             	{
-            		this.maxX = res.x;
+            		this.maxX = res.x();
             	}
-            	if(((BO4BlockFunction)res).y < this.minY)
+            	if(((BO4BlockFunction)res).y() < this.minY)
             	{
-            		this.minY = ((BO4BlockFunction)res).y;
+            		this.minY = ((BO4BlockFunction)res).y();
             	}
-            	if(((BO4BlockFunction)res).y > this.maxY)
+            	if(((BO4BlockFunction)res).y() > this.maxY)
             	{
-            		this.maxY = ((BO4BlockFunction)res).y;
+            		this.maxY = ((BO4BlockFunction)res).y();
             	}
-            	if(res.z < this.minZ)
+            	if(res.z() < this.minZ)
             	{
-            		this.minZ = res.z;
+            		this.minZ = res.z();
             	}
-            	if(res.z > this.maxZ)
+            	if(res.z() > this.maxZ)
             	{
-            		this.maxZ = res.z;
+            		this.maxZ = res.z();
             	}                	
             } else {
                 if (res instanceof BO4WeightedBranchFunction)
@@ -838,15 +838,15 @@ public class BO4Config extends CustomObjectConfigFile
         boolean illegalBlock = false;
         for(BO4BlockFunction block1 : tempBlocksList)
         {
-        	block1.x += this.getXOffset();
-        	block1.z += this.getZOffset();
+        	block1.x(block1.x() + this.getXOffset());
+        	block1.z(block1.z() + this.getZOffset());
 
-    		if(block1.x > 15 || block1.z > 15)
+    		if(block1.x() > 15 || block1.z() > 15)
     		{
     			illegalBlock = true;
     		}
 
-    		if(block1.x < 0 || block1.z < 0)
+    		if(block1.x() < 0 || block1.z() < 0)
     		{
     			illegalBlock = true;
     		}	    		
@@ -872,7 +872,7 @@ public class BO4Config extends CustomObjectConfigFile
         	{
         		for(int h = 0; h < tempBlocksList.size(); h++)
         		{
-        			if(tempBlocksList.get(h).x == x && tempBlocksList.get(h).z == z)
+        			if(tempBlocksList.get(h).x() == x && tempBlocksList.get(h).z() == z)
         			{
         				blocksSorted[blocksSortedIndex] = tempBlocksList.get(h);
         				blocksSortedIndex++;
@@ -884,11 +884,11 @@ public class BO4Config extends CustomObjectConfigFile
         for(int blockIndex = 0; blockIndex < blocksSorted.length; blockIndex++)
         {
         	block = blocksSorted[blockIndex];
-        	if(this.blocks[block.x][block.z] == null)
+        	if(this.blocks[block.x()][block.z()] == null)
         	{
-        		this.blocks[block.x][block.z] = new short[columnSizes[block.x][block.z]];
+        		this.blocks[block.x()][block.z()] = new short[columnSizes[block.x()][block.z()]];
         	}
-       		this.blocks[block.x][block.z][columnBlockIndex[block.x][block.z]] = (short) block.y;
+       		this.blocks[block.x()][block.z()][columnBlockIndex[block.x()][block.z()]] = (short) block.y();
         	
         	this.blocksMaterial[blockIndex] = block.material;
         	this.blocksMetaDataName[blockIndex] = block.metaDataName;
@@ -902,21 +902,21 @@ public class BO4Config extends CustomObjectConfigFile
 	            this.randomBlocksMetaDataTags[blockIndex] = ((BO4RandomBlockFunction)block).metaDataTags;
 	            this.randomBlocksBlockCount[blockIndex] = ((BO4RandomBlockFunction)block).blockCount;
         	}
-        	columnBlockIndex[block.x][block.z]++;
+        	columnBlockIndex[block.x()][block.z()]++;
         }
 
 		boolean illegalModData = false;
         for(BO4ModDataFunction modData : tempModDataList)
         {
-			modData.x += this.getXOffset();
-			modData.z += this.getZOffset();
+			modData.x(modData.x() + this.getXOffset());
+			modData.z(modData.z() + this.getZOffset());
 
-    		if(modData.x > 15 || modData.z > 15)
+    		if(modData.x() > 15 || modData.z() > 15)
     		{
     			illegalModData = true;
     		}
 
-    		if(modData.x < 0 || modData.z < 0)
+    		if(modData.x() < 0 || modData.z() < 0)
     		{
     			illegalModData = true;
     		}
@@ -926,15 +926,15 @@ public class BO4Config extends CustomObjectConfigFile
 		boolean illegalSpawnerData = false;
         for(BO4SpawnerFunction spawnerData : tempSpawnerList)
         {
-        	spawnerData.x += this.getXOffset();
-        	spawnerData.z += this.getZOffset();
+        	spawnerData.x(spawnerData.x() + this.getXOffset());
+        	spawnerData.z(spawnerData.z() + this.getZOffset());
 
-    		if(spawnerData.x > 15 || spawnerData.z > 15)
+    		if(spawnerData.x() > 15 || spawnerData.z() > 15)
     		{
     			illegalSpawnerData = true;
     		}
 
-    		if(spawnerData.x < 0 || spawnerData.z < 0)
+    		if(spawnerData.x() < 0 || spawnerData.z() < 0)
     		{
     			illegalSpawnerData = true;
     		}
@@ -944,15 +944,15 @@ public class BO4Config extends CustomObjectConfigFile
 		boolean illegalParticleData = false;
         for(BO4ParticleFunction particleData : tempParticlesList)
         {
-        	particleData.x += this.getXOffset();
-        	particleData.z += this.getZOffset();
+        	particleData.x(particleData.x() + this.getXOffset());
+        	particleData.z(particleData.z() + this.getZOffset());
 
-    		if(particleData.x > 15 || particleData.z > 15)
+    		if(particleData.x() > 15 || particleData.z() > 15)
     		{
     			illegalParticleData = true;
     		}
 
-    		if(particleData.x < 0 || particleData.z < 0)
+    		if(particleData.x() < 0 || particleData.z() < 0)
     		{
     			illegalParticleData = true;
     		}
@@ -962,15 +962,15 @@ public class BO4Config extends CustomObjectConfigFile
 		boolean illegalEntityData = false;
         for(BO4EntityFunction entityData : tempEntitiesList)
         {
-        	entityData.x += this.getXOffset();
-        	entityData.z += this.getZOffset();
+        	entityData.x(entityData.x() + this.getXOffset());
+        	entityData.z(entityData.z() + this.getZOffset());
 
-    		if(entityData.x > 15 || entityData.z > 15)
+    		if(entityData.x() > 15 || entityData.z() > 15)
     		{
     			illegalEntityData = true;
     		}
 
-    		if(entityData.x < 0 || entityData.z < 0)
+    		if(entityData.x() < 0 || entityData.z() < 0)
     		{
     			illegalEntityData = true;
     		}
@@ -1718,7 +1718,7 @@ public class BO4Config extends CustomObjectConfigFile
 			        {
 			        	if(!(blockFunction instanceof BO4RandomBlockFunction))
 			        	{
-			        		if(blockFunction.x == x && blockFunction.z == z)
+			        		if(blockFunction.x() == x && blockFunction.z() == z)
 			        		{
 			        			blocksInColumn.add(blockFunction);
 			        		}
@@ -1758,7 +1758,7 @@ public class BO4Config extends CustomObjectConfigFile
 			        {
 			        	if(blockFunction instanceof BO4RandomBlockFunction)
 			        	{
-			        		if(blockFunction.x == x && blockFunction.z == z)
+			        		if(blockFunction.x() == x && blockFunction.z() == z)
 			        		{
 			        			blocksInColumn.add(blockFunction);
 			        		}
@@ -2214,9 +2214,9 @@ public class BO4Config extends CustomObjectConfigFile
 		{
 			block = newBlocks.get(i);
 
-			this.blocks[block.x][block.z][columnBlockIndex[block.x][block.z]] = (short) block.y;
+			this.blocks[block.x()][block.z()][columnBlockIndex[block.x()][block.z()]] = (short) block.y();
 
-			int blockIndex = columnBlockIndex[block.x][block.z] + getColumnBlockIndex(columnSizes, block.x, block.z);
+			int blockIndex = columnBlockIndex[block.x()][block.z()] + getColumnBlockIndex(columnSizes, block.x(), block.z());
 
 			this.blocksMaterial[blockIndex] = block.material;
 			this.blocksMetaDataName[blockIndex] = block.metaDataName;
@@ -2230,7 +2230,7 @@ public class BO4Config extends CustomObjectConfigFile
 		        this.randomBlocksMetaDataTags[blockIndex] = ((BO4RandomBlockFunction)block).metaDataTags;
 		        this.randomBlocksBlockCount[blockIndex] = ((BO4RandomBlockFunction)block).blockCount;
 			}
-			columnBlockIndex[block.x][block.z]++;
+			columnBlockIndex[block.x()][block.z()]++;
 		}
     }
     

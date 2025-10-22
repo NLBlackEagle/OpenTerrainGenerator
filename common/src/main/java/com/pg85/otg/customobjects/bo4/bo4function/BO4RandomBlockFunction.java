@@ -38,9 +38,9 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
     public void load(List<String> args) throws InvalidConfigException
     {
         assureSize(5, args);
-        x = readInt(args.get(0), -100, 100);
-        y = (short) readInt(args.get(1), -1000, 1000);
-        z = readInt(args.get(2), -100, 100);
+        x(readInt(args.get(0), -100, 100));
+        y((short) readInt(args.get(1), -1000, 1000));
+        z(readInt(args.get(2), -100, 100));
 
         // Now read the random parts
         int i = 3;
@@ -122,11 +122,11 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
     {
     	BO4RandomBlockFunction rotatedBlock = new BO4RandomBlockFunction(this.getHolder());
 
-        BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedBO3CoordsJustified(x, y, z, rotation);
+        BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedBO3CoordsJustified(x(), y(), z(), rotation);
 
-        rotatedBlock.x = rotatedCoords.getX();
-        rotatedBlock.y = rotatedCoords.getY();
-        rotatedBlock.z = rotatedCoords.getZ();
+        rotatedBlock.x(rotatedCoords.getX());
+        rotatedBlock.y(rotatedCoords.getY());
+        rotatedBlock.z(rotatedCoords.getZ());
 
         rotatedBlock.blocks = blocks;
         
@@ -178,7 +178,7 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
     @Override
     public String makeString()
     {
-        String text = "RandomBlock(" + x + "," + y + "," + z;
+        String text = "RandomBlock(" + x() + "," + y() + "," + z();
         for (int i = 0; i < blockCount; i++)
         {
             if (metaDataTags[i] == null)
@@ -201,7 +201,7 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
     @Override
     public void writeToStream(String[] metaDataNames, LocalMaterialData[] materials, DataOutput stream) throws IOException
     {
-        stream.writeShort(this.y);
+        stream.writeShort(this.y());
         
         stream.writeByte(this.blocks.length);
         
@@ -274,9 +274,9 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
     	
     	File file = holder.getFile();
     	
-    	rbf.x = x;
-    	rbf.y = in.readShort();
-    	rbf.z = z;
+    	rbf.x(x);
+    	rbf.y(in.readShort());
+    	rbf.z(z);
 
     	byte blocksLength = in.readByte();
     	

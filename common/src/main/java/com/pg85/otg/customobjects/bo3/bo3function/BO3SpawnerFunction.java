@@ -16,9 +16,9 @@ public class BO3SpawnerFunction extends SpawnerFunction<BO3Config>
     {
         BO3SpawnerFunction spawnerFunction = new BO3SpawnerFunction();
 
-        spawnerFunction.x = in.readInt();
-        spawnerFunction.y = in.readInt();
-        spawnerFunction.z = in.readInt();
+        spawnerFunction.x(in.readInt());
+        spawnerFunction.y(in.readInt());
+        spawnerFunction.z(in.readInt());
         spawnerFunction.mobName = StreamHelper.readStringFromStream(in);
         spawnerFunction.originalnbtFileName = StreamHelper.readStringFromStream(in);
         spawnerFunction.nbtFileName = StreamHelper.readStringFromStream(in);
@@ -42,9 +42,9 @@ public class BO3SpawnerFunction extends SpawnerFunction<BO3Config>
     public BO3SpawnerFunction rotate()
     {
     	BO3SpawnerFunction rotatedBlock = new BO3SpawnerFunction();
-        rotatedBlock.x = z;
-        rotatedBlock.y = y;
-        rotatedBlock.z = -x;
+        rotatedBlock.x(z());
+        rotatedBlock.y(y());
+        rotatedBlock.z(-x());
         rotatedBlock.mobName = mobName;
 
         rotatedBlock.originalnbtFileName = originalnbtFileName;
