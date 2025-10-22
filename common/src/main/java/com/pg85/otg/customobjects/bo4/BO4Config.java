@@ -435,14 +435,14 @@ public class BO4Config extends CustomObjectConfigFile
 			    	{
 			    		if(this.randomBlocksBlocks[blockIndex] != null)
 			    		{
-			    			block = new BO4RandomBlockFunction(this);
+			    			block = new BO4RandomBlockFunction();
 			    			((BO4RandomBlockFunction)block).blocks = this.randomBlocksBlocks[blockIndex];
 			    			((BO4RandomBlockFunction)block).blockChances = this.randomBlocksBlockChances[blockIndex];
 			    			((BO4RandomBlockFunction)block).metaDataNames = this.randomBlocksMetaDataNames[blockIndex];
 			    			((BO4RandomBlockFunction)block).metaDataTags = this.randomBlocksMetaDataTags[blockIndex];
 			    			((BO4RandomBlockFunction)block).blockCount = this.randomBlocksBlockCount[blockIndex];
 			    		} else {
-			    			block = new BO4BlockFunction(this);
+			    			block = new BO4BlockFunction();
 			    		}
 			    		
 			    		block.x(x);

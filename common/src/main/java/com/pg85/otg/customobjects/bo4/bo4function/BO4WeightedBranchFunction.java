@@ -20,13 +20,6 @@ public class BO4WeightedBranchFunction extends BO4BranchFunction
 {
 	private double cumulativeChance = 0;
 	
-	public BO4WeightedBranchFunction() { }
-	
-	public BO4WeightedBranchFunction(BO4Config holder)
-	{
-		super(holder);
-	}
-	
 	@Override
     protected double readArgs(List<String> args, boolean accumulateChances) throws InvalidConfigException
     {
@@ -80,7 +73,7 @@ public class BO4WeightedBranchFunction extends BO4BranchFunction
     }
 
     @Override
-    public void load(List<String> args) throws InvalidConfigException
+    public void load(BO4Config holder, List<String> args) throws InvalidConfigException
     {
         branchesOTGPlus = new ArrayList<BO4BranchNode>();
         cumulativeChance = readArgs(args, true);
@@ -121,7 +114,7 @@ public class BO4WeightedBranchFunction extends BO4BranchFunction
 
     public BO4WeightedBranchFunction rotate(Rotation rotation)
     {
-    	BO4WeightedBranchFunction rotatedBranch = new BO4WeightedBranchFunction(this.getHolder());
+    	BO4WeightedBranchFunction rotatedBranch = new BO4WeightedBranchFunction();
 
     	rotatedBranch.x(x());
     	rotatedBranch.y(y());
@@ -134,7 +127,6 @@ public class BO4WeightedBranchFunction extends BO4BranchFunction
         rotatedBranch.isRequiredBranch = isRequiredBranch;
         rotatedBranch.cumulativeChance = cumulativeChance;
 
-        rotatedBranch.holder = holder;
         rotatedBranch.valid = valid;
         rotatedBranch.inputName = inputName;
         rotatedBranch.inputArgs = inputArgs;
@@ -185,12 +177,12 @@ public class BO4WeightedBranchFunction extends BO4BranchFunction
 
     public static BO4WeightedBranchFunction fromStream(BO4Config holder, DataInput in) throws IOException, InvalidConfigException
     {
-    	BO4WeightedBranchFunction branchFunction = new BO4WeightedBranchFunction(holder);
+    	BO4WeightedBranchFunction branchFunction = new BO4WeightedBranchFunction();
         String configFunctionString = StreamHelper.readStringFromStream(in);
         int bracketIndex = configFunctionString.indexOf('(');
         String parameters = configFunctionString.substring(bracketIndex + 1, configFunctionString.length() - 1);
         List<String> args = StringHelper.readCommaSeperatedString(parameters);
-		branchFunction.load(args);
+		branchFunction.load(holder, args);
     	return branchFunction;
     }
 }

@@ -28,7 +28,7 @@ public abstract class ModDataFunction<T extends CustomObjectConfigFile> extends 
     }
     
     @Override
-    public void load(List<String> args) throws InvalidConfigException
+    public void load(T holder, List<String> args) throws InvalidConfigException
     {
         assureSize(5, args);
         // Those limits are arbitrary, LocalWorld.setBlock will limit it

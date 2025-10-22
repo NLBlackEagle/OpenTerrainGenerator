@@ -19,14 +19,7 @@ import com.pg85.otg.util.bo3.Rotation;
  * Represents a block in a BO3.
  */
 public class BO4BlockFunction extends BlockFunction<BO4Config>
-{
-    public BO4BlockFunction() { }
-	
-    public BO4BlockFunction(BO4Config holder)
-    {
-    	this.holder = holder;
-    }
-    	
+{	
     @Override
     public void spawn(LocalWorld world, Random random, int x, int y, int z, ChunkCoordinate chunkBeingPopulated, boolean replaceBlock)
     {
@@ -35,7 +28,7 @@ public class BO4BlockFunction extends BlockFunction<BO4Config>
     
     public BO4BlockFunction rotate(Rotation rotation)
     {
-        BO4BlockFunction rotatedBlock = new BO4BlockFunction(this.getHolder());
+        BO4BlockFunction rotatedBlock = new BO4BlockFunction();
 
         rotatedBlock.material = material; // TODO: Make sure this won't cause problems
 
@@ -114,7 +107,7 @@ public class BO4BlockFunction extends BlockFunction<BO4Config>
         
     public static BO4BlockFunction fromStream(int x, int z, String[] metaDataNames, LocalMaterialData[] materials, BO4Config holder, DataInput in) throws IOException
     {
-    	BO4BlockFunction rbf = new BO4BlockFunction(holder);
+    	BO4BlockFunction rbf = new BO4BlockFunction();
     	
     	File file = holder.getFile();
     	   	

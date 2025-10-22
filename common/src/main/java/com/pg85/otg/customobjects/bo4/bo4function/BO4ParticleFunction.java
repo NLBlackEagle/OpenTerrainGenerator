@@ -15,13 +15,6 @@ import com.pg85.otg.util.helpers.StreamHelper;
  */
 public class BO4ParticleFunction extends ParticleFunction<BO4Config>
 {
-	public BO4ParticleFunction() { }	
-	
-	public BO4ParticleFunction(BO4Config holder)
-	{
-		this.holder = holder;
-	}
-	
     public static BO4ParticleFunction read(DataInput in) throws IOException
     {
         BO4ParticleFunction particleFunction = new BO4ParticleFunction();
@@ -43,7 +36,7 @@ public class BO4ParticleFunction extends ParticleFunction<BO4Config>
     
     public BO4ParticleFunction rotate(Rotation rotation)
     {
-    	BO4ParticleFunction rotatedBlock = new BO4ParticleFunction(this.getHolder());
+    	BO4ParticleFunction rotatedBlock = new BO4ParticleFunction();
 
         BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedBO3CoordsJustified(x(), y(), z(), rotation);
 
@@ -97,7 +90,7 @@ public class BO4ParticleFunction extends ParticleFunction<BO4Config>
 	@Override
 	public ParticleFunction<BO4Config> getNewInstance()
 	{
-		return new BO4ParticleFunction(this.getHolder());
+		return new BO4ParticleFunction();
 	}
 	
     public void writeToStream(DataOutput stream) throws IOException
@@ -124,7 +117,7 @@ public class BO4ParticleFunction extends ParticleFunction<BO4Config>
     
     public static BO4ParticleFunction fromStream(BO4Config holder, DataInput in) throws IOException
     {
-    	BO4ParticleFunction particleFunction = new BO4ParticleFunction(holder);
+    	BO4ParticleFunction particleFunction = new BO4ParticleFunction();
     	
     	particleFunction.x(in.readInt());
     	particleFunction.y(in.readInt());

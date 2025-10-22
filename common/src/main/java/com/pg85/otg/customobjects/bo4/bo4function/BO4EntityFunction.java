@@ -14,16 +14,9 @@ import com.pg85.otg.util.helpers.StreamHelper;
  */
 public class BO4EntityFunction extends EntityFunction<BO4Config>
 {	
-	public BO4EntityFunction() { }
-	
-	public BO4EntityFunction(BO4Config holder)
-	{
-		this.holder = holder;
-	}
-	
     public BO4EntityFunction rotate(Rotation rotation)
     {
-    	BO4EntityFunction rotatedBlock = new BO4EntityFunction(this.getHolder());
+    	BO4EntityFunction rotatedBlock = new BO4EntityFunction();
 
         BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedBO3CoordsJustified(x(), y(), z(), rotation);
 
@@ -51,7 +44,7 @@ public class BO4EntityFunction extends EntityFunction<BO4Config>
 	@Override
 	public EntityFunction<BO4Config> createNewInstance()
 	{
-		return new BO4EntityFunction(this.getHolder());
+		return new BO4EntityFunction();
 	}
 	
     public void writeToStream(DataOutput stream) throws IOException
@@ -68,7 +61,7 @@ public class BO4EntityFunction extends EntityFunction<BO4Config>
     
     public static BO4EntityFunction fromStream(BO4Config holder, DataInput in) throws IOException
     {
-    	BO4EntityFunction entityFunction = new BO4EntityFunction(holder);
+    	BO4EntityFunction entityFunction = new BO4EntityFunction();
     	   	
     	entityFunction.x(in.readInt());
     	entityFunction.y(in.readInt());
@@ -80,7 +73,7 @@ public class BO4EntityFunction extends EntityFunction<BO4Config>
     	entityFunction.originalNameTagOrNBTFileName= StreamHelper.readStringFromStream(in);
     	if (entityFunction.originalNameTagOrNBTFileName != null)
     	{
-    	    entityFunction.processNameTagOrFileName(entityFunction.originalNameTagOrNBTFileName);
+    	    entityFunction.processNameTagOrFileName(holder, entityFunction.originalNameTagOrNBTFileName);
     	}
     	entityFunction.rotation = 0;
     	

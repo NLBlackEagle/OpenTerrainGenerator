@@ -25,7 +25,7 @@ public class ModCheck extends BO3Check
     }
 
     @Override
-    protected void load(List<String> args) throws InvalidConfigException
+    protected void load(BO3Config holder, List<String> args) throws InvalidConfigException
     {
         assureSize(1, args);
         mods = new String[args.size()];

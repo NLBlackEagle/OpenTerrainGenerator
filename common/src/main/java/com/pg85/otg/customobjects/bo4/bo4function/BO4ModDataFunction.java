@@ -15,13 +15,6 @@ import com.pg85.otg.util.helpers.StreamHelper;
  */
 public class BO4ModDataFunction extends ModDataFunction<BO4Config>
 {
-	public BO4ModDataFunction() { }
-	
-	public BO4ModDataFunction(BO4Config holder)
-	{
-		this.holder = holder;
-	}
-	
     public static BO4ModDataFunction read(DataInput in) throws IOException
     {
         BO4ModDataFunction modDataFunction = new BO4ModDataFunction();
@@ -37,7 +30,7 @@ public class BO4ModDataFunction extends ModDataFunction<BO4Config>
 	
     public BO4ModDataFunction rotate(Rotation rotation)
     {
-    	BO4ModDataFunction rotatedBlock = new BO4ModDataFunction(this.getHolder());
+    	BO4ModDataFunction rotatedBlock = new BO4ModDataFunction();
 
         BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedBO3CoordsJustified(x(), y(), z(), rotation);
 
@@ -60,7 +53,7 @@ public class BO4ModDataFunction extends ModDataFunction<BO4Config>
 	@Override
 	public ModDataFunction<BO4Config> getNewInstance()
 	{
-		return new BO4ModDataFunction(this.getHolder());
+		return new BO4ModDataFunction();
 	}
 	
     public void writeToStream(DataOutput stream) throws IOException
@@ -75,7 +68,7 @@ public class BO4ModDataFunction extends ModDataFunction<BO4Config>
     
     public static BO4ModDataFunction fromStream(BO4Config holder, DataInput in) throws IOException
     {
-    	BO4ModDataFunction modDataFunction = new BO4ModDataFunction(holder);
+    	BO4ModDataFunction modDataFunction = new BO4ModDataFunction();
     	
     	modDataFunction.x(in.readInt());
     	modDataFunction.y(in.readInt());

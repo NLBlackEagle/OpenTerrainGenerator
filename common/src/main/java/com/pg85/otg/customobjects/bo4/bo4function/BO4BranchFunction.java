@@ -27,16 +27,9 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
     String branchGroup = "";
     boolean isRequiredBranch = false;
    
-    public BO4BranchFunction() { }
-    
-    public BO4BranchFunction(BO4Config holder)
-    {
-    	this.holder = holder;
-    }
-    
     public BO4BranchFunction rotate(Rotation rotation)
     {
-    	BO4BranchFunction rotatedBranch = new BO4BranchFunction(this.getHolder());
+    	BO4BranchFunction rotatedBranch = new BO4BranchFunction();
 
     	rotatedBranch.x(x());
     	rotatedBranch.y(y());
@@ -50,7 +43,6 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
 
         rotatedBranch.branchesOTGPlus = branchesOTGPlus; // TODO: Make sure this won't cause problems
 
-        rotatedBranch.holder = holder;
         rotatedBranch.valid = valid;
         rotatedBranch.inputName = inputName;
         rotatedBranch.inputArgs = inputArgs;
@@ -80,7 +72,7 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
     }
 
     @Override
-    public void load(List<String> args) throws InvalidConfigException
+    public void load(BO4Config holder, List<String> args) throws InvalidConfigException
     {
         branchesOTGPlus = new ArrayList<BO4BranchNode>();
         readArgs(args, false);
@@ -215,12 +207,12 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
     
     public static BO4BranchFunction fromStream(BO4Config holder, DataInput in) throws IOException, InvalidConfigException
     {
-    	BO4BranchFunction branchFunction = new BO4BranchFunction(holder);    	
+    	BO4BranchFunction branchFunction = new BO4BranchFunction();    	
         String configFunctionString = StreamHelper.readStringFromStream(in);
         int bracketIndex = configFunctionString.indexOf('(');
         String parameters = configFunctionString.substring(bracketIndex + 1, configFunctionString.length() - 1);
         List<String> args = StringHelper.readCommaSeperatedString(parameters);        
-		branchFunction.load(args);
+		branchFunction.load(holder, args);
     	return branchFunction;
     }
 }

@@ -239,14 +239,14 @@ public class BO3Config extends CustomObjectConfigFile
 		{
 			if (this.randomBlocksBlocks[rotation][i] != null)
 			{
-				block = new BO3RandomBlockFunction(this);
+				block = new BO3RandomBlockFunction();
 				((BO3RandomBlockFunction) block).blocks = this.randomBlocksBlocks[rotation][i];
 				((BO3RandomBlockFunction) block).blockChances = this.randomBlocksBlockChances[i];
 				((BO3RandomBlockFunction) block).metaDataNames = this.randomBlocksMetaDataNames[i];
 				((BO3RandomBlockFunction) block).metaDataTags = this.randomBlocksMetaDataTags[i];
 				((BO3RandomBlockFunction) block).blockCount = this.randomBlocksBlockCount[i];
 			} else {
-				block = new BO3BlockFunction(this);
+				block = new BO3BlockFunction();
 			}
 
 			block.x(this.blocksX[rotation][i]);
@@ -462,14 +462,14 @@ public class BO3Config extends CustomObjectConfigFile
 
 			if (this.randomBlocksBlocks[0][i] != null)
 			{
-				blockFunction = new BO3RandomBlockFunction(this);
+				blockFunction = new BO3RandomBlockFunction();
 				((BO3RandomBlockFunction) blockFunction).blocks = this.randomBlocksBlocks[0][i];
 				((BO3RandomBlockFunction) blockFunction).blockChances = this.randomBlocksBlockChances[i];
 				((BO3RandomBlockFunction) blockFunction).metaDataNames = this.randomBlocksMetaDataNames[i];
 				((BO3RandomBlockFunction) blockFunction).metaDataTags = this.randomBlocksMetaDataTags[i];
 				((BO3RandomBlockFunction) blockFunction).blockCount = this.randomBlocksBlockCount[i];
 			} else {
-				blockFunction = new BO3BlockFunction(this);
+				blockFunction = new BO3BlockFunction();
 			}
 
 			blockFunction.x(this.blocksX[0][i]);

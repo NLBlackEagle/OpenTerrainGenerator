@@ -22,7 +22,7 @@ public abstract class BlockFunction<T extends CustomObjectConfigFile> extends Cu
     public String metaDataName;
 
     @Override
-    public void load(List<String> args) throws InvalidConfigException
+    public void load(T holder, List<String> args) throws InvalidConfigException
     {
         assureSize(4, args);
         // Those limits are arbitrary, LocalWorld.setBlock will limit it
@@ -40,7 +40,7 @@ public abstract class BlockFunction<T extends CustomObjectConfigFile> extends Cu
         
         if (args.size() == 5)
         {
-            metaDataTag = BO3Loader.loadMetadata(args.get(4), getHolder().getFile());
+            metaDataTag = BO3Loader.loadMetadata(args.get(4), holder.getFile());
             if (metaDataTag != null)
             {
                 metaDataName = args.get(4);

@@ -70,7 +70,7 @@ public abstract class SpawnerFunction<T extends CustomObjectConfigFile> extends 
     }
     
     @Override
-    public void load(List<String> args) throws InvalidConfigException
+    public void load(T holder, List<String> args) throws InvalidConfigException
     {
         assureSize(8, args);
         // Those limits are arbitrary, LocalWorld.setBlock will limit it
@@ -94,7 +94,7 @@ public abstract class SpawnerFunction<T extends CustomObjectConfigFile> extends 
 
         if(originalnbtFileName != null && originalnbtFileName.toLowerCase().trim().endsWith(".txt"))
         {
-        	nbtFileName = getHolder().getFile().getParentFile().getAbsolutePath() + File.separator + originalnbtFileName;
+        	nbtFileName = holder.getFile().getParentFile().getAbsolutePath() + File.separator + originalnbtFileName;
         }
 
         if(param4isNBT)

@@ -26,7 +26,7 @@ public abstract class BranchFunction<T extends CustomObjectConfigFile> extends C
     protected boolean totalChanceSet = false;
 
     @Override
-    public void load(List<String> args) throws InvalidConfigException
+    public void load(T holder, List<String> args) throws InvalidConfigException
     {
         branches = new TreeSet<BranchNode>();
         readArgs(args, false);

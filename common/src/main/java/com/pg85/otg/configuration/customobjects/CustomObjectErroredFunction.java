@@ -28,7 +28,7 @@ public final class CustomObjectErroredFunction<T> extends CustomObjectConfigFunc
     }
 
     @Override
-    protected void load(List<String> args) throws InvalidConfigException
+    protected void load(T holder, List<String> args) throws InvalidConfigException
     {
         throw new UnsupportedOperationException();
     }

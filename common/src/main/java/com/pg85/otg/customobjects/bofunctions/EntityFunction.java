@@ -27,7 +27,7 @@ public abstract class EntityFunction<T extends CustomObjectConfigFile> extends C
     public int rotation = 0;
 
     @Override
-    public void load(List<String> args) throws InvalidConfigException
+    public void load(T holder, List<String> args) throws InvalidConfigException
     {
         assureSize(5, args);
         // Those limits are arbitrary, LocalWorld.setBlock will limit it
@@ -40,7 +40,7 @@ public abstract class EntityFunction<T extends CustomObjectConfigFile> extends C
 
         if(args.size() > 5)
         {
-            processNameTagOrFileName(args.get(5));
+            processNameTagOrFileName(holder, args.get(5));
         }
     }
 
@@ -61,16 +61,16 @@ public abstract class EntityFunction<T extends CustomObjectConfigFile> extends C
         this.name = resourceLocation.split(":")[1];
     }
 
-    public void processNameTagOrFileName(String s) {
+    public void processNameTagOrFileName(T holder, String s) {
         originalNameTagOrNBTFileName = s;
 
         if(originalNameTagOrNBTFileName != null && originalNameTagOrNBTFileName.toLowerCase().trim().endsWith(".txt"))
         {
-            nameTagOrNBTFileName = getHolder().getFile().getParentFile().getAbsolutePath() + File.separator + originalNameTagOrNBTFileName;
+            nameTagOrNBTFileName = holder.getFile().getParentFile().getAbsolutePath() + File.separator + originalNameTagOrNBTFileName;
         }
         else if(originalNameTagOrNBTFileName != null && originalNameTagOrNBTFileName.toLowerCase().trim().endsWith(".nbt"))
         {
-            nameTagOrNBTFileName = getHolder().getFile().getParentFile().getAbsolutePath() + File.separator + originalNameTagOrNBTFileName;
+            nameTagOrNBTFileName = holder.getFile().getParentFile().getAbsolutePath() + File.separator + originalNameTagOrNBTFileName;
             if (namedBinaryTag == null) {
                 // load NBT data from .nbt file
                 try {

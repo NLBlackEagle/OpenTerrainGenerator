@@ -15,13 +15,6 @@ import com.pg85.otg.util.helpers.StreamHelper;
  */
 public class BO4SpawnerFunction extends SpawnerFunction<BO4Config>
 {	
-	public BO4SpawnerFunction() { }
-	
-	public BO4SpawnerFunction(BO4Config holder)
-	{
-		this.holder = holder;
-	}
-	
     public static BO4SpawnerFunction read(DataInput in) throws IOException
     {
         BO4SpawnerFunction spawnerFunction = new BO4SpawnerFunction();
@@ -51,7 +44,7 @@ public class BO4SpawnerFunction extends SpawnerFunction<BO4Config>
 	
     public BO4SpawnerFunction rotate(Rotation rotation)
     {
-    	BO4SpawnerFunction rotatedBlock = new BO4SpawnerFunction(this.getHolder());
+    	BO4SpawnerFunction rotatedBlock = new BO4SpawnerFunction();
 
         BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedBO3CoordsJustified(x(), y(), z(), rotation);
 
@@ -116,7 +109,7 @@ public class BO4SpawnerFunction extends SpawnerFunction<BO4Config>
 	@Override
 	public SpawnerFunction<BO4Config> getNewInstance()
 	{
-		return new BO4SpawnerFunction(this.getHolder());
+		return new BO4SpawnerFunction();
 	}
 	
     public void writeToStream(DataOutput stream) throws IOException
@@ -158,7 +151,7 @@ public class BO4SpawnerFunction extends SpawnerFunction<BO4Config>
     
     public static BO4SpawnerFunction fromStream(BO4Config holder, DataInput in) throws IOException
     {
-    	BO4SpawnerFunction spawnerFunction = new BO4SpawnerFunction(holder);
+    	BO4SpawnerFunction spawnerFunction = new BO4SpawnerFunction();
     	
     	spawnerFunction.x(in.readInt());
     	spawnerFunction.y(in.readInt());

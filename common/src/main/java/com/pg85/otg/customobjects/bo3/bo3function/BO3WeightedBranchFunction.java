@@ -1,6 +1,7 @@
 package com.pg85.otg.customobjects.bo3.bo3function;
 
 import com.pg85.otg.common.LocalWorld;
+import com.pg85.otg.customobjects.bo3.BO3Config;
 import com.pg85.otg.customobjects.bofunctions.BranchNode;
 import com.pg85.otg.customobjects.structures.CustomStructureCoordinate;
 import com.pg85.otg.customobjects.structures.bo3.BO3CustomStructureCoordinate;
@@ -16,7 +17,7 @@ public class BO3WeightedBranchFunction extends BO3BranchFunction
 	private double cumulativeChance = 0;
 		
     @Override
-    public void load(List<String> args) throws InvalidConfigException
+    public void load(BO3Config holder, List<String> args) throws InvalidConfigException
     {
         branches = new TreeSet<BranchNode>();
         cumulativeChance = readArgs(args, true);

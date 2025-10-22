@@ -21,7 +21,7 @@ public class BlockCheck extends BO3Check
     }
 
     @Override
-    public void load(List<String> args) throws InvalidConfigException
+    public void load(BO3Config holder, List<String> args) throws InvalidConfigException
     {
         assureSize(4, args);
         x(readInt(args.get(0), -100, 100));

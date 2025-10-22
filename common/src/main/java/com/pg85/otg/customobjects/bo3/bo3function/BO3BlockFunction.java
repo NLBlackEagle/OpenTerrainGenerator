@@ -12,13 +12,6 @@ import com.pg85.otg.util.ChunkCoordinate;
  */
 public class BO3BlockFunction extends BlockFunction<BO3Config>
 {
-	public BO3BlockFunction() { }
-	
-    public BO3BlockFunction(BO3Config holder)
-    {
-    	this.holder = holder;
-    }
-	
     public BO3BlockFunction rotate()
     {
         BO3BlockFunction rotatedBlock = new BO3BlockFunction();

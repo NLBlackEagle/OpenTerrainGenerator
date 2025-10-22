@@ -27,8 +27,6 @@ public abstract class CustomObjectConfigFunction<T>
      */
     private int coords;
 	
-    protected T holder;
-	
     /**
      * Has a value when valid == false, otherwise null.
      */
@@ -74,10 +72,9 @@ public abstract class CustomObjectConfigFunction<T>
         {
             return null;
         }
-        configFunction.setHolder(holder);
         try
         {
-            configFunction.load(stringArgs);
+            configFunction.load(holder, stringArgs);
         } catch (InvalidConfigException e)
         {
             OTG.log(LogMarker.FATAL, "Invalid default config function! Please report! {}: {}",
@@ -119,15 +116,6 @@ public abstract class CustomObjectConfigFunction<T>
     }
 
     /**
-     * Gets the holder of this config function.
-     * @return The holder.
-     */
-    public final T getHolder()
-    {
-        return holder;
-    }
-
-    /**
      * Gets the class of the holder. The {@link #getHolder()holder of this
      * resource} will be an instance of this type. Multiple invocations of
      * this method on the same instance must always yield the same result.
@@ -147,8 +135,7 @@ public abstract class CustomObjectConfigFunction<T>
      */
     final void init(T holder, List<String> args) throws InvalidConfigException
     {
-        this.holder = holder;
-        load(args);
+        load(holder, args);
     }
 
     /**
@@ -193,7 +180,7 @@ public abstract class CustomObjectConfigFunction<T>
      * @param args The arguments to parse.
      * @throws InvalidConfigException If the syntax is invalid.
      */
-    protected abstract void load(List<String> args) throws InvalidConfigException;
+    protected abstract void load(T holder, List<String> args) throws InvalidConfigException;
 
     /**
      * Formats the material list as a string list.
@@ -273,18 +260,6 @@ public abstract class CustomObjectConfigFunction<T>
     protected final MaterialSet readMaterials(List<String> strings, int start) throws InvalidConfigException
     {
         return MaterialSet.create(strings.subList(start, strings.size()));
-    }
-
-    /**
-     * Sets the holder to the given parameter. Must only be used when manually
-     * constructing this function. The holder must of the type returned by
-     * {@link #getHolderType()}.
-     * @param holder The hoilder.
-     * @see #init(Object, List).
-     */
-    public final void setHolder(T holder)
-    {
-        this.holder = holder;
     }
 
     /**

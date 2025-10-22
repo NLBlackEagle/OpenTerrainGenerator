@@ -215,7 +215,7 @@ public class ServerTickHandler
 		    									entityFunc.processEntityName(paramString2[1]);
 		    									entityFunc.groupSize = paramString2.length > 2 ? Integer.parseInt(paramString2[2]) : 1;
 												if (paramString2.length > 5)
-													entityFunc.processNameTagOrFileName(paramString2[5]);
+													entityFunc.processNameTagOrFileName(null, paramString2[5]);
 												else
 												{
 													entityFunc.nameTagOrNBTFileName = null;

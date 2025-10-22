@@ -21,13 +21,6 @@ public class BO3RandomBlockFunction extends BO3BlockFunction
 
     public byte blockCount = 0;
 	
-    public BO3RandomBlockFunction() { }
-    
-    public BO3RandomBlockFunction(BO3Config holder)
-    {
-    	super(holder);
-    }
-    
     public BO3RandomBlockFunction rotate()
     {
         BO3RandomBlockFunction rotatedBlock = new BO3RandomBlockFunction();
@@ -48,7 +41,7 @@ public class BO3RandomBlockFunction extends BO3BlockFunction
     }
     
     @Override
-    public void load(List<String> args) throws InvalidConfigException
+    public void load(BO3Config holder, List<String> args) throws InvalidConfigException
     {
         assureSize(5, args);
         x(readInt(args.get(0), -100, 100));
@@ -110,7 +103,7 @@ public class BO3RandomBlockFunction extends BO3BlockFunction
                 // Maybe it's a NBT file?
 
                 // Get the file
-                NamedBinaryTag metaData = BO3Loader.loadMetadata(args.get(i), this.getHolder().getFile());
+                NamedBinaryTag metaData = BO3Loader.loadMetadata(args.get(i), holder.getFile());
                 if (metaData != null)
                 {
                     metaDataNames[blockCount] = args.get(i);

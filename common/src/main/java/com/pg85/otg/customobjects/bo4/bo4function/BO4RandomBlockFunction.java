@@ -27,15 +27,8 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
 
     public byte blockCount = 0;   
 
-    public BO4RandomBlockFunction() { }
-    
-    public BO4RandomBlockFunction(BO4Config holder)
-    {
-    	super(holder);
-    }
-    
     @Override
-    public void load(List<String> args) throws InvalidConfigException
+    public void load(BO4Config holder, List<String> args) throws InvalidConfigException
     {
         assureSize(5, args);
         x(readInt(args.get(0), -100, 100));
@@ -97,7 +90,7 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
                 // Maybe it's a NBT file?
 
                 // Get the file
-                NamedBinaryTag metaData = BO3Loader.loadMetadata(args.get(i), this.getHolder().getFile());
+                NamedBinaryTag metaData = BO3Loader.loadMetadata(args.get(i), holder.getFile());
                 if (metaData != null)
                 {
                     metaDataNames[blockCount] = args.get(i);
@@ -120,7 +113,7 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
     
     public BO4RandomBlockFunction rotate(Rotation rotation)
     {
-    	BO4RandomBlockFunction rotatedBlock = new BO4RandomBlockFunction(this.getHolder());
+    	BO4RandomBlockFunction rotatedBlock = new BO4RandomBlockFunction();
 
         BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedBO3CoordsJustified(x(), y(), z(), rotation);
 
@@ -270,7 +263,7 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
     
     public static BO4RandomBlockFunction fromStream(int x, int z, String[] metaDataNames, LocalMaterialData[] materials, BO4Config holder, DataInput in) throws IOException
     {    	
-    	BO4RandomBlockFunction rbf = new BO4RandomBlockFunction(holder);
+    	BO4RandomBlockFunction rbf = new BO4RandomBlockFunction();
     	
     	File file = holder.getFile();
     	
