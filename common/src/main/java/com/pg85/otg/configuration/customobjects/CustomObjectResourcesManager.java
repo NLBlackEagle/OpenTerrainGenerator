@@ -84,7 +84,7 @@ public class CustomObjectResourcesManager
 	            configFunction.init(holder, args);
 	        } catch (InvalidConfigException e)
 	        {
-	            configFunction.invalidate(name, args, e.getMessage());
+	            configFunction = new CustomObjectErroredFunction<>(name, holder, args, e.getMessage());
 	        }
 	        break;
         }

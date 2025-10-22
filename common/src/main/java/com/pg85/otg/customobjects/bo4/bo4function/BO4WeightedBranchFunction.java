@@ -127,11 +127,6 @@ public class BO4WeightedBranchFunction extends BO4BranchFunction
         rotatedBranch.isRequiredBranch = isRequiredBranch;
         rotatedBranch.cumulativeChance = cumulativeChance;
 
-        rotatedBranch.valid = valid;
-        rotatedBranch.inputName = inputName;
-        rotatedBranch.inputArgs = inputArgs;
-        rotatedBranch.error = error;
-
         rotatedBranch.branchesOTGPlus = this.branchesOTGPlus; // TODO: Make sure this won't cause problems
 
         int newX = rotatedBranch.x();

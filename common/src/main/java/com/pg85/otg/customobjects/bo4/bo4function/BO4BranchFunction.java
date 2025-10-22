@@ -43,11 +43,6 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
 
         rotatedBranch.branchesOTGPlus = branchesOTGPlus; // TODO: Make sure this won't cause problems
 
-        rotatedBranch.valid = valid;
-        rotatedBranch.inputName = inputName;
-        rotatedBranch.inputArgs = inputArgs;
-        rotatedBranch.error = error;
-
         int newX = rotatedBranch.x();
         int newZ = rotatedBranch.z();
 

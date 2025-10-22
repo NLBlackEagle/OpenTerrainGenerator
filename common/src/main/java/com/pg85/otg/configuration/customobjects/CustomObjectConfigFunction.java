@@ -28,23 +28,6 @@ public abstract class CustomObjectConfigFunction<T>
     private int coords;
 	
     /**
-     * Has a value when valid == false, otherwise null.
-     */
-    protected String error;
-
-    /**
-     * Only has a value when {@link #invalidate(String, List, String)} is
-     * called.
-     */
-    protected List<String> inputArgs;
-    /**
-     * Only has a value when {@link #invalidate(String, List, String)} is
-     * called.
-     */
-    protected String inputName;
-    protected boolean valid = true;
-	
-    /**
      * Convenience method for creating a config function. Used to create
      * the default config functions.
      *
@@ -106,13 +89,9 @@ public abstract class CustomObjectConfigFunction<T>
      * @throws IllegalStateException If the object {@link #isValid() is
      * valid}, so no error occurred.
      */
-    public final String getError() throws IllegalStateException
+    public String getError() throws IllegalStateException
     {
-        if (isValid())
-        {
-            throw new IllegalStateException("Function is valid, so no error");
-        }
-        return error;
+        throw new IllegalStateException("Function is valid, so no error");
     }
 
     /**
@@ -139,20 +118,6 @@ public abstract class CustomObjectConfigFunction<T>
     }
 
     /**
-     * Invalidates this resource.
-     * @param name  Name of this resource, for output.
-     * @param args  Arguments used in this resource, for output.
-     * @param error Error message detailing what went wrong.
-     */
-    final void invalidate(String name, List<String> args, String error)
-    {
-        valid = false;
-        this.inputName = name;
-        this.inputArgs = args;
-        this.error = error;
-    }
-
-    /**
      * Returns whether or not the two resources are similar to each other AND
      * not equal. This should return true if two resources are of the same class
      * and if critical element are the same. For example source blocks. This
@@ -168,9 +133,9 @@ public abstract class CustomObjectConfigFunction<T>
      * <p/>
      * @return Whether this ConfigFunction has a correct syntax.
      */
-    public final boolean isValid()
+    public boolean isValid()
     {
-        return valid;
+        return true;
     }
 
     /**
@@ -262,36 +227,9 @@ public abstract class CustomObjectConfigFunction<T>
         return MaterialSet.create(strings.subList(start, strings.size()));
     }
 
-    /**
-     * @deprecated Use {@link #invalidate(String, List, String)} to invalidate
-     * the object. Manually validating an object is no longer needed.
-     * Re-validating is no longer possible, just create a new instance.
-     */
-    @Deprecated
-    public final void setValid(boolean valid)
-    {
-        if (valid == false)
-        {
-            throw new UnsupportedOperationException("Use the invalidate method");
-        }
-        if (valid == true && !isValid())
-        {
-            throw new UnsupportedOperationException("Revalidating objects is no longer supported");
-        }
-        // So (valid == true && isValid()), so it's safe to do nothing
-    }
-
     public final String write()
     {
-        if (!valid)
-        {
-            // Show error message
-            return "## INVALID " + inputName.toUpperCase() + " - " + error + " ##" + System.getProperty("line.separator") + inputName + "("
-                    + StringHelper.join(inputArgs, ",") + ")";
-        } else
-        {
-            return makeString();
-        }
+        return makeString();
     }
 
     /**

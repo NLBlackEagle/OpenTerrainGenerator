@@ -10,6 +10,7 @@ public final class CustomObjectErroredFunction<T> extends CustomObjectConfigFunc
     private final Class<T> holder;
     private final String name;
     private final List<String> args;
+    private final String error;
 
     CustomObjectErroredFunction(String name, T holder, List<String> args, String error)
     {
@@ -18,7 +19,7 @@ public final class CustomObjectErroredFunction<T> extends CustomObjectConfigFunc
         this.holder = holderClass;
         this.name = name;
         this.args = args;
-        this.invalidate(name, args, error);
+        this.error = error;
     }
 
     @Override
@@ -34,9 +35,21 @@ public final class CustomObjectErroredFunction<T> extends CustomObjectConfigFunc
     }
 
     @Override
+    public boolean isValid()
+    {
+        return false;
+    }
+
+    @Override
+    public String getError()
+    {
+        return error;
+    }
+
+    @Override
     public String makeString()
     {
-        return name + "(" + StringHelper.join(args, ",") + ")";
+        return "## INVALID " + name.toUpperCase() + " - " + error + " ##" + System.getProperty("line.separator") + name + "(" + StringHelper.join(args, ",") + ")";
     }
 
     @Override
