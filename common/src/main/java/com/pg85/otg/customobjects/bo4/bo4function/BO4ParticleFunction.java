@@ -1,8 +1,8 @@
 package com.pg85.otg.customobjects.bo4.bo4function;
 
+import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import com.pg85.otg.customobjects.bo4.BO4Config;
 import com.pg85.otg.customobjects.bofunctions.ParticleFunction;
 import com.pg85.otg.customobjects.structures.bo4.BO4CustomStructureCoordinate;
@@ -102,25 +102,25 @@ public class BO4ParticleFunction extends ParticleFunction<BO4Config>
         stream.writeBoolean(this.velocityZSet);
     }
     
-    public static BO4ParticleFunction fromStream(BO4Config holder, ByteBuffer buffer) throws IOException
+    public static BO4ParticleFunction fromStream(BO4Config holder, DataInput in) throws IOException
     {
     	BO4ParticleFunction particleFunction = new BO4ParticleFunction(holder);
     	
-    	particleFunction.x = buffer.getInt();
-    	particleFunction.y = buffer.getInt();
-    	particleFunction.z = buffer.getInt();
+    	particleFunction.x = in.readInt();
+    	particleFunction.y = in.readInt();
+    	particleFunction.z = in.readInt();
     	
-    	particleFunction.firstSpawn = buffer.get() != 0;
-    	particleFunction.particleName = StreamHelper.readStringFromBuffer(buffer);
-    	particleFunction.interval = buffer.getDouble();
-    	particleFunction.intervalOffset = buffer.getDouble();
-    	particleFunction.velocityX = buffer.getDouble();
-    	particleFunction.velocityY = buffer.getDouble();
-    	particleFunction.velocityZ = buffer.getDouble();
+    	particleFunction.firstSpawn = in.readByte() != 0;
+    	particleFunction.particleName = StreamHelper.readStringFromStream(in);
+    	particleFunction.interval = in.readDouble();
+    	particleFunction.intervalOffset = in.readDouble();
+    	particleFunction.velocityX = in.readDouble();
+    	particleFunction.velocityY = in.readDouble();
+    	particleFunction.velocityZ = in.readDouble();
     	
-    	particleFunction.velocityXSet = buffer.get() != 0;
-    	particleFunction.velocityYSet = buffer.get() != 0;
-    	particleFunction.velocityZSet = buffer.get() != 0;
+    	particleFunction.velocityXSet = in.readByte() != 0;
+    	particleFunction.velocityYSet = in.readByte() != 0;
+    	particleFunction.velocityZSet = in.readByte() != 0;
     	
     	return particleFunction;
     }

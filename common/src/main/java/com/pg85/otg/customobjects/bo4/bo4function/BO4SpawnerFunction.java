@@ -1,8 +1,8 @@
 package com.pg85.otg.customobjects.bo4.bo4function;
 
+import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import com.pg85.otg.customobjects.bo4.BO4Config;
 import com.pg85.otg.customobjects.bofunctions.SpawnerFunction;
 import com.pg85.otg.customobjects.structures.bo4.BO4CustomStructureCoordinate;
@@ -128,43 +128,43 @@ public class BO4SpawnerFunction extends SpawnerFunction<BO4Config>
         stream.writeBoolean(this.metaDataProcessed);
     }
     
-    public static BO4SpawnerFunction fromStream(BO4Config holder, ByteBuffer buffer) throws IOException
+    public static BO4SpawnerFunction fromStream(BO4Config holder, DataInput in) throws IOException
     {
     	BO4SpawnerFunction spawnerFunction = new BO4SpawnerFunction(holder);
     	
-    	spawnerFunction.x = buffer.getInt();
-    	spawnerFunction.y = buffer.getInt();
-    	spawnerFunction.z = buffer.getInt();
+    	spawnerFunction.x = in.readInt();
+    	spawnerFunction.y = in.readInt();
+    	spawnerFunction.z = in.readInt();
     	
-    	spawnerFunction.firstSpawn = buffer.get() != 0;
+    	spawnerFunction.firstSpawn = in.readByte() != 0;
 
-    	spawnerFunction.mobName = StreamHelper.readStringFromBuffer(buffer);
+    	spawnerFunction.mobName = StreamHelper.readStringFromStream(in);
 
-    	spawnerFunction.nbtFileName = StreamHelper.readStringFromBuffer(buffer);
-    	spawnerFunction.originalnbtFileName = StreamHelper.readStringFromBuffer(buffer);
-    	spawnerFunction.groupSize = buffer.getInt();
+    	spawnerFunction.nbtFileName = StreamHelper.readStringFromStream(in);
+    	spawnerFunction.originalnbtFileName = StreamHelper.readStringFromStream(in);
+    	spawnerFunction.groupSize = in.readInt();
     	
-    	spawnerFunction.interval = buffer.getInt();
-    	spawnerFunction.intervalOffset = buffer.getInt();
+    	spawnerFunction.interval = in.readInt();
+    	spawnerFunction.intervalOffset = in.readInt();
     	
-    	spawnerFunction.spawnChance = buffer.getInt();
-    	spawnerFunction.maxCount = buffer.getInt();
+    	spawnerFunction.spawnChance = in.readInt();
+    	spawnerFunction.maxCount = in.readInt();
 
-    	spawnerFunction.despawnTime = buffer.getInt();
+    	spawnerFunction.despawnTime = in.readInt();
     	
-    	spawnerFunction.velocityX = buffer.getDouble();
-    	spawnerFunction.velocityY = buffer.getDouble();
-    	spawnerFunction.velocityZ = buffer.getDouble();
+    	spawnerFunction.velocityX = in.readDouble();
+    	spawnerFunction.velocityY = in.readDouble();
+    	spawnerFunction.velocityZ = in.readDouble();
     	
-    	spawnerFunction.yaw = buffer.getFloat();
-    	spawnerFunction.pitch = buffer.getFloat();
+    	spawnerFunction.yaw = in.readFloat();
+    	spawnerFunction.pitch = in.readFloat();
     	
-    	spawnerFunction.velocityXSet = buffer.get() != 0;
-    	spawnerFunction.velocityYSet = buffer.get() != 0;
-    	spawnerFunction.velocityZSet = buffer.get() != 0;
+    	spawnerFunction.velocityXSet = in.readByte() != 0;
+    	spawnerFunction.velocityYSet = in.readByte() != 0;
+    	spawnerFunction.velocityZSet = in.readByte() != 0;
     	
-    	spawnerFunction.metaDataTag = StreamHelper.readStringFromBuffer(buffer);
-    	spawnerFunction.metaDataProcessed = buffer.get() != 0;
+    	spawnerFunction.metaDataTag = StreamHelper.readStringFromStream(in);
+    	spawnerFunction.metaDataProcessed = in.readByte() != 0;
     	
     	return spawnerFunction;
     }

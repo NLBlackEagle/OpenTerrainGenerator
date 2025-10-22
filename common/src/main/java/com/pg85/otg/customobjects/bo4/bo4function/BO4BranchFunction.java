@@ -12,9 +12,9 @@ import com.pg85.otg.util.bo3.Rotation;
 import com.pg85.otg.util.helpers.StreamHelper;
 import com.pg85.otg.util.helpers.StringHelper;
 
+import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.*;
 
 /**
@@ -213,10 +213,10 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
         StreamHelper.writeStringToStream(stream, makeString());
     }
     
-    public static BO4BranchFunction fromStream(BO4Config holder, ByteBuffer buffer) throws IOException, InvalidConfigException
+    public static BO4BranchFunction fromStream(BO4Config holder, DataInput in) throws IOException, InvalidConfigException
     {
     	BO4BranchFunction branchFunction = new BO4BranchFunction(holder);    	
-        String configFunctionString = StreamHelper.readStringFromBuffer(buffer);
+        String configFunctionString = StreamHelper.readStringFromStream(in);
         int bracketIndex = configFunctionString.indexOf('(');
         String parameters = configFunctionString.substring(bracketIndex + 1, configFunctionString.length() - 1);
         List<String> args = StringHelper.readCommaSeperatedString(parameters);        

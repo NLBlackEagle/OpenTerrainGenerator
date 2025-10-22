@@ -1,9 +1,9 @@
 package com.pg85.otg.customobjects.bo4.bo4function;
 
+import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.Random;
 
 import com.pg85.otg.common.LocalMaterialData;
@@ -112,23 +112,23 @@ public class BO4BlockFunction extends BlockFunction<BO4Config>
         }
     }
         
-    public static BO4BlockFunction fromStream(int x, int z, String[] metaDataNames, LocalMaterialData[] materials, BO4Config holder, ByteBuffer buffer) throws IOException
+    public static BO4BlockFunction fromStream(int x, int z, String[] metaDataNames, LocalMaterialData[] materials, BO4Config holder, DataInput in) throws IOException
     {
     	BO4BlockFunction rbf = new BO4BlockFunction(holder);
     	
     	File file = holder.getFile();
     	   	
     	rbf.x = x;
-    	rbf.y = buffer.getShort();
+    	rbf.y = in.readShort();
     	rbf.z = z;
     	
-    	short materialId = buffer.getShort();
+    	short materialId = in.readShort();
     	if(materialId != -1)
     	{
     		rbf.material = materials[materialId];
     	}
     	
-    	short metaDataNameId = buffer.getShort();
+    	short metaDataNameId = in.readShort();
     	if(metaDataNameId != -1)
     	{
     		rbf.metaDataName = metaDataNames[metaDataNameId];

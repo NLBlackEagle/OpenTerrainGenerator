@@ -17,18 +17,21 @@ import com.pg85.otg.generator.biome.BiomeModeManager;
 import com.pg85.otg.generator.resource.Resource;
 import com.pg85.otg.logging.LogMarker;
 import com.pg85.otg.util.ChunkCoordinate;
+import com.pg85.otg.util.CompressionUtils;
 
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import org.apache.commons.lang3.StringUtils;
 
 public class OTG
 {		
@@ -366,49 +369,29 @@ public class OTG
     
     public static boolean bo4DataExists(BO4Config config)
     {
-		String filePath = 
-			config.getFile().getAbsolutePath().endsWith(".BO4") ? config.getFile().getAbsolutePath().replace(".BO4", ".BO4Data") :
-			config.getFile().getAbsolutePath().endsWith(".bo4") ? config.getFile().getAbsolutePath().replace(".bo4", ".BO4Data") :
-			config.getFile().getAbsolutePath().endsWith(".BO3") ? config.getFile().getAbsolutePath().replace(".BO3", ".BO4Data") :
-			config.getFile().getAbsolutePath().endsWith(".bo3") ? config.getFile().getAbsolutePath().replace(".bo3", ".BO4Data") :
-			config.getFile().getAbsolutePath();
-
-        File file = new File(filePath);
-        return file.exists();
+        return Files.exists(getBO4DataFile(config));
     }
     
     public static void generateBO4Data(BO4Config config)
     {
-        //write to disk
-		String filePath = 
-			config.getFile().getAbsolutePath().endsWith(".BO4") ? config.getFile().getAbsolutePath().replace(".BO4", ".BO4Data") :
-			config.getFile().getAbsolutePath().endsWith(".bo4") ? config.getFile().getAbsolutePath().replace(".bo4", ".BO4Data") :
-			config.getFile().getAbsolutePath().endsWith(".BO3") ? config.getFile().getAbsolutePath().replace(".BO3", ".BO4Data") :
-			config.getFile().getAbsolutePath().endsWith(".bo3") ? config.getFile().getAbsolutePath().replace(".bo3", ".BO4Data") :
-			config.getFile().getAbsolutePath();
-
-        File file = new File(filePath);
-        if(!file.exists())
+        try(DataOutputStream out = new DataOutputStream(new BufferedOutputStream(CompressionUtils.newDeflaterOutputStream(getBO4DataFile(config)))))
         {
-            try {
-				ByteArrayOutputStream bos = new ByteArrayOutputStream();
-				DataOutputStream dos = new DataOutputStream(bos);
-				config.writeToStream(dos);
-				byte[] compressedBytes = com.pg85.otg.util.CompressionUtils.compress(bos.toByteArray());
-				dos.close();
-				FileOutputStream fos = new FileOutputStream(file);
-				DataOutputStream dos2 = new DataOutputStream(fos);
-				dos2.write(compressedBytes, 0, compressedBytes.length);
-				dos2.close();
-            }
-            catch (FileNotFoundException e)
-            {
-                e.printStackTrace();
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
+            config.writeToStream(out);
         }
+        catch(IOException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    
+    private static Path getBO4DataFile(BO4Config config)
+    {
+        Path file = config.getFile().toPath();
+        String name = file.getFileName().toString();
+        if(StringUtils.endsWithIgnoreCase(name, ".BO4") || StringUtils.endsWithIgnoreCase(name, ".BO3"))
+        {
+            return file.resolveSibling(name.substring(0, name.length() - 4) + ".BO4Data");
+        }
+        return file;
     }
 }
