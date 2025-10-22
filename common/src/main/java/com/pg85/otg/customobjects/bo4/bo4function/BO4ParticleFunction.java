@@ -3,6 +3,7 @@ package com.pg85.otg.customobjects.bo4.bo4function;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+
 import com.pg85.otg.customobjects.bo4.BO4Config;
 import com.pg85.otg.customobjects.bofunctions.ParticleFunction;
 import com.pg85.otg.customobjects.structures.bo4.BO4CustomStructureCoordinate;
@@ -21,6 +22,25 @@ public class BO4ParticleFunction extends ParticleFunction<BO4Config>
 		this.holder = holder;
 	}
 	
+    public static BO4ParticleFunction read(DataInput in) throws IOException
+    {
+        BO4ParticleFunction particleFunction = new BO4ParticleFunction();
+
+        particleFunction.x = in.readInt();
+        particleFunction.y = in.readInt();
+        particleFunction.z = in.readInt();
+        particleFunction.particleName = StreamHelper.readStringFromStream(in);
+        particleFunction.interval = in.readDouble();
+        particleFunction.velocityX = in.readDouble();
+        particleFunction.velocityY = in.readDouble();
+        particleFunction.velocityZ = in.readDouble();
+        particleFunction.velocityXSet = in.readByte() != 0;
+        particleFunction.velocityYSet = in.readByte() != 0;
+        particleFunction.velocityZSet = in.readByte() != 0;
+
+        return particleFunction;
+    }
+    
     public BO4ParticleFunction rotate(Rotation rotation)
     {
     	BO4ParticleFunction rotatedBlock = new BO4ParticleFunction(this.getHolder());

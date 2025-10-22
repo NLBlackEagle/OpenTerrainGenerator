@@ -1,10 +1,13 @@
 package com.pg85.otg.customobjects.structures;
 
+import java.io.DataOutput;
+import java.io.IOException;
+
 import com.pg85.otg.OTG;
+import com.pg85.otg.customobjects.CustomObject;
 import com.pg85.otg.logging.LogMarker;
 import com.pg85.otg.util.bo3.Rotation;
-import com.pg85.otg.util.helpers.MathHelper;
-import com.pg85.otg.customobjects.CustomObject;
+import com.pg85.otg.util.helpers.StreamHelper;
 
 /**
  * Represents an object along with its location in the world.
@@ -21,6 +24,15 @@ public abstract class CustomStructureCoordinate
     public int z;
 	
     protected CustomStructureCoordinate() { } 
+
+    public static void write(DataOutput out, CustomStructureCoordinate structureCoordinate) throws IOException
+    {
+        StreamHelper.writeStringToStream(out, structureCoordinate.bo3Name);
+        out.writeInt(structureCoordinate.rotation.getRotationId());
+        out.writeInt(structureCoordinate.getX());
+        out.writeInt(structureCoordinate.getY());
+        out.writeInt(structureCoordinate.getZ());
+    }
             
     public int getX()
     {

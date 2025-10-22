@@ -1,9 +1,13 @@
 package com.pg85.otg.customobjects.bofunctions;
 
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.List;
+
 import com.pg85.otg.configuration.customobjects.CustomObjectConfigFile;
 import com.pg85.otg.configuration.customobjects.CustomObjectConfigFunction;
 import com.pg85.otg.exception.InvalidConfigException;
-import java.util.List;
+import com.pg85.otg.util.helpers.StreamHelper;
 
 /**
  * Represents a block in a BO3.
@@ -27,6 +31,21 @@ public abstract class ParticleFunction<T extends CustomObjectConfigFile> extends
     public boolean velocityYSet = false;
     public boolean velocityZSet = false;
 
+    public static void write(DataOutput out, ParticleFunction<?> particleFunction) throws IOException
+    {
+        out.writeInt(particleFunction.x);
+        out.writeInt(particleFunction.y);
+        out.writeInt(particleFunction.z);
+        StreamHelper.writeStringToStream(out, particleFunction.particleName.replace(":", "&#58;").replace(" ", "&nbsp;"));
+        out.writeDouble(particleFunction.interval);
+        out.writeDouble(particleFunction.velocityX);
+        out.writeDouble(particleFunction.velocityY);
+        out.writeDouble(particleFunction.velocityZ);
+        out.writeBoolean(particleFunction.velocityXSet);
+        out.writeBoolean(particleFunction.velocityYSet);
+        out.writeBoolean(particleFunction.velocityZSet);
+    }
+    
     @Override
     public void load(List<String> args) throws InvalidConfigException
     {

@@ -2,6 +2,7 @@ package com.pg85.otg.customobjects.structures.bo4;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -16,7 +17,6 @@ import com.pg85.otg.customobjects.structures.CustomStructureCache;
 import com.pg85.otg.customobjects.structures.CustomStructureFileManager;
 import com.pg85.otg.customobjects.structures.PlottedChunksRegion;
 import com.pg85.otg.customobjects.structures.StructuredCustomObject;
-import com.pg85.otg.customobjects.structures.bo4.BO4CustomStructure;
 import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.generator.resource.CustomStructureGen;
 import com.pg85.otg.logging.LogMarker;
@@ -39,8 +39,8 @@ public class CustomStructurePlotter
 	// Used to find distance between structures and structure groups, only stores 1 chunk per structure in the 
 	// calculated center of the structure. Does not clean itself when used with the pre-generator and will become 
 	// slower as it fills up, use as little as possible! (can't clean itself because max radius for BO4 groups cannot be known)	
-	private final HashMap<String, ArrayList<ChunkCoordinate>> spawnedStructuresByName;  // structure name -> start chunk coords. Saved to disk.
-	private final HashMap<String, HashMap<ChunkCoordinate, Integer>> spawnedStructuresByGroup; // group name -> Map<ChunkCoord, Radius>. Saved to disk.    
+	private final Map<String, List<ChunkCoordinate>> spawnedStructuresByName;  // structure name -> start chunk coords. Saved to disk.
+	private final Map<String, Map<ChunkCoordinate, Integer>> spawnedStructuresByGroup; // group name -> Map<ChunkCoord, Radius>. Saved to disk.    
 
 	// Locking objects to ensure plotting code can
 	// never run multiple times asynchronously, or recursively.
@@ -61,8 +61,8 @@ public class CustomStructurePlotter
         this.plottedChunksFastCache = new LRUCache<ChunkCoordinate, Object>(2048);
         
         // Persistent caches
-        this.spawnedStructuresByName = new HashMap<String, ArrayList<ChunkCoordinate>>();
-        this.spawnedStructuresByGroup = new HashMap<String, HashMap<ChunkCoordinate, Integer>>();
+        this.spawnedStructuresByName = new HashMap<>();
+        this.spawnedStructuresByGroup = new HashMap<>();
         this.bo4StructureCache = new HashMap<ChunkCoordinate, BO4CustomStructure[][]>();
         this.plottedChunks = new HashMap<ChunkCoordinate, PlottedChunksRegion>(); 
 	}
@@ -970,7 +970,7 @@ public class CustomStructurePlotter
 						                			String bO3Name = ((BO4)currentStructureSpawning[0]).getName();
 						                			ChunkCoordinate bo4SpawnCoord = ChunkCoordinate.fromChunkCoords(spawnCoordX, spawnCoordZ);
 
-						                			ArrayList<ChunkCoordinate> chunkCoords = this.spawnedStructuresByName.get(bO3Name);
+						                			List<ChunkCoordinate> chunkCoords = this.spawnedStructuresByName.get(bO3Name);
 					                				if(chunkCoords == null)
 							                		{
 							                			chunkCoords = new ArrayList<ChunkCoordinate>();
@@ -990,7 +990,7 @@ public class CustomStructurePlotter
 					                						int bo4GroupFrequency = entry.getValue().intValue();
 					                						if(bo4GroupFrequency > 0)
 					                						{
-					                							HashMap<ChunkCoordinate, Integer> spawnedStructures = this.spawnedStructuresByGroup.get(bo4GroupName);
+					                							Map<ChunkCoordinate, Integer> spawnedStructures = this.spawnedStructuresByGroup.get(bo4GroupName);
 					                							if(spawnedStructures == null)
 					                							{
 					                								spawnedStructures = new HashMap<ChunkCoordinate, Integer>();
@@ -1057,7 +1057,7 @@ public class CustomStructurePlotter
 		{
 			float distanceBetweenStructures = 0;
 			
-			ArrayList<ChunkCoordinate> chunkCoords = spawnedStructuresByName.get(bO3Name);
+			List<ChunkCoordinate> chunkCoords = spawnedStructuresByName.get(bO3Name);
 			if(chunkCoords != null)
 			{
             	// Check BO3 frequency
@@ -1082,7 +1082,7 @@ public class CustomStructurePlotter
         	ChunkCoordinate cachedChunk = null;
         	for(Entry<String, Integer> entry : BO3ToSpawn.getConfig().bo4Groups.entrySet())
         	{
-        		HashMap<ChunkCoordinate, Integer> spawnedStructure = spawnedStructuresByGroup.get(entry.getKey());
+        		Map<ChunkCoordinate, Integer> spawnedStructure = spawnedStructuresByGroup.get(entry.getKey());
         		if(spawnedStructure != null)
         		{
         			for(Entry<ChunkCoordinate, Integer> cachedChunkEntry : spawnedStructure.entrySet())
@@ -1114,8 +1114,7 @@ public class CustomStructurePlotter
 
 	public void loadPlottedChunks(LocalWorld world)
 	{
-		this.plottedChunks.clear();
-		this.plottedChunks.putAll(CustomStructureFileManager.loadPlottedChunksData(world));
+		CustomStructureFileManager.loadPlottedChunksData(world, this.plottedChunks);
 	}
 	
 	public void saveSpawnedStructures(LocalWorld world)
@@ -1137,7 +1136,7 @@ public class CustomStructurePlotter
 	    }
     }
 
-	public void loadStructureCache(LocalWorld world, Map<CustomStructure, ArrayList<ChunkCoordinate>> loadedStructures)
+	public void loadStructureCache(LocalWorld world, Map<CustomStructure, List<ChunkCoordinate>> loadedStructures)
 	{
         this.bo4StructureCache.clear();
         
@@ -1145,7 +1144,7 @@ public class CustomStructurePlotter
 		{
 			if(loadedStructures != null)
 			{
-				for(Entry<CustomStructure, ArrayList<ChunkCoordinate>> loadedStructure : loadedStructures.entrySet())
+				for(Entry<CustomStructure, List<ChunkCoordinate>> loadedStructure : loadedStructures.entrySet())
 				{
 					if(loadedStructure == null)
 					{

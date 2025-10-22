@@ -1,52 +1,73 @@
 package com.pg85.otg.customobjects.structures;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.util.Arrays;
+
+import com.pg85.otg.OTG;
+import com.pg85.otg.logging.LogMarker;
 
 public class PlottedChunksRegion
 {
-	private boolean requiresSave = false;
-	private boolean[][] plottedChunks = new boolean[CustomStructureCache.REGION_SIZE][CustomStructureCache.REGION_SIZE];
+    private boolean requiresSave = false;
+    private final boolean[] plottedChunks = new boolean[CustomStructureCache.REGION_SIZE * CustomStructureCache.REGION_SIZE];
 
-	public PlottedChunksRegion() { }
+    public boolean requiresSave()
+    {
+        return this.requiresSave;
+    }
 
-	public PlottedChunksRegion(boolean[][] plottedChunks)
-	{
-		this.plottedChunks = plottedChunks;
-	}
+    public void markSaved()
+    {
+        this.requiresSave = false;
+    }
 
-	public boolean requiresSave()
-	{
-		return this.requiresSave;
-	}
+    public boolean getChunk(int internalX, int internalZ)
+    {
+        return this.plottedChunks[internalX * CustomStructureCache.REGION_SIZE + internalZ];
+    }
 
-	public void markSaved()
-	{
-		this.requiresSave = false;
-	}
+    public void setChunk(int internalX, int internalZ)
+    {
+        if(!this.plottedChunks[internalX * CustomStructureCache.REGION_SIZE + internalZ])
+        {
+            this.plottedChunks[internalX * CustomStructureCache.REGION_SIZE + internalZ] = true;
+            this.requiresSave = true;
+        }
+    }
 
-	public boolean getChunk(int internalX, int internalZ)
-	{
-		return this.plottedChunks[internalX][internalZ];
-	}
+    public void write(DataOutput out) throws IOException
+    {
+        write(out, this);
+    }
 
-	public void setChunk(int internalX, int internalZ)
-	{
-		this.plottedChunks[internalX][internalZ] = true;
-		this.requiresSave = true;
-	}
+    public static void write(DataOutput out, PlottedChunksRegion region) throws IOException
+    {
+        out.writeInt(1); // version
+        out.writeInt(CustomStructureCache.REGION_SIZE);
+        for(boolean plotted : region.plottedChunks)
+        {
+            out.writeBoolean(plotted);
+        }
+    }
 
-	public boolean[][] getArray()
-	{
-		return this.plottedChunks;
-	}
-
-	public static PlottedChunksRegion getFilledRegion()
-	{
-		boolean[][] plottedChunks = new boolean[CustomStructureCache.REGION_SIZE][CustomStructureCache.REGION_SIZE];
-		for(int i = 0; i < CustomStructureCache.REGION_SIZE; i++)
-		{
-			Arrays.fill(plottedChunks[i], true);
-		}
-		return new PlottedChunksRegion(plottedChunks);
-	}
+    public static PlottedChunksRegion read(DataInput in) throws IOException
+    {
+        in.readInt(); // version
+        PlottedChunksRegion region = new PlottedChunksRegion();
+        if(in.readInt() != CustomStructureCache.REGION_SIZE)
+        {
+            OTG.log(LogMarker.INFO, "PlottedChunks region files were corrupted or exported with an incompatible version of OTG, ignoring.");
+            Arrays.fill(region.plottedChunks, true);
+        }
+        else
+        {
+            for(int i = 0; i < region.plottedChunks.length; i++)
+            {
+                region.plottedChunks[i] = in.readBoolean();
+            }
+        }
+        return region;
+    }
 }

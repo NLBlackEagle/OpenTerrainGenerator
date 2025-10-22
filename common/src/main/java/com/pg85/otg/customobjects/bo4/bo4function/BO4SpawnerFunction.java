@@ -3,6 +3,7 @@ package com.pg85.otg.customobjects.bo4.bo4function;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+
 import com.pg85.otg.customobjects.bo4.BO4Config;
 import com.pg85.otg.customobjects.bofunctions.SpawnerFunction;
 import com.pg85.otg.customobjects.structures.bo4.BO4CustomStructureCoordinate;
@@ -20,6 +21,33 @@ public class BO4SpawnerFunction extends SpawnerFunction<BO4Config>
 	{
 		this.holder = holder;
 	}
+	
+    public static BO4SpawnerFunction read(DataInput in) throws IOException
+    {
+        BO4SpawnerFunction spawnerFunction = new BO4SpawnerFunction();
+
+        spawnerFunction.x = in.readInt();
+        spawnerFunction.y = in.readInt();
+        spawnerFunction.z = in.readInt();
+        spawnerFunction.mobName = StreamHelper.readStringFromStream(in);
+        spawnerFunction.originalnbtFileName = StreamHelper.readStringFromStream(in);
+        spawnerFunction.nbtFileName = StreamHelper.readStringFromStream(in);
+        spawnerFunction.groupSize = in.readInt();
+        spawnerFunction.interval = in.readInt();
+        spawnerFunction.spawnChance = in.readInt();
+        spawnerFunction.maxCount = in.readInt();
+        spawnerFunction.despawnTime = in.readInt();
+        spawnerFunction.velocityX = in.readDouble();
+        spawnerFunction.velocityY = in.readDouble();
+        spawnerFunction.velocityZ = in.readDouble();
+        spawnerFunction.velocityXSet = in.readByte() != 0;
+        spawnerFunction.velocityYSet = in.readByte() != 0;
+        spawnerFunction.velocityZSet = in.readByte() != 0;
+        spawnerFunction.yaw = in.readFloat();
+        spawnerFunction.pitch = in.readFloat();
+
+        return spawnerFunction;
+    }
 	
     public BO4SpawnerFunction rotate(Rotation rotation)
     {

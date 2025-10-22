@@ -1,9 +1,14 @@
 package com.pg85.otg.customobjects.bofunctions;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.List;
+
 import com.pg85.otg.configuration.customobjects.CustomObjectConfigFile;
 import com.pg85.otg.configuration.customobjects.CustomObjectConfigFunction;
 import com.pg85.otg.exception.InvalidConfigException;
-import java.util.List;
+import com.pg85.otg.util.helpers.StreamHelper;
 
 /**
  * Represents a block in a BO3.
@@ -13,7 +18,16 @@ public abstract class ModDataFunction<T extends CustomObjectConfigFile> extends 
     public int y;
     public String modId;
     public String modData;
-
+    
+    public static void write(DataOutput out, ModDataFunction<?> modDataFunction) throws IOException
+    {
+        out.writeInt(modDataFunction.x);
+        out.writeInt(modDataFunction.y);
+        out.writeInt(modDataFunction.z);
+        StreamHelper.writeStringToStream(out, modDataFunction.modId.replace(":", "&#58;").replace(" ", "&nbsp;"));
+        StreamHelper.writeStringToStream(out, modDataFunction.modData.replace(":", "&#58;").replace(" ", "&nbsp;"));
+    }
+    
     @Override
     public void load(List<String> args) throws InvalidConfigException
     {

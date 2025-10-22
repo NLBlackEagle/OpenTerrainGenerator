@@ -3,6 +3,7 @@ package com.pg85.otg.customobjects.bo4.bo4function;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+
 import com.pg85.otg.customobjects.bo4.BO4Config;
 import com.pg85.otg.customobjects.bofunctions.ModDataFunction;
 import com.pg85.otg.customobjects.structures.bo4.BO4CustomStructureCoordinate;
@@ -20,6 +21,19 @@ public class BO4ModDataFunction extends ModDataFunction<BO4Config>
 	{
 		this.holder = holder;
 	}
+	
+    public static BO4ModDataFunction read(DataInput in) throws IOException
+    {
+        BO4ModDataFunction modDataFunction = new BO4ModDataFunction();
+
+        modDataFunction.x = in.readInt();
+        modDataFunction.y = in.readInt();
+        modDataFunction.z = in.readInt();
+        modDataFunction.modId = StreamHelper.readStringFromStream(in);
+        modDataFunction.modData = StreamHelper.readStringFromStream(in);
+
+        return modDataFunction;
+    }
 	
     public BO4ModDataFunction rotate(Rotation rotation)
     {

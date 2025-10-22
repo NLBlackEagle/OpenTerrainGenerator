@@ -1,12 +1,18 @@
 package com.pg85.otg.customobjects.structures.bo4;
 
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.IOException;
+
 import com.pg85.otg.OTG;
 import com.pg85.otg.common.LocalWorld;
-import com.pg85.otg.logging.LogMarker;
-import com.pg85.otg.util.bo3.Rotation;
 import com.pg85.otg.customobjects.CustomObject;
 import com.pg85.otg.customobjects.structures.CustomStructureCoordinate;
 import com.pg85.otg.customobjects.structures.StructuredCustomObject;
+import com.pg85.otg.logging.LogMarker;
+import com.pg85.otg.util.DataUtil.IOFunction;
+import com.pg85.otg.util.bo3.Rotation;
+import com.pg85.otg.util.helpers.StreamHelper;
 
 /**
  * Represents an object along with its location in the world.
@@ -33,7 +39,22 @@ public class BO4CustomStructureCoordinate extends CustomStructureCoordinate
         this.isWeightedBranch = isWeightedBranch;
         this.branchGroup = branchGroup;
     }
-    
+
+    public static IOFunction<DataInputStream, BO4CustomStructureCoordinate> reader(LocalWorld world) throws IOException
+    {
+        return in -> read(world, in);
+    }
+
+    public static BO4CustomStructureCoordinate read(LocalWorld world, DataInput in) throws IOException
+    {
+        String bo3Name = StreamHelper.readStringFromStream(in);
+        Rotation coordRotation = Rotation.getRotation(in.readInt());
+        int coordX = in.readInt();
+        int coordY = in.readInt();
+        int coordZ = in.readInt();
+        return new BO4CustomStructureCoordinate(world, null, bo3Name, coordRotation, coordX, (short) coordY, coordZ, 0, false, false, null);
+    }
+
     /**
      * Returns the object of this coordinate.
      *

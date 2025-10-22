@@ -1,5 +1,10 @@
 package com.pg85.otg.util;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
+import com.pg85.otg.configuration.customobjects.CustomObjectConfigFunction;
 import com.pg85.otg.customobjects.structures.CustomStructureCache;
 import com.pg85.otg.util.helpers.MathHelper;
 
@@ -139,6 +144,17 @@ public class ChunkCoordinate
         return new ChunkCoordinate(chunkX, chunkZ);
     }
     
+    public static ChunkCoordinate read(DataInput in) throws IOException
+    {
+        return new ChunkCoordinate(in.readInt(), in.readInt());
+    }
+    
+    public static void write(DataOutput out, ChunkCoordinate chunkCoordinate) throws IOException
+    {
+        out.writeInt(chunkCoordinate.chunkX);
+        out.writeInt(chunkCoordinate.chunkZ);
+    }
+    
 	public ChunkCoordinate toRegionCoord()
 	{
 		return ChunkCoordinate.fromChunkCoords(
@@ -146,6 +162,16 @@ public class ChunkCoordinate
 			MathHelper.floorDiv(chunkZ, CustomStructureCache.REGION_SIZE)
 		);
 	}
+
+    public boolean regionContainsChunk(ChunkCoordinate chunkCoordinate)
+    {
+        return chunkCoordinate.toRegionCoord().equals(this);
+    }
+
+    public boolean regionContains(CustomObjectConfigFunction<?> function)
+    {
+        return regionContainsChunk(ChunkCoordinate.fromChunkCoords(function.x, function.z));
+    }
 
 	public int getRegionInternalX()
 	{

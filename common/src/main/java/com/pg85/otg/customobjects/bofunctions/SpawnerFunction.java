@@ -1,16 +1,19 @@
 package com.pg85.otg.customobjects.bofunctions;
 
-import com.pg85.otg.OTG;
-import com.pg85.otg.configuration.customobjects.CustomObjectConfigFile;
-import com.pg85.otg.configuration.customobjects.CustomObjectConfigFunction;
-import com.pg85.otg.exception.InvalidConfigException;
-import com.pg85.otg.logging.LogMarker;
 import java.io.BufferedReader;
+import java.io.DataOutput;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+
+import com.pg85.otg.OTG;
+import com.pg85.otg.configuration.customobjects.CustomObjectConfigFile;
+import com.pg85.otg.configuration.customobjects.CustomObjectConfigFunction;
+import com.pg85.otg.exception.InvalidConfigException;
+import com.pg85.otg.logging.LogMarker;
+import com.pg85.otg.util.helpers.StreamHelper;
 
 /**
  * Represents a block in a BO3.
@@ -44,6 +47,29 @@ public abstract class SpawnerFunction<T extends CustomObjectConfigFile> extends 
 
     protected String metaDataTag;
     protected boolean metaDataProcessed = false;
+    
+    public static void write(DataOutput out, SpawnerFunction<?> spawnerFunction) throws IOException
+    {
+        out.writeInt(spawnerFunction.x);
+        out.writeInt(spawnerFunction.y);
+        out.writeInt(spawnerFunction.z);
+        StreamHelper.writeStringToStream(out, spawnerFunction.mobName.replace(":", "&#58;").replace(" ", "&nbsp;"));
+        StreamHelper.writeStringToStream(out, spawnerFunction.originalnbtFileName.replace(":", "&#58;").replace(" ", "&nbsp;"));
+        StreamHelper.writeStringToStream(out, spawnerFunction.nbtFileName.replace(":", "&#58;").replace(" ", "&nbsp;"));
+        out.writeInt(spawnerFunction.groupSize);
+        out.writeInt(spawnerFunction.interval);
+        out.writeInt(spawnerFunction.spawnChance);
+        out.writeInt(spawnerFunction.maxCount);
+        out.writeInt(spawnerFunction.despawnTime);
+        out.writeDouble(spawnerFunction.velocityX);
+        out.writeDouble(spawnerFunction.velocityY);
+        out.writeDouble(spawnerFunction.velocityZ);
+        out.writeBoolean(spawnerFunction.velocityXSet);
+        out.writeBoolean(spawnerFunction.velocityYSet);
+        out.writeBoolean(spawnerFunction.velocityZSet);
+        out.writeFloat(spawnerFunction.yaw);
+        out.writeFloat(spawnerFunction.pitch);
+    }
     
     @Override
     public void load(List<String> args) throws InvalidConfigException

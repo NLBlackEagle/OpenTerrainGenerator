@@ -19,6 +19,7 @@ import com.pg85.otg.util.helpers.RandomHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -288,7 +289,7 @@ public class CustomStructureCache
 
         this.worldInfoChunks = new HashMap<ChunkCoordinate, StructureDataRegion>();
 		
-    	Map<CustomStructure, ArrayList<ChunkCoordinate>> loadedStructures = CustomStructureFileManager.loadStructureData(this.world);
+    	Map<CustomStructure, List<ChunkCoordinate>> loadedStructures = CustomStructureFileManager.loadStructureData(this.world);
 		if(loadedStructures != null)
 		{
 	        if(this.world.isBo4Enabled())
@@ -296,7 +297,7 @@ public class CustomStructureCache
 	        	this.plotter.loadStructureCache(this.world, loadedStructures);
 	        }
 
-			for(Entry<CustomStructure, ArrayList<ChunkCoordinate>> loadedStructure : loadedStructures.entrySet())
+			for(Entry<CustomStructure, List<ChunkCoordinate>> loadedStructure : loadedStructures.entrySet())
 			{
 				if(loadedStructure == null)
 				{
