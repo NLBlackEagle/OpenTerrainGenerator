@@ -142,19 +142,19 @@ public class ChunkCoordinate
 	public ChunkCoordinate toRegionCoord()
 	{
 		return ChunkCoordinate.fromChunkCoords(
-			MathHelper.floor((double)getChunkX() / (double)CustomStructureCache.REGION_SIZE), 
-			MathHelper.floor((double)getChunkZ() / (double)CustomStructureCache.REGION_SIZE)
+			MathHelper.floorDiv(chunkX, CustomStructureCache.REGION_SIZE),
+			MathHelper.floorDiv(chunkZ, CustomStructureCache.REGION_SIZE)
 		);
 	}
 
 	public int getRegionInternalX()
 	{
-		return MathHelper.mod(getChunkX(), CustomStructureCache.REGION_SIZE);
+		return MathHelper.floorMod(chunkX, CustomStructureCache.REGION_SIZE);
 	}
 	
 	public int getRegionInternalZ()
 	{
-		return MathHelper.mod(getChunkZ(), CustomStructureCache.REGION_SIZE);
+		return MathHelper.floorMod(chunkZ, CustomStructureCache.REGION_SIZE);
 	}
 	
     @Override
@@ -168,7 +168,7 @@ public class ChunkCoordinate
      * @return The x position.
      */
     public int getBlockXCenter() {
-        return chunkX * CHUNK_SIZE + CHUNK_POPULATION_OFFSET_X;
+        return (chunkX << 4) | CHUNK_POPULATION_OFFSET_X;
     }
     
     /**
@@ -176,7 +176,7 @@ public class ChunkCoordinate
      * @return The z position.
      */
     public int getBlockZCenter() {
-        return chunkZ * CHUNK_SIZE + CHUNK_POPULATION_OFFSET_Z;
+        return (chunkZ << 4) | CHUNK_POPULATION_OFFSET_Z;
     }
 
     /**
@@ -186,7 +186,7 @@ public class ChunkCoordinate
      */
     public int getBlockX()
     {
-        return chunkX * CHUNK_SIZE;
+        return chunkX << 4;
     }
 
     /**
@@ -196,7 +196,7 @@ public class ChunkCoordinate
      */
     public int getBlockZ()
     {
-        return chunkZ * CHUNK_SIZE;
+        return chunkZ << 4;
     }
 
     /**

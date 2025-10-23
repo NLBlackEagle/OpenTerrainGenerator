@@ -64,15 +64,6 @@ public class MathHelper
         return check > max ? max : (check < min ? min : check);
     }
     
-    /*
-     * Modulus, rather than java's modulo (%)
-     * which does a remainder operation.
-     */
-    public static int mod(int x, int y)
-    {
-        return floorMod(x, y);
-    }
-    
     public static int floorDiv(int x, int y)
     {
         int i = x / y;
