@@ -1,12 +1,12 @@
 package com.pg85.otg.forge.materials;
 
 import com.pg85.otg.common.LocalMaterialData;
+import com.pg85.otg.util.bo3.Rotation;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.Rotation;
 
 class StateMaterialData extends ForgeMaterialData
 {
@@ -88,22 +88,24 @@ class StateMaterialData extends ForgeMaterialData
     }
 
     @Override
-    public StateMaterialData rotate(int rotateTimes)
+    public StateMaterialData rotate(Rotation rotation)
     {
         IBlockState newState;
-        switch(rotateTimes & 3)
+        switch(rotation)
         {
-        case 1:
-            newState = this.state.withRotation(Rotation.CLOCKWISE_90);
-            break;
-        case 2:
-            newState = this.state.withRotation(Rotation.CLOCKWISE_180);
-            break;
-        case 3:
-            newState = this.state.withRotation(Rotation.COUNTERCLOCKWISE_90);
-            break;
-        default:
-            return this;
+            case NORTH:
+                return this;
+            case WEST:
+                newState = this.state.withRotation(net.minecraft.util.Rotation.CLOCKWISE_90);
+                break;
+            case SOUTH:
+                newState = this.state.withRotation(net.minecraft.util.Rotation.CLOCKWISE_180);
+                break;
+            case EAST:
+                newState = this.state.withRotation(net.minecraft.util.Rotation.COUNTERCLOCKWISE_90);
+                break;
+            default:
+                throw new IllegalArgumentException();
         }
         if(newState == this.state)
         {

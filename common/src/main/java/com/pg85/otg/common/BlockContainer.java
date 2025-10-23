@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 import com.pg85.otg.util.bo3.NamedBinaryTag;
+import com.pg85.otg.util.bo3.Rotation;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
@@ -45,12 +46,7 @@ public abstract class BlockContainer
 
     public abstract BlockContainer withMaterial(LocalMaterialData material);
 
-    public BlockContainer rotate()
-    {
-        return rotate(1);
-    }
-
-    public abstract BlockContainer rotate(int rotation);
+    public abstract BlockContainer rotate(Rotation rotation);
 
     public static class WithoutTag extends BlockContainer
     {
@@ -93,7 +89,7 @@ public abstract class BlockContainer
         }
 
         @Override
-        public BlockContainer rotate(int rotation)
+        public BlockContainer rotate(Rotation rotation)
         {
             LocalMaterialData rotatedMaterial;
             if((rotatedMaterial = material.rotate(rotation)) == material)
@@ -147,7 +143,7 @@ public abstract class BlockContainer
         }
 
         @Override
-        public BlockContainer rotate(int rotation)
+        public BlockContainer rotate(Rotation rotation)
         {
             LocalMaterialData rotatedMaterial;
             if((rotatedMaterial = material.rotate(rotation)) == material)

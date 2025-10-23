@@ -12,6 +12,7 @@ import com.pg85.otg.OTGEngine;
 import com.pg85.otg.common.LocalMaterialData;
 import com.pg85.otg.common.LocalWorld;
 import com.pg85.otg.exception.InvalidConfigException;
+import com.pg85.otg.util.bo3.Rotation;
 import com.pg85.otg.util.helpers.StringHelper;
 import com.pg85.otg.util.minecraft.defaults.DefaultMaterial;
 
@@ -349,25 +350,35 @@ public class MaterialSet
      *
      * @return The new material set.
      */
-    public MaterialSet rotate()
+    public MaterialSet rotate(Rotation rotation)
     {
-        MaterialSet rotatedSet = new MaterialSet();
-        rotatedSet.mode = this.mode;
-        boolean rotatedEqualsThis = true;
-        for(LocalMaterialData material : this.materials)
+        switch(rotation)
         {
-            LocalMaterialData rotatedMaterial = material.rotate();
-            rotatedSet.materials.add(rotatedMaterial);
-            if(rotatedMaterial != material)
-            {
-                rotatedEqualsThis = false;
-            }
+            case NORTH:
+                return this;
+            case WEST:
+            case SOUTH:
+            case EAST:
+                MaterialSet rotatedSet = new MaterialSet();
+                rotatedSet.mode = this.mode;
+                boolean rotatedEqualsThis = true;
+                for(LocalMaterialData material : this.materials)
+                {
+                    LocalMaterialData rotatedMaterial = material.rotate(rotation);
+                    rotatedSet.materials.add(rotatedMaterial);
+                    if(rotatedMaterial != material)
+                    {
+                        rotatedEqualsThis = true;
+                    }
+                }
+                if(rotatedEqualsThis)
+                {
+                    return this;
+                }
+                rotatedSet.recomputeMap();
+                return rotatedSet;
+            default:
+                throw new IllegalArgumentException();
         }
-        if(rotatedEqualsThis)
-        {
-            return this;
-        }
-        rotatedSet.recomputeMap();
-        return rotatedSet;
     }
 }

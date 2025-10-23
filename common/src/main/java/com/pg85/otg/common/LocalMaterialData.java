@@ -4,6 +4,7 @@ import java.nio.file.Path;
 
 import com.pg85.otg.OTGEngine;
 import com.pg85.otg.configuration.biome.BiomeConfig;
+import com.pg85.otg.util.bo3.Rotation;
 import com.pg85.otg.util.minecraft.defaults.DefaultMaterial;
 
 /**
@@ -177,19 +178,7 @@ public abstract class LocalMaterialData
      * 
      * @return The rotated material.
      */
-    public LocalMaterialData rotate()
-    {
-        return rotate(1);
-    }
-
-    /**
-     * Gets a new material that is rotated 90 degrees. North -> west -> south ->
-     * east. If this material cannot be rotated, the material itself is
-     * returned.
-     * 
-     * @return The rotated material.
-     */
-    public abstract LocalMaterialData rotate(int rotateTimes);
+    public abstract LocalMaterialData rotate(Rotation rotation);
 
     /**
      * Gets whether this material can be used as an anchor point for a smooth area

@@ -114,7 +114,7 @@ public class BO3 implements StructuredCustomObject
     @Override
     public boolean spawnFromSapling(LocalWorld world, Random random, Rotation rotation, int x, int y, int z)
     {
-        BO3BlockFunction[] blocks = this.settings.getBlocks(rotation.getRotationId());
+        BO3BlockFunction[] blocks = this.settings.getBlocks(rotation);
 
         ArrayList<BO3BlockFunction> blocksToSpawn = new ArrayList<BO3BlockFunction>();
 
@@ -166,7 +166,7 @@ public class BO3 implements StructuredCustomObject
     @Override
     public boolean spawnForced(LocalWorld world, Random random, Rotation rotation, int x, int y, int z)
     {
-        BO3BlockFunction[] blocks = this.settings.getBlocks(rotation.getRotationId());
+        BO3BlockFunction[] blocks = this.settings.getBlocks(rotation);
         ObjectExtrusionHelper oeh = new ObjectExtrusionHelper(this.settings.extrudeMode, this.settings.extrudeThroughBlocks);
         HashSet<ChunkCoordinate> chunks = new HashSet<ChunkCoordinate>();
 
@@ -283,7 +283,7 @@ public class BO3 implements StructuredCustomObject
             }
     	}
 
-        BO3BlockFunction[] blocks = this.settings.getBlocks(rotation.getRotationId());
+        BO3BlockFunction[] blocks = this.settings.getBlocks(rotation);
         HashSet<ChunkCoordinate> loadedChunks = new HashSet<ChunkCoordinate>();
         ChunkCoordinate chunkCoord;
         for (BO3BlockFunction block : blocks)

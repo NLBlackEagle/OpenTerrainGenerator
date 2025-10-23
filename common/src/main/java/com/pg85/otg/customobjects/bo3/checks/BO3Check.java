@@ -5,6 +5,7 @@ import com.pg85.otg.configuration.ConfigFunction;
 import com.pg85.otg.configuration.customobjects.CustomObjectConfigFunction;
 import com.pg85.otg.customobjects.bo3.BO3Config;
 import com.pg85.otg.util.ChunkCoordinate;
+import com.pg85.otg.util.bo3.Rotation;
 
 /**
  * Represents a check - something that can prevent the BO3 from spawning if this
@@ -41,5 +42,5 @@ public abstract class BO3Check extends CustomObjectConfigFunction<BO3Config>
         return check.x() == x() && check.y() == y() && check.z() == z();
     }
 
-    public abstract BO3Check rotate();
+    public abstract BO3Check rotate(Rotation rotation);
 }

@@ -112,7 +112,7 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
         rotatedBlock.blockContainers = new BlockContainer[blockCount];
         for(int i = 0; i < blockCount; i++)
         {
-            rotatedBlock.blockContainers[i] = blockContainers[i].rotate(4 - rotation.getRotationId());
+            rotatedBlock.blockContainers[i] = blockContainers[i].rotate(rotation);
         }
         rotatedBlock.blockCount = blockCount;
         rotatedBlock.blockChances = blockChances;

@@ -17,12 +17,34 @@ import java.util.*;
  */
 public class BO3BranchFunction extends BranchFunction<BO3Config>
 {	
-    public BO3BranchFunction rotate()
+    public BO3BranchFunction rotate(Rotation rotation)
     {
+        int rotatedX;
+        int rotatedZ;
+        switch(rotation)
+        {
+            case NORTH:
+                return this;
+            case WEST:
+                rotatedX = z();
+                rotatedZ = -x();
+                break;
+            case SOUTH:
+                rotatedX = -x();
+                rotatedZ = -z();
+                break;
+            case EAST:
+                rotatedX = -z();
+                rotatedZ = x();
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
+
         BO3BranchFunction rotatedBranch = new BO3BranchFunction();
-        rotatedBranch.x(z());
+        rotatedBranch.x(rotatedX);
         rotatedBranch.y(y());
-        rotatedBranch.z(-x());
+        rotatedBranch.z(rotatedZ);
         rotatedBranch.branches = new TreeSet<BranchNode>();
         rotatedBranch.totalChance = totalChance;
         rotatedBranch.totalChanceSet = totalChanceSet;

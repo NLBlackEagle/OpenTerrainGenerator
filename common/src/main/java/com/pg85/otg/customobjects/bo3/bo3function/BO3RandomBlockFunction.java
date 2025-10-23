@@ -9,6 +9,7 @@ import com.pg85.otg.common.LocalWorld;
 import com.pg85.otg.customobjects.bo3.BO3Config;
 import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.util.ChunkCoordinate;
+import com.pg85.otg.util.bo3.Rotation;
 import com.pg85.otg.util.materials.MaterialHelper;
 
 public class BO3RandomBlockFunction extends BO3BlockFunction
@@ -18,23 +19,23 @@ public class BO3RandomBlockFunction extends BO3BlockFunction
 
     public byte blockCount = 0;
 	
-    public BO3RandomBlockFunction rotate(int rotation)
+    public BO3RandomBlockFunction rotate(Rotation rotation)
     {
         int rotatedX;
         int rotatedZ;
         switch(rotation)
         {
-            case 0:
+            case NORTH:
                 return this;
-            case 1:
+            case WEST:
                 rotatedX = z();
                 rotatedZ = -x();
                 break;
-            case 2:
+            case SOUTH:
                 rotatedX = -x();
                 rotatedZ = -z();
                 break;
-            case 3:
+            case EAST:
                 rotatedX = -z();
                 rotatedZ = x();
                 break;

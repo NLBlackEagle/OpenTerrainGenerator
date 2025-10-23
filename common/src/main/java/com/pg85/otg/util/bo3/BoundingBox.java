@@ -67,15 +67,45 @@ public final class BoundingBox implements Cloneable
      * Gets a new bounding box that is rotated 90 degrees to the original. The original bounding box will not be modified.
      * @return A new, rotated bounding box.
      */
-    public BoundingBox rotate()
+    public BoundingBox rotate(Rotation rotation)
     {
+        int rotatedMinX;
+        int rotatedMinZ;
+        int rotatedMaxX;
+        int rotatedMaxZ;
+        switch(rotation)
+        {
+            case NORTH:
+                return this;
+            case WEST:
+                rotatedMinX = minZ;
+                rotatedMinZ = -minX;
+                rotatedMaxX = maxZ;
+                rotatedMaxZ = -maxX;
+                break;
+            case SOUTH:
+                rotatedMinX = -minX;
+                rotatedMinZ = -minZ;
+                rotatedMaxX = -maxX;
+                rotatedMaxZ = -maxZ;
+                break;
+            case EAST:
+                rotatedMinX = -minZ;
+                rotatedMinZ = minX;
+                rotatedMaxX = -maxZ;
+                rotatedMaxZ = maxX;
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
+
         BoundingBox cloned = new BoundingBox();
-        cloned.minX = minZ;
+        cloned.minX = rotatedMinX;
         cloned.minY = minY;
-        cloned.minZ = -minX;
-        cloned.maxX = maxZ;
+        cloned.minZ = rotatedMinZ;
+        cloned.maxX = rotatedMaxX;
         cloned.maxY = maxY;
-        cloned.maxZ = -maxX;
+        cloned.maxZ = rotatedMaxZ;
         return cloned;
     }
 

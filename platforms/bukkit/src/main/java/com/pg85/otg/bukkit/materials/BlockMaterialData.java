@@ -1,6 +1,7 @@
 package com.pg85.otg.bukkit.materials;
 
 import com.pg85.otg.common.LocalMaterialData;
+import com.pg85.otg.util.bo3.Rotation;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
@@ -77,7 +78,7 @@ class BlockMaterialData extends BukkitMaterialData
     }
 
     @Override
-    public BlockMaterialData rotate(int rotateTimes)
+    public BlockMaterialData rotate(Rotation rotation)
     {
         return this;
     }

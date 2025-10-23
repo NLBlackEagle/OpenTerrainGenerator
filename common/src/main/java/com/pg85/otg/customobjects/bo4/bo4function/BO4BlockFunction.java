@@ -32,7 +32,7 @@ public class BO4BlockFunction extends BlockFunction<BO4Config>
         rotatedBlock.x(rotatedCoords.getX());
         rotatedBlock.y(rotatedCoords.getY());
         rotatedBlock.z(rotatedCoords.getZ());
-        rotatedBlock.blockContainer = blockContainer.rotate(4 - rotation.getRotationId());
+        rotatedBlock.blockContainer = blockContainer.rotate(rotation);
         return rotatedBlock;
     }
     

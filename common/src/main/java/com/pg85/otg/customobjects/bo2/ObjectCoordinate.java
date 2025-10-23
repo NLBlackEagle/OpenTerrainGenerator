@@ -2,6 +2,7 @@ package com.pg85.otg.customobjects.bo2;
 
 import com.pg85.otg.common.LocalMaterialData;
 import com.pg85.otg.exception.InvalidConfigException;
+import com.pg85.otg.util.bo3.Rotation;
 import com.pg85.otg.util.materials.MaterialHelper;
 
 class ObjectCoordinate
@@ -42,17 +43,37 @@ class ObjectCoordinate
         return hash;
     }
 
-    ObjectCoordinate rotate()
+    ObjectCoordinate rotate(Rotation rotation)
     {
-        ObjectCoordinate newCoordinate = new ObjectCoordinate(this.z, this.y, (this.x * -1));
-        newCoordinate.material = this.material.rotate();
+        int rotatedX;
+        int rotatedZ;
+        switch(rotation)
+        {
+            case NORTH:
+                return this;
+            case WEST:
+                rotatedX = z;
+                rotatedZ = -x;
+                break;
+            case SOUTH:
+                rotatedX = -x;
+                rotatedZ = -z;
+                break;
+            case EAST:
+                rotatedX = -z;
+                rotatedZ = x;
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
+
+        ObjectCoordinate newCoordinate = new ObjectCoordinate(rotatedX, this.y, rotatedZ);
+        newCoordinate.material = this.material.rotate(rotation);
         newCoordinate.branchOdds = this.branchOdds;
 
         if (this.branchDirection != -1)
         {
-            newCoordinate.branchDirection = this.branchDirection + 1;
-            if (newCoordinate.branchDirection > 3)
-                newCoordinate.branchDirection = 0;
+            newCoordinate.branchDirection = (this.branchDirection + rotation.ordinal()) % 4;
         }
 
         return newCoordinate;

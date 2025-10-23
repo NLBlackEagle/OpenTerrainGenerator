@@ -2,6 +2,7 @@ package com.pg85.otg.bukkit.materials;
 
 import com.pg85.otg.common.LocalMaterialData;
 import com.pg85.otg.common.LocalWorld;
+import com.pg85.otg.util.bo3.Rotation;
 import com.pg85.otg.util.minecraft.defaults.DefaultMaterial;
 
 import it.unimi.dsi.fastutil.objects.Object2ReferenceMap;
@@ -98,7 +99,7 @@ class UnknownMaterialData extends BukkitMaterialData
     }
 
     @Override
-    public LocalMaterialData rotate(int rotateTimes)
+    public LocalMaterialData rotate(Rotation rotation)
     {
         return this;
     }

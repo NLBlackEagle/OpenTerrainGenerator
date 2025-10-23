@@ -26,6 +26,7 @@ import com.pg85.otg.customobjects.bo3.checks.ModCheck;
 import com.pg85.otg.customobjects.bo3.checks.ModCheckNot;
 import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.util.bo3.BoundingBox;
+import com.pg85.otg.util.bo3.Rotation;
 import com.pg85.otg.util.materials.MaterialSet;
 import com.pg85.otg.util.minecraft.defaults.DefaultStructurePart;
 
@@ -176,15 +177,15 @@ public class BO3Config extends CustomObjectConfigFile
 		return this.reader.getFile();
 	}
 
-    public BO3BlockFunction[] getBlocks(int rotation)
+    public BO3BlockFunction[] getBlocks(Rotation rotation)
     {
-        switch(rotation %= 4)
+        switch(rotation)
         {
-            case 0:
+            case NORTH:
                 return this.blocks;
-            case 1:
-            case 2:
-            case 3:
+            case WEST:
+            case SOUTH:
+            case EAST:
                 // TODO cache this
                 BO3BlockFunction[] rotatedBlocks = new BO3BlockFunction[this.blocks.length];
                 for(int i = 0; i < this.blocks.length; i++)
@@ -618,39 +619,39 @@ public class BO3Config extends CustomObjectConfigFile
 			this.bo3Checks[i] = new BO3Check[this.bo3Checks[i - 1].length];
 			for (int j = 0; j < this.bo3Checks[i].length; j++) 
 			{
-				this.bo3Checks[i][j] = this.bo3Checks[i - 1][j].rotate();
+				this.bo3Checks[i][j] = this.bo3Checks[i - 1][j].rotate(Rotation.WEST);
 			}
 			// Branches
 			this.branches[i] = new BO3BranchFunction[this.branches[i - 1].length];
 			for (int j = 0; j < this.branches[i].length; j++)
 			{
-				this.branches[i][j] = this.branches[i - 1][j].rotate();
+				this.branches[i][j] = this.branches[i - 1][j].rotate(Rotation.WEST);
 			}
 			// Bounding box
-			this.boundingBoxes[i] = this.boundingBoxes[i - 1].rotate();
+			this.boundingBoxes[i] = this.boundingBoxes[i - 1].rotate(Rotation.WEST);
 
 			this.entityFunctions[i] = new BO3EntityFunction[this.entityFunctions[i - 1].length];
 			for (int j = 0; j < this.entityFunctions[i].length; j++)
 			{
-				this.entityFunctions[i][j] = this.entityFunctions[i - 1][j].rotate();
+				this.entityFunctions[i][j] = this.entityFunctions[i - 1][j].rotate(Rotation.WEST);
 			}
 
 			this.particleFunctions[i] = new BO3ParticleFunction[this.particleFunctions[i - 1].length];
 			for (int j = 0; j < this.particleFunctions[i].length; j++)
 			{
-				this.particleFunctions[i][j] = this.particleFunctions[i - 1][j].rotate();
+				this.particleFunctions[i][j] = this.particleFunctions[i - 1][j].rotate(Rotation.WEST);
 			}
 
 			this.spawnerFunctions[i] = new BO3SpawnerFunction[this.spawnerFunctions[i - 1].length];
 			for (int j = 0; j < this.spawnerFunctions[i].length; j++)
 			{
-				this.spawnerFunctions[i][j] = this.spawnerFunctions[i - 1][j].rotate();
+				this.spawnerFunctions[i][j] = this.spawnerFunctions[i - 1][j].rotate(Rotation.WEST);
 			}
 
 			this.modDataFunctions[i] = new BO3ModDataFunction[this.modDataFunctions[i - 1].length];
 			for (int j = 0; j < this.modDataFunctions[i].length; j++)
 			{
-				this.modDataFunctions[i][j] = this.modDataFunctions[i - 1][j].rotate();
+				this.modDataFunctions[i][j] = this.modDataFunctions[i - 1][j].rotate(Rotation.WEST);
 			}
 		}
 	}

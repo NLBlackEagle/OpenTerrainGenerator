@@ -5,6 +5,7 @@ import com.pg85.otg.configuration.standard.PluginStandardValues;
 import com.pg85.otg.customobjects.bo3.BO3Config;
 import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.util.ChunkCoordinate;
+import com.pg85.otg.util.bo3.Rotation;
 import com.pg85.otg.util.materials.MaterialSet;
 
 import java.util.List;
@@ -48,13 +49,34 @@ public class BlockCheck extends BO3Check
     }
 
     @Override
-    public BO3Check rotate()
+    public BO3Check rotate(Rotation rotation)
     {
+        int rotatedX;
+        int rotatedZ;
+        switch(rotation)
+        {
+            case NORTH:
+                return this;
+            case WEST:
+                rotatedX = z();
+                rotatedZ = -x();
+                break;
+            case SOUTH:
+                rotatedX = -x();
+                rotatedZ = -z();
+                break;
+            case EAST:
+                rotatedX = -z();
+                rotatedZ = x();
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
         BlockCheck rotatedCheck = new BlockCheck();
-        rotatedCheck.x(z());
+        rotatedCheck.x(rotatedX);
         rotatedCheck.y(y());
-        rotatedCheck.z(-x());
-        rotatedCheck.toCheck = this.toCheck.rotate();
+        rotatedCheck.z(rotatedZ);
+        rotatedCheck.toCheck = this.toCheck.rotate(rotation);
         return rotatedCheck;
     }
     

@@ -6,29 +6,30 @@ import com.pg85.otg.common.LocalWorld;
 import com.pg85.otg.customobjects.bo3.BO3Config;
 import com.pg85.otg.customobjects.bofunctions.BlockFunction;
 import com.pg85.otg.util.ChunkCoordinate;
+import com.pg85.otg.util.bo3.Rotation;
 
 /**
  * Represents a block in a BO3.
  */
 public class BO3BlockFunction extends BlockFunction<BO3Config>
 {
-    public BO3BlockFunction rotate(int rotation)
+    public BO3BlockFunction rotate(Rotation rotation)
     {
         int rotatedX;
         int rotatedZ;
         switch(rotation)
         {
-            case 0:
+            case NORTH:
                 return this;
-            case 1:
+            case WEST:
                 rotatedX = z();
                 rotatedZ = -x();
                 break;
-            case 2:
+            case SOUTH:
                 rotatedX = -x();
                 rotatedZ = -z();
                 break;
-            case 3:
+            case EAST:
                 rotatedX = -z();
                 rotatedZ = x();
                 break;

@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import com.pg85.otg.customobjects.bo3.BO3Config;
 import com.pg85.otg.customobjects.bofunctions.ModDataFunction;
+import com.pg85.otg.util.bo3.Rotation;
 import com.pg85.otg.util.helpers.StreamHelper;
 
 /**
@@ -25,12 +26,34 @@ public class BO3ModDataFunction extends ModDataFunction<BO3Config>
         return modDataFunction;
     }
     
-    public BO3ModDataFunction rotate()
+    public BO3ModDataFunction rotate(Rotation rotation)
     {
+        int rotatedX;
+        int rotatedZ;
+        switch(rotation)
+        {
+            case NORTH:
+                return this;
+            case WEST:
+                rotatedX = z();
+                rotatedZ = -x();
+                break;
+            case SOUTH:
+                rotatedX = -x();
+                rotatedZ = -z();
+                break;
+            case EAST:
+                rotatedX = -z();
+                rotatedZ = x();
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
+
         BO3ModDataFunction rotatedBlock = new BO3ModDataFunction();
-        rotatedBlock.x(z());
+        rotatedBlock.x(rotatedX);
         rotatedBlock.y(y());
-        rotatedBlock.z(-x());
+        rotatedBlock.z(rotatedZ);
         rotatedBlock.modId = modId;
         rotatedBlock.modData = modData;
 

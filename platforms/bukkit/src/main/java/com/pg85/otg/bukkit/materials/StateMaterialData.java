@@ -1,6 +1,7 @@
 package com.pg85.otg.bukkit.materials;
 
 import com.pg85.otg.common.LocalMaterialData;
+import com.pg85.otg.util.bo3.Rotation;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
@@ -88,22 +89,24 @@ class StateMaterialData extends BukkitMaterialData
     }
 
     @Override
-    public StateMaterialData rotate(int rotateTimes)
+    public StateMaterialData rotate(Rotation rotation)
     {
         IBlockData newState;
-        switch(rotateTimes & 3)
+        switch(rotation)
         {
-        case 1:
-            newState = this.state.a(EnumBlockRotation.CLOCKWISE_90);
-            break;
-        case 2:
-            newState = this.state.a(EnumBlockRotation.CLOCKWISE_180);
-            break;
-        case 3:
-            newState = this.state.a(EnumBlockRotation.COUNTERCLOCKWISE_90);
-            break;
-        default:
-            return this;
+            case NORTH:
+                return this;
+            case WEST:
+                newState = this.state.a(EnumBlockRotation.CLOCKWISE_90);
+                break;
+            case SOUTH:
+                newState = this.state.a(EnumBlockRotation.CLOCKWISE_180);
+                break;
+            case EAST:
+                newState = this.state.a(EnumBlockRotation.COUNTERCLOCKWISE_90);
+                break;
+            default:
+                throw new IllegalArgumentException();
         }
         if(newState == this.state)
         {

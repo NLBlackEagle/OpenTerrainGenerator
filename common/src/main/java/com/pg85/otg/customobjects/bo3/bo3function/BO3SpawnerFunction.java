@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import com.pg85.otg.customobjects.bo3.BO3Config;
 import com.pg85.otg.customobjects.bofunctions.SpawnerFunction;
+import com.pg85.otg.util.bo3.Rotation;
 import com.pg85.otg.util.helpers.StreamHelper;
 
 /**
@@ -39,12 +40,34 @@ public class BO3SpawnerFunction extends SpawnerFunction<BO3Config>
         return spawnerFunction;
     }
     
-    public BO3SpawnerFunction rotate()
+    public BO3SpawnerFunction rotate(Rotation rotation)
     {
+        int rotatedX;
+        int rotatedZ;
+        switch(rotation)
+        {
+            case NORTH:
+                return this;
+            case WEST:
+                rotatedX = z();
+                rotatedZ = -x();
+                break;
+            case SOUTH:
+                rotatedX = -x();
+                rotatedZ = -z();
+                break;
+            case EAST:
+                rotatedX = -z();
+                rotatedZ = x();
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
+
     	BO3SpawnerFunction rotatedBlock = new BO3SpawnerFunction();
-        rotatedBlock.x(z());
+        rotatedBlock.x(rotatedX);
         rotatedBlock.y(y());
-        rotatedBlock.z(-x());
+        rotatedBlock.z(rotatedZ);
         rotatedBlock.mobName = mobName;
 
         rotatedBlock.originalnbtFileName = originalnbtFileName;
