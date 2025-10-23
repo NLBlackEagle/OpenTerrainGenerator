@@ -272,17 +272,17 @@ public class MaterialSet
         Stream<String> prefix;
         switch(this.mode)
         {
-        case ALL:
-            return SOLID_MATERIALS;
-        case SOLID:
-            prefix = Stream.of(SOLID_MATERIALS);
-            break;
-        case NON_SOLID:
-            prefix = Stream.of(NON_SOLID_MATERIALS);
-            break;
-        default:
-            prefix = Stream.empty();
-            break;
+            case ALL:
+                return SOLID_MATERIALS;
+            case SOLID:
+                prefix = Stream.of(SOLID_MATERIALS);
+                break;
+            case NON_SOLID:
+                prefix = Stream.of(NON_SOLID_MATERIALS);
+                break;
+            default:
+                prefix = Stream.empty();
+                break;
         }
         return Stream.concat(prefix, this.materials.stream().map(Object::toString)).collect(Collectors.joining(","));
     }
