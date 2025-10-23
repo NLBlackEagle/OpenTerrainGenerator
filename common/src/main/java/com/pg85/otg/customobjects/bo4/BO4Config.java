@@ -149,16 +149,7 @@ public class BO4Config extends CustomObjectConfigFile
 
     private String worldName;
 
-    // Store blocks in arrays instead of as BO4BlockFunctions,
-    // since that gives way too much overhead memory wise.
-    // We may have tens of millions of blocks, java doesn't handle lots of small classes well.
-    private short[][][]blocks;
-    private BlockContainer[]blocksMaterial;
-
-    private BlockContainer[][] randomBlocksBlocks;
-    private byte[][] randomBlocksBlockChances;
-    private byte[] randomBlocksBlockCount;    
-    //
+    private BO4BlockFunction[] blocks;
     
     private BO4BranchFunction[] branchesOTGPlus;
     private BO4ModDataFunction[] modDataOTGPlus;
@@ -306,80 +297,31 @@ public class BO4Config extends CustomObjectConfigFile
     		
     		this.heightMap = new BO4BlockFunction[16][16];
 
-	        // make heightmap containing the highest or lowest blocks in this chunk
-    		int blockIndex = 0;
-    		BlockContainer material;
-    		boolean isSmoothAreaAnchor;
-    		boolean isRandomBlock;
-    		int y;
-	    	for(int x = 0; x < xSize; x++)
-	    	{
-	    		for(int z = 0; z < zSize; z++)
-	    		{
-	    			if(blocks[x][z] != null)
-	    			{
-	    				for(int i = 0; i < blocks[x][z].length; i++)
-	    				{
-	    					isSmoothAreaAnchor = false;
-	    					isRandomBlock = this.randomBlocksBlocks[blockIndex] != null;
-	    					y = blocks[x][z][i];
-	    					
-				    		if(isRandomBlock)
-				    		{
-	        					for(BlockContainer randomBlockContainer : this.randomBlocksBlocks[blockIndex])
-		            			{
-	        						LocalMaterialData randomMaterial = randomBlockContainer.material();
-	        						// TODO: Material should never be null, fix the code in RandomBlockFunction.load() that causes this.
-	        						if(randomMaterial == null)
-	        						{
-	        							continue;
-	        						}
-	        						if(randomMaterial.isSmoothAreaAnchor(start.getConfig().overrideChildSettings && this.overrideChildSettings ? start.getConfig().smoothStartWood : this.smoothStartWood, start.getConfig().spawnUnderWater))
-	        						{
-	        							isSmoothAreaAnchor = true;
-	        							break;
-	        						}
-		            			}
-				    		}
-
-				    		material = this.blocksMaterial[blockIndex];
-	            			if(
-	            					isSmoothAreaAnchor ||
-	        						(
-	    								!isRandomBlock &&
-	    								material.material().isSmoothAreaAnchor(start.getConfig().overrideChildSettings && this.overrideChildSettings ? start.getConfig().smoothStartWood : this.smoothStartWood, start.getConfig().spawnUnderWater)
-	    							)
-	        					)
-	                			{
-	    	            			if(
-	    	            				(!(start.getConfig().overrideChildSettings && this.overrideChildSettings ? start.getConfig().smoothStartTop : this.smoothStartTop) && y == getminY()) ||
-	    		        				((start.getConfig().overrideChildSettings && this.overrideChildSettings ? start.getConfig().smoothStartTop : this.smoothStartTop) && (this.heightMap[x][z] == null || y > this.heightMap[x][z].y()))
-	    	    					)
-	    	            			{
-	    	            				BO4BlockFunction blockFunction = null;
-	    	            				if(isRandomBlock)
-	    	            				{
-	    	            					blockFunction = new BO4RandomBlockFunction();
-	    	    			    			((BO4RandomBlockFunction)blockFunction).blockContainers = this.randomBlocksBlocks[blockIndex];
-	    	    			    			((BO4RandomBlockFunction)blockFunction).blockChances = this.randomBlocksBlockChances[blockIndex];
-	    	    			    			((BO4RandomBlockFunction)blockFunction).blockCount = this.randomBlocksBlockCount[blockIndex];
-	    	            				} else {
-	    	            					blockFunction = new BO4BlockFunction();
-	    	            				}
-	    	            				blockFunction.blockContainer = material;
-	    	            				blockFunction.x(x);
-	    	            				blockFunction.y((short) y);
-	    	            				blockFunction.z(z);	    	            				
-	    	            				
-	    	            				this.heightMap[x][z] = blockFunction;
-	    	            			}
-	                			}
-				    		
-							blockIndex++;
-	    				}
-	    			}
-	    		}
-	    	}
+            // make heightmap containing the highest or lowest blocks in this chunk
+            boolean allowWood = start.getConfig().overrideChildSettings && overrideChildSettings ? start.getConfig().smoothStartWood : smoothStartWood;
+            boolean allowLiquid = start.getConfig().spawnUnderWater;
+            for(BO4BlockFunction block : blocks)
+            {
+                if(heightMap[block.x()][block.z()] != null && block.y() < heightMap[block.x()][block.z()].y())
+                {
+                    continue;
+                }
+                if(block instanceof BO4RandomBlockFunction)
+                {
+                    if(Arrays.stream(((BO4RandomBlockFunction) block).blockContainers).noneMatch(b -> b.material().isSmoothAreaAnchor(allowWood, allowLiquid)))
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    if(!block.material().isSmoothAreaAnchor(allowWood, allowLiquid))
+                    {
+                        continue;
+                    }
+                }
+                heightMap[block.x()][block.z()] = block;
+            }
     	}
     	return this.heightMap;
     }
@@ -414,41 +356,7 @@ public class BO4Config extends CustomObjectConfigFile
 			}
     	}
     	
-    	BO4BlockFunction[] blocksOTGPlus = new BO4BlockFunction[this.blocksMaterial.length];
-    	
-    	BO4BlockFunction block;
-    	int blockIndex = 0;
-    	for(int x = 0; x < xSize; x++)
-    	{
-    		for(int z = 0; z < zSize; z++)
-			{
-    			if(this.blocks[x][z] != null)
-    			{
-			    	for(int i = 0; i < this.blocks[x][z].length; i++)
-			    	{
-			    		if(this.randomBlocksBlocks[blockIndex] != null)
-			    		{
-			    			block = new BO4RandomBlockFunction();
-			    			((BO4RandomBlockFunction)block).blockContainers = this.randomBlocksBlocks[blockIndex];
-			    			((BO4RandomBlockFunction)block).blockChances = this.randomBlocksBlockChances[blockIndex];
-			    			((BO4RandomBlockFunction)block).blockCount = this.randomBlocksBlockCount[blockIndex];
-			    		} else {
-			    			block = new BO4BlockFunction();
-			    		}
-			    		
-			    		block.x(x);
-			    		block.y(this.blocks[x][z][i]);
-			    		block.z(z);
-			    		block.blockContainer = this.blocksMaterial[blockIndex];
-			    					    		
-			    		blocksOTGPlus[blockIndex] = block;
-						blockIndex++;
-			    	} 
-    			}
-			}
-    	}
-
-    	return blocksOTGPlus;
+        return this.blocks;
     }
 
     protected BO4BranchFunction[] getbranches()
@@ -840,51 +748,7 @@ public class BO4Config extends CustomObjectConfigFile
     			illegalBlock = true;
     		}	    		
         }
-        
-        this.blocks = new short[this.xSize][this.zSize][];
-    	this.blocksMaterial = new BlockContainer[tempBlocksList.size()];
-    	
-        this.randomBlocksBlocks = new BlockContainer[tempBlocksList.size()][];
-        this.randomBlocksBlockChances = new byte[tempBlocksList.size()][];
-        this.randomBlocksBlockCount = new byte[tempBlocksList.size()]; 
-        
-        short[][] columnBlockIndex = new short[this.xSize][this.zSize];
-        BO4BlockFunction[] blocksSorted = new BO4BlockFunction[tempBlocksList.size()];
-        int blocksSortedIndex = 0;
-        for(int x = 0; x < this.xSize; x++)
-        {
-        	for(int z = 0; z < this.zSize; z++)
-        	{
-        		for(int h = 0; h < tempBlocksList.size(); h++)
-        		{
-        			if(tempBlocksList.get(h).x() == x && tempBlocksList.get(h).z() == z)
-        			{
-        				blocksSorted[blocksSortedIndex] = tempBlocksList.get(h);
-        				blocksSortedIndex++;
-        			}
-        		}
-        	}
-        }
-        BO4BlockFunction block;
-        for(int blockIndex = 0; blockIndex < blocksSorted.length; blockIndex++)
-        {
-        	block = blocksSorted[blockIndex];
-        	if(this.blocks[block.x()][block.z()] == null)
-        	{
-        		this.blocks[block.x()][block.z()] = new short[columnSizes[block.x()][block.z()]];
-        	}
-       		this.blocks[block.x()][block.z()][columnBlockIndex[block.x()][block.z()]] = (short) block.y();
-        	
-        	this.blocksMaterial[blockIndex] = block.blockContainer;
-        	
-        	if(block instanceof BO4RandomBlockFunction)
-        	{
-	            this.randomBlocksBlocks[blockIndex] = ((BO4RandomBlockFunction)block).blockContainers;
-	            this.randomBlocksBlockChances[blockIndex] = ((BO4RandomBlockFunction)block).blockChances;
-	            this.randomBlocksBlockCount[blockIndex] = ((BO4RandomBlockFunction)block).blockCount;
-        	}
-        	columnBlockIndex[block.x()][block.z()]++;
-        }
+        this.blocks = tempBlocksList.toArray(new BO4BlockFunction[tempBlocksList.size()]);
 
 		boolean illegalModData = false;
         for(BO4ModDataFunction modData : tempModDataList)
@@ -2166,63 +2030,7 @@ public class BO4Config extends CustomObjectConfigFile
 
     private void loadBlockArrays(ArrayList<BO4BlockFunction> newBlocks, short[][] columnSizes)
     {
-        // Store blocks in arrays instead of BO4BlockFunctions,
-        // since that gives way too much overhead memory wise.
-        // We may have tens of millions of blocks, java doesn't handle lots of small classes well.
-		this.blocks = new short[xSize][zSize][];
-		this.blocksMaterial = new BlockContainer[newBlocks.size()];
-		
-		this.randomBlocksBlocks = new BlockContainer[newBlocks.size()][];
-		this.randomBlocksBlockChances = new byte[newBlocks.size()][];
-		this.randomBlocksBlockCount = new byte[newBlocks.size()]; 
-		
-		BO4BlockFunction block;
-    	short[][] columnBlockIndex = new short[xSize][zSize];
-    	for(int x = 0; x < xSize; x++)
-    	{
-    		for(int z = 0; z < zSize; z++)
-    		{
-				if(this.blocks[x][z] == null)
-				{
-					this.blocks[x ][z] = new short[columnSizes[x][z]];
-				}
-    		}
-    	}
-		for(int i = 0; i < newBlocks.size(); i++)
-		{
-			block = newBlocks.get(i);
-
-			this.blocks[block.x()][block.z()][columnBlockIndex[block.x()][block.z()]] = (short) block.y();
-
-			int blockIndex = columnBlockIndex[block.x()][block.z()] + getColumnBlockIndex(columnSizes, block.x(), block.z());
-
-			this.blocksMaterial[blockIndex] = block.blockContainer;
-			
-			if(block instanceof BO4RandomBlockFunction)
-			{
-		        this.randomBlocksBlocks[blockIndex] = ((BO4RandomBlockFunction)block).blockContainers;
-		        this.randomBlocksBlockChances[blockIndex] = ((BO4RandomBlockFunction)block).blockChances;
-		        this.randomBlocksBlockCount[blockIndex] = ((BO4RandomBlockFunction)block).blockCount;
-			}
-			columnBlockIndex[block.x()][block.z()]++;
-		}
-    }
-    
-    private int getColumnBlockIndex(short[][] columnSizes, int columnX, int columnZ)
-    {
-    	int blockIndex = 0;
-    	for(int x = 0; x < 16; x++)
-    	{
-    		for(int z = 0; z < 16; z++)
-    		{
-    			if(columnX == x && columnZ == z)
-    			{
-    				return blockIndex;
-    			}
-    			blockIndex += columnSizes[x][z];
-    		}
-    	}
-    	return blockIndex;
+        this.blocks = newBlocks.toArray(new BO4BlockFunction[newBlocks.size()]);
     }
     
 	@Override
