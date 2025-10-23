@@ -70,12 +70,18 @@ public class MathHelper
      */
     public static int mod(int x, int y)
     {
-        int result = x % y;
-        if (result < 0)
-        {
-            result += y;
-        }
-        return result;
+        return floorMod(x, y);
+    }
+    
+    public static int floorDiv(int x, int y)
+    {
+        int i = x / y;
+        return x < 0 != y < 0 && x != y * i ? i - 1 : i;
+    }
+    
+    public static int floorMod(int x, int y)
+    {
+        return x - floorDiv(x, y) * y;
     }
     
     public static boolean tryParseInt(String value)
