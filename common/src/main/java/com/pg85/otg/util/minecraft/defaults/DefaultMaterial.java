@@ -317,7 +317,7 @@ public enum DefaultMaterial
     		return null;
     	}
     	
-        DefaultMaterial defaultMaterial = lookupName.get(blockName);
+        DefaultMaterial defaultMaterial = lookupName.get(blockName.toUpperCase());
         if (defaultMaterial != null)
         {
             return defaultMaterial;
