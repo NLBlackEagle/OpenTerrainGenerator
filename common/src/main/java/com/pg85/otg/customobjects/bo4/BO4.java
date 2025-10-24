@@ -268,13 +268,19 @@ public class BO4 implements StructuredCustomObject
 	        	if(block instanceof BO4RandomBlockFunction)
 	        	{
 	        		randomBlockFunction = ((BO4RandomBlockFunction)block);
+	        		boolean blockSelected = false;
 	                for (int i = 0; i < randomBlockFunction.blockCount; i++)
 	                {
 	                    if (random.nextInt(100) < randomBlockFunction.blockChances[i])
 	                    {
 	                    	block.blockContainer = randomBlockFunction.blockContainers[i];
+	                    	blockSelected = true;
 	                    	break;
 	                    }
+	                }
+	                if(!blockSelected)
+	                {
+	                    continue;
 	                }
 	        	}
 	
