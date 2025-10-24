@@ -3,6 +3,8 @@ package com.pg85.otg.util.minecraft.defaults;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Contains a lot of alternative mob names. The implementation should support
  * this names, along with the other names that are available on the current
@@ -148,10 +150,8 @@ public enum EntityNames
     private static String keyFromAlias(String alias)
     {
         String key = alias.trim().toLowerCase();
-        if(key.startsWith("minecraft:"))
-        {
-            key = key.substring("minecraft:".length());
-        }
+        key = StringUtils.removeStart(key, "minecraft:");
+        key = StringUtils.remove(key, '_');
         return key;
     }
 
