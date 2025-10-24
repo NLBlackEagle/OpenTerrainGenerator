@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import com.pg85.otg.configuration.customobjects.CustomObjectConfigFile;
 import com.pg85.otg.configuration.customobjects.CustomObjectConfigFunction;
@@ -177,25 +179,41 @@ public class BO3Config extends CustomObjectConfigFile
 		return this.reader.getFile();
 	}
 
-    public BO3BlockFunction[] getBlocks(Rotation rotation)
+    public BO3BlockFunction[] getBlocks()
     {
-        switch(rotation)
+        return this.blocks;
+    }
+
+    public int blockCount()
+    {
+        return this.blocks.length;
+    }
+
+    public Iterable<BO3BlockFunction> blocks(Rotation rotation)
+    {
+        if(rotation == Rotation.NORTH)
         {
-            case NORTH:
-                return this.blocks;
-            case WEST:
-            case SOUTH:
-            case EAST:
-                // TODO cache this
-                BO3BlockFunction[] rotatedBlocks = new BO3BlockFunction[this.blocks.length];
-                for(int i = 0; i < this.blocks.length; i++)
-                {
-                    rotatedBlocks[i] = this.blocks[i].rotate(rotation);
-                }
-                return rotatedBlocks;
-            default:
-                throw new IllegalStateException();
+            return Arrays.asList(this.blocks);
         }
+
+        return () -> new Iterator<BO3BlockFunction>()
+        {
+            int i;
+
+            @Override
+            public boolean hasNext()
+            {
+                return this.i < BO3Config.this.blocks.length;
+            }
+
+            @Override
+            public BO3BlockFunction next()
+            {
+                if(this.i >= BO3Config.this.blocks.length)
+                    throw new NoSuchElementException();
+                return BO3Config.this.blocks[this.i++].rotate(rotation);
+            }
+        };
     }
 
 	protected BO3BranchFunction[] getbranches()

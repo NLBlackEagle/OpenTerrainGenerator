@@ -144,6 +144,26 @@ public class ChunkCoordinate
         return new ChunkCoordinate(chunkX, chunkZ);
     }
     
+    public static ChunkCoordinate fromPacked(long packed)
+    {
+        return new ChunkCoordinate(packedX(packed), packedZ(packed));
+    }
+    
+    public static long packed(int chunkX, int chunkZ)
+    {
+        return (chunkZ & 0xFFFFFFFFL) << 32 | chunkX & 0xFFFFFFFFL;
+    }
+    
+    public static int packedX(long packed)
+    {
+        return (int) packed;
+    }
+    
+    public static int packedZ(long packed)
+    {
+        return (int) (packed >> 32);
+    }
+    
     public static ChunkCoordinate read(DataInput in) throws IOException
     {
         return new ChunkCoordinate(in.readInt(), in.readInt());
