@@ -12,6 +12,7 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-databind:${jackson_version}"
     implementation "org.yaml:snakeyaml:${snakeyaml_version}"
     implementation 'it.unimi.dsi:fastutil:7.1.0'
+    implementation 'org.apache.commons:commons-lang3:3.5'
 }
 
 shadowJar {
