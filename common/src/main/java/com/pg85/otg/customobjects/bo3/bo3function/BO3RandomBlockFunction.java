@@ -47,6 +47,7 @@ public class BO3RandomBlockFunction extends BO3BlockFunction
         rotatedBlock.x(rotatedX);
         rotatedBlock.y(y());
         rotatedBlock.z(rotatedZ);
+        rotatedBlock.blockContainer = blockContainer.rotate(rotation);
         rotatedBlock.blockCount = blockCount;
         rotatedBlock.blockContainers = new BlockContainer[blockCount];
         for(int i = 0; i < blockCount; i++)
@@ -133,6 +134,7 @@ public class BO3RandomBlockFunction extends BO3BlockFunction
             i++;
             blockCount++;
         }
+        blockContainer = blockContainers.length > 0 ? blockContainers[0] : BlockContainer.of(MaterialHelper.AIR);
     }
 
     @Override

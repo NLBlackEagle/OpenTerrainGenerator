@@ -99,6 +99,7 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
             i++;
             blockCount++;
         }
+        blockContainer = blockContainers.length > 0 ? blockContainers[0] : BlockContainer.of(MaterialHelper.AIR);
     }
     
     public BO4RandomBlockFunction rotate(Rotation rotation)
@@ -109,6 +110,7 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
         rotatedBlock.x(rotatedCoords.getX());
         rotatedBlock.y(rotatedCoords.getY());
         rotatedBlock.z(rotatedCoords.getZ());
+        rotatedBlock.blockContainer = blockContainer.rotate(rotation);
         rotatedBlock.blockContainers = new BlockContainer[blockCount];
         for(int i = 0; i < blockCount; i++)
         {
