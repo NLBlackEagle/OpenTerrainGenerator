@@ -57,6 +57,12 @@ class UnknownMaterialData extends BukkitMaterialData
     }
 
     @Override
+    public LocalMaterialData withBlockData()
+    {
+        return this;
+    }
+
+    @Override
     public LocalMaterialData withDefaultBlockData()
     {
         return this;

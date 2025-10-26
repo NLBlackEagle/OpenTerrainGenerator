@@ -34,6 +34,12 @@ class StateMaterialData extends BukkitMaterialData
     }
 
     @Override
+    public LocalMaterialData withBlockData()
+    {
+        return this;
+    }
+
+    @Override
     public StateMaterialData withDefaultBlockData()
     {
         if(this.blockData == 0)

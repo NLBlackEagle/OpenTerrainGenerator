@@ -29,6 +29,8 @@ public abstract class LocalMaterialData
 
     public abstract LocalMaterialData withoutBlockData();
 
+    public abstract LocalMaterialData withBlockData();
+
     /**
      * Gets an instance with the same material as this object, but the default
      * block data of the material. This instance is not modified.

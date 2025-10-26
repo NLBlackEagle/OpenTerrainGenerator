@@ -33,6 +33,12 @@ class StateMaterialData extends ForgeMaterialData
     }
 
     @Override
+    public LocalMaterialData withBlockData()
+    {
+        return this;
+    }
+
+    @Override
     public StateMaterialData withDefaultBlockData()
     {
         if(this.blockData == 0)

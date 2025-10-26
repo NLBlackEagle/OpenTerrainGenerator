@@ -31,6 +31,12 @@ class BlockMaterialData extends BukkitMaterialData
     }
 
     @Override
+    public LocalMaterialData withBlockData()
+    {
+        return withDefaultBlockData();
+    }
+
+    @Override
     public StateMaterialData withDefaultBlockData()
     {
         return BukkitMaterialData.ofMinecraftBlockState(this.block.getBlockData());

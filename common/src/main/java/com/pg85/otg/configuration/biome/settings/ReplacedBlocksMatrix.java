@@ -296,12 +296,12 @@ public class ReplacedBlocksMatrix
         {
             return material;
         }
-        LocalMaterialData replaceToMaterial = targetsAtHeight.targetsWithoutBlockData.get(material);
+        LocalMaterialData replaceToMaterial = targetsAtHeight.targetsWithoutBlockData.get(material.withoutBlockData());
         if(replaceToMaterial != null)
         {
             return replaceToMaterial;
         }
-        replaceToMaterial = targetsAtHeight.targetsWithBlockData.get(material);
+        replaceToMaterial = targetsAtHeight.targetsWithBlockData.get(material.withBlockData());
         if(replaceToMaterial != null)
         {
             return replaceToMaterial;

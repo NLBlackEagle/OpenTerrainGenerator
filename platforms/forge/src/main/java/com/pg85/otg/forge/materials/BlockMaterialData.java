@@ -31,6 +31,12 @@ class BlockMaterialData extends ForgeMaterialData
     }
 
     @Override
+    public LocalMaterialData withBlockData()
+    {
+        return withDefaultBlockData();
+    }
+
+    @Override
     public StateMaterialData withDefaultBlockData()
     {
         return ForgeMaterialData.ofMinecraftBlockState(this.block.getDefaultState());

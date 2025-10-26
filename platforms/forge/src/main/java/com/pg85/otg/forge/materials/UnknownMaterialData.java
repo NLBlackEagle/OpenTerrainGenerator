@@ -57,6 +57,12 @@ class UnknownMaterialData extends ForgeMaterialData
     }
 
     @Override
+    public LocalMaterialData withBlockData()
+    {
+        return this;
+    }
+
+    @Override
     public LocalMaterialData withDefaultBlockData()
     {
         return this;
