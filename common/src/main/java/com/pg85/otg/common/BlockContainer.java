@@ -59,7 +59,7 @@ public abstract class BlockContainer
 
         public static BlockContainer of(LocalMaterialData material)
         {
-            return INSTANCES.computeIfAbsent(material.withDefaultBlockData(), WithoutTag::new);
+            return INSTANCES.computeIfAbsent(material.withBlockData(), WithoutTag::new);
         }
 
         @Override
