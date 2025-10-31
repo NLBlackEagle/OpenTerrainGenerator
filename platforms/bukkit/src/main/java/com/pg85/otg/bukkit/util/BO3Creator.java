@@ -92,7 +92,7 @@ public class BO3Creator extends BOCreator
                     block = world.getBlockAt(x + start.getBlockX(), y + start.getBlockY(), z + start.getBlockZ());
                     data = BukkitMaterialData.ofBukkitBlock(block);
 
-                    if (centerBlock != null && centerBlock.equals(data))
+                    if (centerBlock != null && centerBlock.matches(data))
                     {
                         centerPointX = x + start.getBlockX();
                         centerPointY = y + start.getBlockY();

@@ -85,7 +85,7 @@ public class SimpleSurfaceGenerator implements SurfaceGenerator
             	// same biome water block as surface/ground/stone block.                
                 // TODO: If other mods have problems bc of replaced blocks in the chunk during ReplaceBiomeBlocks, 
                 // do replaceblock for stone/water here instead of when initially filling the chunk.
-                else if(!blockOnCurrentPos.equals(biomeConfig.getWaterBlockReplaced(world, y)))
+                else if(!biomeConfig.getWaterBlockReplaced(world, y).matches(blockOnCurrentPos))
                 {
                 	// Place surface/ground down to a certain depth per column,
                 	// determined via noise. groundLayerDepth == 0 means we're 

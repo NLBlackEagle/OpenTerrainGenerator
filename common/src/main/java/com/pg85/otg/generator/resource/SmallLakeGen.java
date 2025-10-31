@@ -171,7 +171,7 @@ public class SmallLakeGen extends Resource
                                 return;
                             }
                             localMaterialData2 = world.getMaterial(x + j, y + i2, z + i1, chunkBeingPopulated);
-                            if ((i2 < 4) && (localMaterialData == null || !localMaterialData.isSolid()) && (localMaterialData2 == null || !localMaterialData2.equals(material)))
+                            if ((i2 < 4) && (localMaterialData == null || !localMaterialData.isSolid()) && (localMaterialData2 == null || !material.matches(localMaterialData2)))
                             {
                                 return;
                             }

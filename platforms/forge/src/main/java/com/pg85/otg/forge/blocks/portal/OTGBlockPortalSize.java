@@ -208,7 +208,7 @@ public class OTGBlockPortalSize
 			{
 				for(LocalMaterialData portalMaterial : portalMaterials)
 				{
-					if(material.equals(portalMaterial))
+					if(portalMaterial.matches(material))
 					{
 						isPortalMaterial = true;
 					}
@@ -276,7 +276,7 @@ public class OTGBlockPortalSize
     				boolean isPortalMaterial = false;
     				for(LocalMaterialData portalMaterial : portalMaterials)
     				{
-    					if(material.equals(portalMaterial))
+    					if(portalMaterial.matches(material))
     					{
     						isPortalMaterial = true;
     					}

@@ -236,9 +236,9 @@ public class BO4 implements StructuredCustomObject
 		boolean followGround = false, followStone = false, followSurface = false;
 		if (replaceBelowMaterial != null)
 		{
-			if (replaceBelowMaterial.equals(bo3GroundBlock)) followGround = true;
-			else if (replaceBelowMaterial.equals(bo3StoneBlock)) followStone = true;
-			else if (replaceBelowMaterial.equals(bo3SurfaceBlock)) followSurface = true;
+			if (replaceBelowMaterial.matches(bo3GroundBlock)) followGround = true;
+			else if (replaceBelowMaterial.matches(bo3StoneBlock)) followStone = true;
+			else if (replaceBelowMaterial.matches(bo3SurfaceBlock)) followSurface = true;
 		}
 
     	// Get the right coordinates based on rotation

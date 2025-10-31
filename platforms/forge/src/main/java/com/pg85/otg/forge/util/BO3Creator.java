@@ -86,7 +86,7 @@ public class BO3Creator extends BOCreator
 
                     ForgeMaterialData data = ForgeMaterialData.ofMinecraftBlockState(block);
 
-                    if (centerBlock != null && centerBlock.equals(data))
+                    if (centerBlock != null && centerBlock.matches(data))
                     {
                         centerPointX = x + start.getBlockX();
                         centerPointY = y + start.getBlockY();

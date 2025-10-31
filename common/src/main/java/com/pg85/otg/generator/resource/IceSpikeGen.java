@@ -240,7 +240,7 @@ public class IceSpikeGen extends Resource
         					(
     							worldMaterial.isAir() || 
     							sourceBlocks.contains(worldMaterial) || 
-    							worldMaterial.equals(this.material)
+    							this.material.matches(worldMaterial)
 							)
             			)
                     	{

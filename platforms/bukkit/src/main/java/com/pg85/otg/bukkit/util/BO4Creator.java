@@ -88,7 +88,7 @@ public class BO4Creator extends BOCreator
                             data = BukkitMaterialData.ofBukkitBlock(block);
 
                             // If we have a match for the center block, update values and end the loop
-                            if (centerBlock.equals(data)) {
+                            if (centerBlock.matches(data)) {
                                 centerPointX = x + start.getBlockX();
                                 centerPointY = y + start.getBlockY();
                                 centerPointZ = z + start.getBlockZ();
