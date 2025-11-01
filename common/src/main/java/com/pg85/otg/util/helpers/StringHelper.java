@@ -81,6 +81,29 @@ public abstract class StringHelper
         }
     }
 
+    public static boolean isNumber(String s)
+    {
+        boolean digitFound = false;
+        boolean dotFound = false;
+        for(int i = 0; i < s.length(); i++)
+        {
+            char c = s.charAt(i);
+            if(i == 0 && c == '-')
+                continue;
+            if(c == '.')
+            {
+                if(dotFound)
+                    return false;
+                dotFound = true;
+                continue;
+            }
+            if(!Character.isDigit(c))
+                return false;
+            digitFound = true;
+        }
+        return digitFound;
+    }
+
     /**
      * Parses the string and returns a number between minValue and maxValue.
      * 

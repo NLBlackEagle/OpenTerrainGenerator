@@ -14,6 +14,7 @@ import com.pg85.otg.customobjects.structures.bo4.BO4CustomStructureCoordinate;
 import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.util.ChunkCoordinate;
 import com.pg85.otg.util.bo3.Rotation;
+import com.pg85.otg.util.helpers.StringHelper;
 import com.pg85.otg.util.materials.MaterialHelper;
 
 public class BO4RandomBlockFunction extends BO4BlockFunction
@@ -36,26 +37,24 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
         int size = args.size();
 
         // Get number of blocks first, params can vary so can't just count.
-        while (i < size)
-        {           
-        	i++;
-            if (i >= size)
+        while(i < size)
+        {
+            i++;
+            if(i >= size)
             {
                 throw new InvalidConfigException("Missing chance parameter");
             }
-            try
+            if(!StringHelper.isNumber(args.get(i)))
             {
-                readInt(args.get(i), 1, 100);
-            }
-            catch (InvalidConfigException e)
-            {
-                // Get the chance
                 i++;
-                if (i >= size)
+                if(i >= size)
                 {
                     throw new InvalidConfigException("Missing chance parameter");
                 }
-                readInt(args.get(i), 1, 100);
+                if(!StringHelper.isNumber(args.get(i)))
+                {
+                    throw new NumberFormatException("'" + args.get(i) + "'" + " is not a number!");
+                }
             }
             i++;
             blockCount++;
@@ -66,37 +65,24 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
         
         i = 3;
         blockCount = 0;
-        while (i < size)
+        while(i < size)
         {
             // Parse chance and metadata
-        	LocalMaterialData material = MaterialHelper.readMaterial(args.get(i));
+            LocalMaterialData material = MaterialHelper.readMaterial(args.get(i));
             i++;
-            if (i >= size)
+            if(StringHelper.isNumber(args.get(i)))
             {
-                throw new InvalidConfigException("Missing chance parameter");
-            }
-            try
-            {
-                blockChances[blockCount] = (byte) readInt(args.get(i), 1, 100);
                 blockContainers[blockCount] = material.blockContainer();
-            }
-            catch (InvalidConfigException e)
-            {
-                // Maybe it's a NBT file?
-
-                // Get the file
-                blockContainers[blockCount] = material.blockContainer(holder.getFile().getParentFile().toPath(), args.get(i));
-
-                // Get the chance
-                i++;
-                if (i >= size)
-                {
-                    throw new InvalidConfigException("Missing chance parameter");
-                }
                 blockChances[blockCount] = (byte) readInt(args.get(i), 1, 100);
+                i++;
             }
-
-            i++;
+            else
+            {
+                blockContainers[blockCount] = material.blockContainer(holder.getFile().getParentFile().toPath(), args.get(i));
+                i++;
+                blockChances[blockCount] = (byte) readInt(args.get(i), 1, 100);
+                i++;
+            }
             blockCount++;
         }
         blockContainer = blockContainers.length > 0 ? blockContainers[0] : BlockContainer.of(MaterialHelper.AIR);
