@@ -19,11 +19,12 @@ import com.pg85.otg.util.bo3.NamedBinaryTag;
 import com.pg85.otg.util.minecraft.defaults.DefaultMaterial;
 
 import net.minecraft.server.v1_12_R1.BlockPosition;
+import net.minecraft.server.v1_12_R1.Blocks;
 import net.minecraft.server.v1_12_R1.Chunk;
+import net.minecraft.server.v1_12_R1.ChunkSection;
 import net.minecraft.server.v1_12_R1.DataConverter;
 import net.minecraft.server.v1_12_R1.DataConverterRegistry;
 import net.minecraft.server.v1_12_R1.DataConverterTypes;
-import net.minecraft.server.v1_12_R1.IBlockData;
 import net.minecraft.server.v1_12_R1.NBTTagCompound;
 import net.minecraft.server.v1_12_R1.TileEntity;
 
@@ -132,23 +133,17 @@ public class OTGChunkGenerator extends ChunkGenerator
     public ChunkData generateChunkData(World world, Random random, int chunkX, int chunkZ, BiomeGrid biome)
     {
         makeSureWorldIsInitialized(world);
-    	
-    	ChunkData chunkData = this.NotGenerate ? null : unloadedChunksCache.get(ChunkCoordinate.fromChunkCoords(chunkX,chunkZ));
-    	if(chunkData == null)
-    	{
-            chunkData = createChunkData(world);
 
-            if (this.NotGenerate)
-            {
-                return chunkData;
-            }
+        if(this.NotGenerate)
+        {
+            return this.createChunkData(this.world.getWorld().getWorld());
+        }
 
-            ChunkCoordinate chunkCoord = ChunkCoordinate.fromChunkCoords(chunkX, chunkZ);
-            BukkitChunkBuffer chunkBuffer = new BukkitChunkBuffer(chunkCoord, chunkData);
-            this.chunkProviderOTG.generate(chunkBuffer);
-            
-    	}
-    	return chunkData;    	
+        return this.unloadedChunksCache.computeIfAbsent(ChunkCoordinate.fromChunkCoords(chunkX, chunkZ), k -> {
+            ChunkData v = this.createChunkData(this.world.getWorld().getWorld());
+            this.chunkProviderOTG.generate(new BukkitChunkBuffer(k, v));
+            return v;
+        });
     }
 
     public Chunk getChunk(int x, int z)
@@ -191,62 +186,46 @@ public class OTGChunkGenerator extends ChunkGenerator
         }
     }
 
+    @SuppressWarnings("deprecation")
     public LocalMaterialData[] getBlockColumnInUnloadedChunk(int x, int z)
     {
-    	BlockPos2D blockPos = new BlockPos2D(x, z);
-    	ChunkCoordinate chunkCoord = ChunkCoordinate.fromBlockCoords(x, z);
-    	int chunkX = chunkCoord.getChunkX();
-    	int chunkZ = chunkCoord.getChunkZ();
-    	
-		// Get internal coordinates for block in chunk
-    	byte blockX = (byte)(x &= 0xF);
-    	byte blockZ = (byte)(z &= 0xF);
+        LocalMaterialData[] blockColumn = new LocalMaterialData[256];
 
-    	LocalMaterialData[] cachedColumn = this.unloadedBlockColumnsCache.get(blockPos);
+        Chunk chunk = this.world.getWorld().getChunkProvider().getLoadedChunkAt(x >> 4, z >> 4);
+        if(chunk != null)
+        {
+            int y = 0;
+            for(ChunkSection section : chunk.getSections())
+            {
+                if(section != null)
+                {
+                    for(int i = 0; i < 16; i++)
+                    {
+                        blockColumn[y++] = BukkitMaterialData.ofMinecraftBlockState(section.getType(x & 15, i, z & 15));
+                    }
+                }
+                else
+                {
+                    for(int i = 0; i < 16; i++)
+                    {
+                        blockColumn[y++] = BukkitMaterialData.ofMinecraftBlockState(Blocks.AIR.getBlockData());
+                    }
+                }
+            }
+        }
+        else
+        {
+            ChunkData chunkData = this.generateChunkData(this.world.getWorld().getWorld(), null, x >> 4, z >> 4, null);
+            for(int y = 0; y < 256; y++)
+            {
+                MaterialData materialData = chunkData.getTypeAndData(x & 15, y, z & 15);
+                blockColumn[y] = BukkitMaterialData.ofMinecraftBlockState(materialData.getItemTypeId(), materialData.getData());
+            }
+        }
 
-    	if(cachedColumn != null)
-    	{
-    		return cachedColumn;
-    	}
-    	   	
-		cachedColumn = new LocalMaterialData[256];
-		
-    	Chunk chunk = this.world.getWorld().getChunkProvider().getLoadedChunkAt(chunkX, chunkZ);
-    	if(chunk == null)
-    	{
-	    	ChunkData chunkData = this.unloadedChunksCache.get(chunkCoord);
-	    	if(chunkData == null)
-	    	{
-				// Generate a chunk without populating it
-	    		chunkData = this.generateChunkData(this.world.getWorld().getWorld(), this.world.getWorld().random, chunkX, chunkZ, (BiomeGrid)null);
-	    	}
-	        for(short y = 0; y < 256; y++)
-	        {
-	        	MaterialData blockInChunk = chunkData.getTypeAndData(blockX, y, blockZ);
-	        	if(blockInChunk != null)
-	        	{
-	        		cachedColumn[y] = BukkitMaterialData.ofMinecraftBlockState(blockInChunk.getItemTypeId(), blockInChunk.getData());
-	        	} else {       		
-	        		break;
-	        	}
-	        }
-			unloadedChunksCache.put(chunkCoord, chunkData);			
-    	} else {
-	        for(short y = 0; y < 256; y++)
-	        {
-	        	IBlockData blockInChunk = chunk.getBlockData(new BlockPosition(blockX, y, blockZ));
-	        	if(blockInChunk != null)
-	        	{
-	        		cachedColumn[y] = BukkitMaterialData.ofMinecraftBlockState(blockInChunk);
-	        	} else {       		
-	        		break;
-	        	}
-	        }    		
-    	}    	
-        unloadedBlockColumnsCache.put(blockPos, cachedColumn);		
-        return cachedColumn;
+        return blockColumn;
     }
-    
+
     public double getBiomeBlocksNoiseValue(int blockX, int blockZ)
     {
     	return this.chunkProviderOTG.getBiomeBlocksNoiseValue(blockX, blockZ);

@@ -1393,46 +1393,30 @@ public class BukkitWorld implements LocalWorld
     @Override
     public LocalMaterialData getMaterial(int x, int y, int z, ChunkCoordinate chunkBeingPopulated)
     {
-        if (y >= PluginStandardValues.WORLD_HEIGHT || y < PluginStandardValues.WORLD_DEPTH)
+        if(y >= PluginStandardValues.WORLD_HEIGHT || y < PluginStandardValues.WORLD_DEPTH)
         {
-        	return null;
+            return BukkitMaterialData.ofMinecraftBlockState(Blocks.AIR.getBlockData());
         }
 
-        // If the chunk exists or is inside the area being populated, fetch it normally.
         Chunk chunk = null;
-    	if(
-			(chunkBeingPopulated != null && OTG.IsInAreaBeingPopulated(x, z, chunkBeingPopulated)) 
-			//|| getChunkGenerator().chunkExists(x, z)			
-		)
-    	{
-    		chunk = getChunkGenerator().getChunk(x, z);
-    	}
-    	
-		// If the chunk doesn't exist and we're doing something outside the
-    	// population sequence, return the material without loading the chunk.
-    	if(chunk == null && chunkBeingPopulated == null)
-		{
-			ChunkCoordinate chunkCoord = ChunkCoordinate.fromBlockCoords(x, z);
-    		// If the chunk has already been loaded, no need to use fake chunks.
-    		if(world.getChunkProviderServer().isLoaded(chunkCoord.getChunkX(), chunkCoord.getChunkZ()))
-    		{
-    			chunk = getChunkGenerator().getChunk(x, z);
-    		} else {
-    			// Calculate the material without loading the chunk.
-    			return getChunkGenerator().getMaterialInUnloadedChunk(x,y,z);
-    		}
-    	}
-    	
-		// Tried to query an unloaded chunk outside the area being populated
-    	if(chunk == null)
-    	{
-            return null;
-    	}
-    	
-		// Get internal coordinates for block in chunk
-        int internalX = x & 0xF;
-        int internalZ = z & 0xF;
-        return BukkitMaterialData.ofMinecraftBlockState(chunk.a(internalX, y, internalZ));
+        if(chunkBeingPopulated != null)
+        {
+            if(!OTG.IsInAreaBeingPopulated(x, z, chunkBeingPopulated))
+            {
+                return BukkitMaterialData.ofMinecraftBlockState(Blocks.AIR.getBlockData());
+            }
+            chunk = this.world.getChunkAt(x >> 4, z >> 4);
+        }
+        else
+        {
+            chunk = this.world.getChunkProvider().getLoadedChunkAt(x >> 4, z >> 4);
+            if(chunk == null)
+            {
+                return this.generator.getMaterialInUnloadedChunk(x, y, z);
+            }
+        }
+
+        return BukkitMaterialData.ofMinecraftBlockState(chunk.a(x & 15, y, z & 15));
     }
 	
     @Override

@@ -31,8 +31,8 @@ import com.pg85.otg.util.minecraft.defaults.DefaultMaterial;
 
 import net.minecraft.block.BlockGravel;
 import net.minecraft.block.BlockSand;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.datafix.DataFixer;
@@ -42,6 +42,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome.SpawnListEntry;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraftforge.common.util.Constants.BlockFlags;
 import net.minecraftforge.fml.common.event.FMLInterModComms;
@@ -77,11 +78,29 @@ public class OTGChunkGenerator implements IChunkGenerator
     }
     
 	// Chunks
-    
+
     @Override
     public Chunk generateChunk(int chunkX, int chunkZ)
     {
-		return getBlocks(chunkX, chunkZ, true);
+        Chunk chunk = this.generateRawChunk(chunkX, chunkZ);
+        fillBiomeArray(chunk);
+        chunk.generateSkylightMap();
+        return chunk;
+    }
+
+    private Chunk generateRawChunk(int chunkX, int chunkZ)
+    {
+        return this.unloadedChunksCache.computeIfAbsent(ChunkCoordinate.fromChunkCoords(chunkX, chunkZ), k -> {
+            Chunk v;
+            synchronized(chunkBufferLock)
+            {
+                chunkBuffer = new ForgeChunkBuffer(k);
+                this.chunkProviderOTG.generate(chunkBuffer);
+                v = chunkBuffer.toChunk(this.world.getWorld());
+                chunkBuffer = null;
+            }
+            return v;
+        });
     }
 
     @Override
@@ -158,37 +177,6 @@ public class OTGChunkGenerator implements IChunkGenerator
 
     // Blocks
     
-    private Chunk getBlocks(int chunkX, int chunkZ, boolean provideChunk)
-    {
-    	Chunk chunk = unloadedChunksCache.get(ChunkCoordinate.fromChunkCoords(chunkX,chunkZ));
-    	if(chunk == null)
-    	{
-    		chunk = new Chunk(this.world.getWorld(), chunkX, chunkZ);
-
-    		ChunkCoordinate chunkCoord = ChunkCoordinate.fromChunkCoords(chunkX, chunkZ);
-    		synchronized(chunkBufferLock)
-    		{
-	    		chunkBuffer = new ForgeChunkBuffer(chunkCoord);
-	    		this.chunkProviderOTG.generate(chunkBuffer);
-	    		chunk = chunkBuffer.toChunk(this.world.getWorld());
-		        chunkBuffer = null;
-    		}
-	        fillBiomeArray(chunk);
-	        //if(world.getConfigs().getWorldConfig().ModeTerrain == TerrainMode.TerrainTest)
-	        //{
-	        	chunk.generateSkylightMap(); // Normally chunks are lit in the ObjectSpawner after finishing their population step, TerrainTest skips the population step though so light blocks here.
-	        //}
-    	} else {
-	        fillBiomeArray(chunk);
-	        //if(world.getConfigs().getWorldConfig().ModeTerrain == TerrainMode.TerrainTest)
-	        {
-	        	chunk.generateSkylightMap(); // Normally chunks are lit in the ObjectSpawner after finishing their population step, TerrainTest skips the population step though so light blocks here.
-	        }
-    	}
-
-    	return chunk;
-    }
-    
     /**
      * Fills the biome array of a chunk with the proper saved ids (no
      * generation ids).
@@ -212,59 +200,32 @@ public class OTGChunkGenerator implements IChunkGenerator
     
     public LocalMaterialData[] getBlockColumnInUnloadedChunk(int x, int z)
     {
-    	BlockPos2D blockPos = new BlockPos2D(x, z);
-    	ChunkCoordinate chunkCoord = ChunkCoordinate.fromBlockCoords(x, z);
-    	int chunkX = chunkCoord.getChunkX();
-    	int chunkZ = chunkCoord.getChunkZ();
-    	
-		// Get internal coordinates for block in chunk
-    	byte blockX = (byte)(x &= 0xF);
-    	byte blockZ = (byte)(z &= 0xF);
-
-    	LocalMaterialData[] cachedColumn = this.unloadedBlockColumnsCache.get(blockPos);
-
-    	if(cachedColumn != null)
-    	{
-    		return cachedColumn;
-    	}
-    	
-    	Chunk chunk = this.world.getWorld().getChunkProvider().getLoadedChunk(chunkX, chunkZ);
-    	if(chunk == null)
-    	{
-    		chunk = this.unloadedChunksCache.get(chunkCoord);
-    	} else {
-    		this.unloadedChunksCache.remove(chunkCoord);
-    	}
-    	if(chunk == null)
-    	{
-			// Generate a chunk without populating it
-	    	chunk = new Chunk(this.world.getWorld(), chunkX, chunkZ);
-	    	synchronized(chunkBufferLock)
-	    	{
-				chunkBuffer = new ForgeChunkBuffer(chunkCoord);
-				this.chunkProviderOTG.generate(chunkBuffer);
-				chunk = chunkBuffer.toChunk(this.world.getWorld());
-				chunkBuffer = null;
-	    	}
-			unloadedChunksCache.put(chunkCoord, chunk);
-    	}
-		
-		cachedColumn = new LocalMaterialData[256];
-
-    	IBlockState blockInChunk;
-    	for(short y = 0; y < 256; y++)
+        Chunk chunk = this.world.world.getChunkProvider().getLoadedChunk(x >> 4, z >> 4);
+        if(chunk == null)
         {
-        	blockInChunk = chunk.getBlockState(new BlockPos(blockX, y, blockZ));
-        	if(blockInChunk != null)
-        	{
-	        	cachedColumn[y] = ForgeMaterialData.ofMinecraftBlockState(blockInChunk);
-        	} else {
-        		break;
-        	}
+            chunk = this.generateRawChunk(x >> 4, z >> 4);
         }
-		unloadedBlockColumnsCache.put(blockPos, cachedColumn);
-		
-        return cachedColumn;
+
+        LocalMaterialData[] blockColumn = new LocalMaterialData[256];
+        int y = 0;
+        for(ExtendedBlockStorage section : chunk.getBlockStorageArray())
+        {
+            if(section != null)
+            {
+                for(int i = 0; i < 16; i++)
+                {
+                    blockColumn[y++] = ForgeMaterialData.ofMinecraftBlockState(section.get(x & 15, i, z & 15));
+                }
+            }
+            else
+            {
+                for(int i = 0; i < 16; i++)
+                {
+                    blockColumn[y++] = ForgeMaterialData.ofMinecraftBlockState(Blocks.AIR.getDefaultState());
+                }
+            }
+        }
+        return blockColumn;
     }
     
     public double getBiomeBlocksNoiseValue(int blockX, int blockZ)
