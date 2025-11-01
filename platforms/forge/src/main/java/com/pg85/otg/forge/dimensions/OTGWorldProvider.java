@@ -1,7 +1,5 @@
 package com.pg85.otg.forge.dimensions;
 
-import java.util.Random;
-
 import com.pg85.otg.OTG;
 import com.pg85.otg.configuration.dimensions.DimensionConfig;
 import com.pg85.otg.configuration.dimensions.DimensionsConfig;
@@ -164,29 +162,31 @@ public class OTGWorldProvider extends WorldProviderSurface
     @Override
     public BlockPos getRandomizedSpawnPoint()
     {
-    	DimensionConfig dimConfig = getDimensionConfig();   	
-    	if(dimConfig != null && dimConfig.Settings.SpawnPointSet)
-    	{
-    	    int randX = 0, randZ = 0;
-			// Calculate random spawn position within a circular radius around the spawn coords
-            if (dimConfig.GameRules.SpawnRadius != 0)
+        DimensionConfig dimConfig = getDimensionConfig();
+        if(dimConfig != null && dimConfig.Settings.SpawnPointSet)
+        {
+            int x = 0;
+            int z = 0;
+            // Calculate random spawn position within a circular radius around the spawn coords
+            if(dimConfig.GameRules.SpawnRadius != 0)
             {
-                Random rand = new Random();
-                randX = -dimConfig.GameRules.SpawnRadius + rand.nextInt(dimConfig.GameRules.SpawnRadius * 2);
-                // MaxZ = sqrt(spawnradius^2 - randX^2)
-                int maxZ =  (int)Math.floor(Math.sqrt((dimConfig.GameRules.SpawnRadius * dimConfig.GameRules.SpawnRadius) - (randX * randX)));
-                randZ = maxZ == 0 ? 0 : -maxZ + rand.nextInt(maxZ * 2);
+                int radius = dimConfig.GameRules.SpawnRadius;
+                do
+                {
+                    x = -radius + this.world.rand.nextInt(radius * 2 + 1);
+                    z = -radius + this.world.rand.nextInt(radius * 2 + 1);
+                }
+                while(x * x + z * z > radius * radius);
             }
-            int SpawnPosX = (this.world.getWorldInfo().getSpawnX() + randX);
-            int SpawnPosZ = (this.world.getWorldInfo().getSpawnZ() + randZ);
+            x += this.world.getWorldInfo().getSpawnX();
+            z += this.world.getWorldInfo().getSpawnZ();
 
-            BlockPos SpawnPos = new BlockPos(SpawnPosX, 0, SpawnPosZ);
-            BlockPos SpawnPosNew = world.getTopSolidOrLiquidBlock(SpawnPos);
-
-            return new BlockPos(SpawnPosNew);
-    	} else {
-    		return super.getRandomizedSpawnPoint();
-    	}
+            return world.getTopSolidOrLiquidBlock(new BlockPos(x, 0, z)).toImmutable();
+        }
+        else
+        {
+            return super.getRandomizedSpawnPoint();
+        }
     }
 
     // True if the player can respawn in this dimension (true = overworld, false = nether).
