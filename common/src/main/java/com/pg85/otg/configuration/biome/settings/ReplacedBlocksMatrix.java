@@ -291,6 +291,10 @@ public class ReplacedBlocksMatrix
 
     public LocalMaterialData replaceBlock(int y, LocalMaterialData material)
     {
+        if(y < 0 || y >= targetsAtHeights.length)
+        {
+            return material;
+        }
         ReplaceBlockEntry targetsAtHeight = targetsAtHeights[y];
         if(targetsAtHeight == null)
         {
