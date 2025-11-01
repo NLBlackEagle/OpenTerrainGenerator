@@ -42,16 +42,15 @@ import com.pg85.otg.util.bo3.Rotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class ObjectSpawner
 {
 	// Locking objects / checks to prevent populate running on multiple threads,
 	// or when the world is waiting for an opportunity to save.
-	// TODO: Make this prettier
-	public Object lockingObject = new Object();
-	public boolean populating;
+	public final Lock lock = new ReentrantLock();
 	public boolean processing = false;
-	public boolean saving;
 	public boolean saveRequired;
 	//
 	
@@ -68,71 +67,36 @@ public class ObjectSpawner
 
     public void populate(ChunkCoordinate chunkCoord)
     {
-    	boolean unlockWhenDone = false;
-		// Wait for another thread running SaveToDisk, then place a lock.
-		boolean firstLog = false;
-		while(true)
-		{
-			//OTG.log(LogMarker.INFO, "Populate waiting on SaveToDisk.");
-			synchronized(this.lockingObject)
-			{
-				if(!this.saving)
-				{
-					// If populating then this method is being called recursively (indicating cascading chunk-gen).
-					// This method can be called recursively, but should never be called by two threads at once.
-					// TODO: Make sure that's the case.
-					if(!this.populating)
-					{
-						this.populating = true;
-						unlockWhenDone = true;
-					}
-					break;
-				} else {
-					if(firstLog)
-					{
-						OTG.log(LogMarker.WARN, "Populate waiting on SaveToDisk. Although other mods could be causing this and there may not be any problem, this can potentially cause an endless loop!");
-						firstLog = false;
-					}
-				}
-			}
-		}
-		synchronized(this.lockingObject)
-		{
-			this.saveRequired = true;
-		}
+        lock.lock();
+        try
+        {
+            if(!this.processing)
+            {
+                this.processing = true;
 
-		if (!this.processing)
-		{
-			this.processing = true;
+                // Cache all biomes in the are being populated (2x2 chunks)
+                this.world.cacheBiomesForPopulation(chunkCoord);
+                doPopulate(chunkCoord);
 
-			// Cache all biomes in the are being populated (2x2 chunks)
-			this.world.cacheBiomesForPopulation(chunkCoord);
-			doPopulate(chunkCoord);
-			
-			this.processing = false;
-		} else {
+                this.processing = false;
+            }
+            else
+            {
+                // Don't use the population chunk biome cache during cascading chunk generation
+                this.world.invalidatePopulationBiomeCache();
+                doPopulate(chunkCoord);
 
-			// Don't use the population chunk biome cache during cascading chunk generation
-			this.world.invalidatePopulationBiomeCache();
-			doPopulate(chunkCoord);
-			
-			OTG.log(LogMarker.INFO, "Cascading chunk generation detected.");
-			if(OTG.getPluginConfig().developerMode)
-			{			
-				OTG.log(LogMarker.INFO, Arrays.toString(Thread.currentThread().getStackTrace()));
-			}
-		}
-
-		// Release the lock
-		synchronized(this.lockingObject)
-		{
-			// This assumes that this method can only be called alone or recursively, never by 2 threads at once.
-			// TODO: Make sure that's the case.
-			if(unlockWhenDone)
-			{
-				this.populating = false;
-			}
-		}
+                OTG.log(LogMarker.INFO, "Cascading chunk generation detected.");
+                if(OTG.getPluginConfig().developerMode)
+                {
+                    OTG.log(LogMarker.INFO, Arrays.toString(Thread.currentThread().getStackTrace()));
+                }
+            }
+        }
+        finally
+        {
+            lock.unlock();
+        }
 
 		// Resource spawning may have changed terrain dramatically, update 
 		// the spawnpoint so players don't spawn mid-air or underground
