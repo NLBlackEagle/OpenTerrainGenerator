@@ -231,9 +231,6 @@ public abstract class Layer
      */
     protected int getBiomeFromLayer(int selection)
     {
-        return 
-    		(selection & LandBit) != 0 && (selection & BiomeBitsAreSetBit) != 0 ? 
-    		(selection & BiomeBits) : 
-			this.defaultOceanId;
+        return (selection & (LandBit | BiomeBitsAreSetBit)) == (LandBit | BiomeBitsAreSetBit) ? (selection & BiomeBits) : this.defaultOceanId;
     }
 }
