@@ -63,9 +63,7 @@ public class BO3RandomBlockFunction extends BO3BlockFunction
     public void load(BO3Config holder, List<String> args) throws InvalidConfigException
     {
         assureSize(5, args);
-        x(readInt(args.get(0), -100, 100));
-        y((short) readInt(args.get(1), -1000, 1000));
-        z(readInt(args.get(2), -100, 100));
+        readXYZ(args, 0);
 
         // Now read the random parts
         int i = 3;

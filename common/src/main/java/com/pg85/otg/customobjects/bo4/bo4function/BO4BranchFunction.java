@@ -80,9 +80,7 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
 		// assureSize only returns false if size() < size
 		assureSize(8, args);
 
-        x(readInt(args.get(0), -10000, 10000));
-        y(readInt(args.get(1), -255, 255));
-        z(readInt(args.get(2), -10000, 10000));
+        readXYZ(args, 0);
         isRequiredBranch = readBoolean(args.get(3));
 
         int i;

@@ -40,9 +40,7 @@ public class LightCheck extends BO3Check
     public void load(BO3Config holder, List<String> args) throws InvalidConfigException
     {
         assureSize(5, args);
-		x(readInt(args.get(0), -100, 100));
-        y(readInt(args.get(1), -100, 100));
-        z(readInt(args.get(2), -100, 100));
+        readXYZ(args, 0);
         minLightLevel = readInt(args.get(3), 0, 16);
         maxLightLevel = readInt(args.get(4), minLightLevel, 16);
     }

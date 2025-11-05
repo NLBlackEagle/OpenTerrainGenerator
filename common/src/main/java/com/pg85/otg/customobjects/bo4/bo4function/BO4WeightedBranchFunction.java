@@ -27,9 +27,7 @@ public class BO4WeightedBranchFunction extends BO4BranchFunction
 		// assureSize only returns false if size() < size
 		assureSize(8, args);
 
-        x(readInt(args.get(0), -32, 32));
-        y(readInt(args.get(1), -255, 255));
-        z(readInt(args.get(2), -32, 32));
+        readXYZ(args, 0);
         isRequiredBranch = readBoolean(args.get(3));
 
         int i;

@@ -246,7 +246,7 @@ public class BO4 implements StructuredCustomObject
     	ArrayList<Object[]> coordsAboveDone = new ArrayList<Object[]>();
     	ArrayList<Object[]> coordsBelowDone = new ArrayList<Object[]>();
 
-    	BO4BlockFunction blockToQueueForSpawn = new BO4BlockFunction();
+    	BO4BlockContainer blockToQueueForSpawn = new BO4BlockContainer();
     	LocalMaterialData sourceBlockMaterial;
 
     	boolean outOfBounds = false;
@@ -321,7 +321,7 @@ public class BO4 implements StructuredCustomObject
 	
 		        			while(blockY <= highestBlockToReplace && blockY > y + newBlock.y())
 		        			{
-	                            blockToQueueForSpawn = new BO4BlockFunction();
+	                            blockToQueueForSpawn = new BO4BlockContainer();
 	
 		        				// TODO: Make override leaves and air configurable
 		        				// TODO: Make replaceAbove height configurable
@@ -378,7 +378,7 @@ public class BO4 implements StructuredCustomObject
 		    						{	    						
 			                			if(!sourceBlockMaterial.isSolid())
 			                			{
-				                            blockToQueueForSpawn = new BO4BlockFunction();
+				                            blockToQueueForSpawn = new BO4BlockContainer();
 				                            blockToQueueForSpawn.x(x + newBlock.x());
 				                            blockToQueueForSpawn.y((short) blockY);
 				                            blockToQueueForSpawn.z(z + newBlock.z());
@@ -426,7 +426,7 @@ public class BO4 implements StructuredCustomObject
 		        	
 		        	if(y + newBlock.y() > 0 && y + newBlock.y() < 256 && !doReplaceAboveBelowOnly)
 		        	{
-	                    blockToQueueForSpawn = new BO4BlockFunction();
+	                    blockToQueueForSpawn = new BO4BlockContainer();
 	                    blockToQueueForSpawn.x(x + newBlock.x());
 	                    blockToQueueForSpawn.y((short) (y + newBlock.y()));
 	                    blockToQueueForSpawn.z(z + newBlock.z());
@@ -515,7 +515,7 @@ public class BO4 implements StructuredCustomObject
 	
 		        			while(blockY <= highestBlockToReplace && blockY > y + block.y())
 		        			{
-	                            blockToQueueForSpawn = new BO4BlockFunction();
+	                            blockToQueueForSpawn = new BO4BlockContainer();
 	
 		        				if(spawnUnderWater && blockY >= waterLevel)// && replaceAboveMaterial.isLiquid())
 				            	{
@@ -570,7 +570,7 @@ public class BO4 implements StructuredCustomObject
 		    						{	    						
 			                			if(!sourceBlockMaterial.isSolid())
 			                			{
-				                            blockToQueueForSpawn = new BO4BlockFunction();
+				                            blockToQueueForSpawn = new BO4BlockContainer();
 				                            blockToQueueForSpawn.x(x + block.x());
 				                            blockToQueueForSpawn.y((short) blockY);
 				                            blockToQueueForSpawn.z(z + block.z());
@@ -618,7 +618,7 @@ public class BO4 implements StructuredCustomObject
 	    			
 	    			if(y + block.y() > 0 && y + block.y() < 256 && !doReplaceAboveBelowOnly)
 	    			{
-	                    blockToQueueForSpawn = new BO4BlockFunction();
+	                    blockToQueueForSpawn = new BO4BlockContainer();
 	                    blockToQueueForSpawn.x(x + block.x());
 	                    blockToQueueForSpawn.y((short) (y + block.y()));
 	                    blockToQueueForSpawn.z(z + block.z());

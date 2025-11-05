@@ -25,9 +25,7 @@ public class BlockCheck extends BO3Check
     public void load(BO3Config holder, List<String> args) throws InvalidConfigException
     {
         assureSize(4, args);
-        x(readInt(args.get(0), -100, 100));
-		y(readInt(args.get(1), -100, 100));
-		z(readInt(args.get(2), -100, 100));
+        readXYZ(args, 0);
         toCheck = readMaterials(args, 3);
     }
 

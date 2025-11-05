@@ -13,19 +13,25 @@ import java.util.List;
 
 public abstract class CustomObjectConfigFunction<T>
 {
-    private static final int X_BITS = 11;
-    private static final int Y_BITS = 10;
-    private static final int Z_BITS = 11;
-    private static final int X_SHIFT = 0;
-    private static final int Y_SHIFT = X_SHIFT + X_BITS;
-    private static final int Z_SHIFT = Y_SHIFT + Y_BITS;
-    private static final int X_MASK = ((1 << X_BITS) - 1) << X_SHIFT;
-    private static final int Y_MASK = ((1 << Y_BITS) - 1) << Y_SHIFT;
-    private static final int Z_MASK = ((1 << Z_BITS) - 1) << Z_SHIFT;
+    protected static final int X_BITS = 11;
+    protected static final int Y_BITS = 10;
+    protected static final int Z_BITS = 11;
+    protected static final int X_SHIFT = 0;
+    protected static final int Y_SHIFT = X_SHIFT + X_BITS;
+    protected static final int Z_SHIFT = Y_SHIFT + Y_BITS;
+    protected static final int X_MASK = ((1 << X_BITS) - 1) << X_SHIFT;
+    protected static final int Y_MASK = ((1 << Y_BITS) - 1) << Y_SHIFT;
+    protected static final int Z_MASK = ((1 << Z_BITS) - 1) << Z_SHIFT;
+    protected static final int X_MIN = -1 << X_BITS - 1;
+    protected static final int X_MAX = (1 << X_BITS - 1) - 1;
+    protected static final int Y_MIN = -1 << Y_BITS - 1;
+    protected static final int Y_MAX = (1 << Y_BITS - 1) - 1;
+    protected static final int Z_MIN = -1 << Z_BITS - 1;
+    protected static final int Z_MAX = (1 << Z_BITS - 1) - 1;
     /**
-     * layout: z = 11 bits [-1024,1023], y = 10 bits [-512,511], x = 11 bits [-1024,1023]
+     * layout: z = {@value #X_BITS} bits [{@value #X_MIN}, {@value #X_MAX}], y = {@value #Y_BITS} bits [{@value #Y_MIN}, {@value #Y_MAX}], x = {@value #Z_BITS} bits [{@value #Z_MIN}, {@value #Z_MAX}]
      */
-    private int coords;
+    protected int coords;
 	
     /**
      * Convenience method for creating a config function. Used to create
@@ -163,6 +169,15 @@ public abstract class CustomObjectConfigFunction<T>
      */
     public abstract String makeString();
 
+    public void readXYZ(List<String> args, int index) throws InvalidConfigException
+    {
+        this.assureSize(index + 3, args);
+        int x = this.readInt(args.get(index + 0), X_MIN, X_MAX);
+        int y = this.readInt(args.get(index + 1), Y_MIN, Y_MAX);
+        int z = this.readInt(args.get(index + 2), Z_MIN, Z_MAX);
+        coords = ((x << X_SHIFT) & X_MASK) | ((y << Y_SHIFT) & Y_MASK) | ((z << Z_SHIFT) & Z_MASK);
+    }
+
     /**
      * Parses the string and returns a number between minValue and
      * maxValue.
@@ -230,22 +245,6 @@ public abstract class CustomObjectConfigFunction<T>
     public final String write()
     {
         return makeString();
-    }
-
-    /**
-     * @see #coords
-     */
-    public void xyz(int xyz)
-    {
-        coords = xyz;
-    }
-
-    /**
-     * @see #coords
-     */
-    public int xyz()
-    {
-        return coords;
     }
 
     public void x(int x)

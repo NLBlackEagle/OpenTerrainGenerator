@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Represents an entity in a BO3.
  */
-public abstract class EntityFunction<T extends CustomObjectConfigFile> extends CustomObjectConfigFunction<T>
+public abstract class EntityFunction<T extends CustomObjectConfigFile> extends ExtendedFunction<T>
 {
     public String name = "";
     public int groupSize = 1;
@@ -30,11 +30,7 @@ public abstract class EntityFunction<T extends CustomObjectConfigFile> extends C
     public void load(T holder, List<String> args) throws InvalidConfigException
     {
         assureSize(5, args);
-        // Those limits are arbitrary, LocalWorld.setBlock will limit it
-        // correctly based on what chunks can be accessed
-		x(readInt(args.get(0), -100, 100));
-        y(readInt(args.get(1), -1000, 1000));
-        z(readInt(args.get(2), -100, 100));
+        readXYZ(args, 0);
         processEntityName(args.get(3));
         groupSize = readInt(args.get(4), 0, Integer.MAX_VALUE);
 

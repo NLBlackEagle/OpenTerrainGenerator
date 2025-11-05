@@ -18,7 +18,7 @@ import com.pg85.otg.util.helpers.StreamHelper;
 /**
  * Represents a block in a BO3.
  */
-public abstract class SpawnerFunction<T extends CustomObjectConfigFile> extends CustomObjectConfigFunction<T>
+public abstract class SpawnerFunction<T extends CustomObjectConfigFile> extends ExtendedFunction<T>
 {
     public Boolean firstSpawn = true;
     public String mobName = "";
@@ -73,11 +73,7 @@ public abstract class SpawnerFunction<T extends CustomObjectConfigFile> extends 
     public void load(T holder, List<String> args) throws InvalidConfigException
     {
         assureSize(8, args);
-        // Those limits are arbitrary, LocalWorld.setBlock will limit it
-        // correctly based on what chunks can be accessed
-		x(readInt(args.get(0), -100, 100));
-        y(readInt(args.get(1), -1000, 1000));
-        z(readInt(args.get(2), -100, 100));
+        readXYZ(args, 0);
         mobName = args.get(3);
 
         boolean param4isNBT = false;
