@@ -1,6 +1,5 @@
 package com.pg85.otg.forge.materials;
 
-import com.pg85.otg.common.LocalMaterialData;
 import com.pg85.otg.util.bo3.Rotation;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceMap;
@@ -26,13 +25,13 @@ class BlockMaterialData extends ForgeMaterialData
     }
 
     @Override
-    public LocalMaterialData withoutBlockData()
+    public BlockMaterialData withoutBlockData()
     {
         return this;
     }
 
     @Override
-    public LocalMaterialData withBlockData()
+    public StateMaterialData withBlockData()
     {
         return withDefaultBlockData();
     }
