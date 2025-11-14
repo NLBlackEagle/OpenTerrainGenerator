@@ -12,6 +12,7 @@ import net.minecraft.server.v1_12_R1.IBlockData;
 class StateMaterialData extends BukkitMaterialData
 {
     private static final Reference2ReferenceMap<IBlockData, StateMaterialData> INSTANCES = new Reference2ReferenceOpenHashMap<>();
+    private BlockMaterialData withoutBlockData;
     private final IBlockData state;
     private final byte blockData;
 
@@ -30,7 +31,12 @@ class StateMaterialData extends BukkitMaterialData
     @Override
     public LocalMaterialData withoutBlockData()
     {
-        return BukkitMaterialData.ofMinecraftBlock(this.getBlock());
+        BlockMaterialData withoutBlockData;
+        if((withoutBlockData = this.withoutBlockData) == null)
+        {
+            this.withoutBlockData = withoutBlockData = BlockMaterialData.of(this.getBlock());
+        }
+        return withoutBlockData;
     }
 
     @Override

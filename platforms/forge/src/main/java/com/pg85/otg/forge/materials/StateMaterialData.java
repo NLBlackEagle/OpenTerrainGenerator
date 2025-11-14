@@ -11,6 +11,7 @@ import net.minecraft.block.state.IBlockState;
 class StateMaterialData extends ForgeMaterialData
 {
     private static final Reference2ReferenceMap<IBlockState, StateMaterialData> INSTANCES = new Reference2ReferenceOpenHashMap<>();
+    private BlockMaterialData withoutBlockData;
     private final IBlockState state;
     private final byte blockData;
 
@@ -29,7 +30,12 @@ class StateMaterialData extends ForgeMaterialData
     @Override
     public LocalMaterialData withoutBlockData()
     {
-        return ForgeMaterialData.ofMinecraftBlock(this.getBlock());
+        BlockMaterialData withoutBlockData;
+        if((withoutBlockData = this.withoutBlockData) == null)
+        {
+            this.withoutBlockData = withoutBlockData = BlockMaterialData.of(this.getBlock());
+        }
+        return withoutBlockData;
     }
 
     @Override

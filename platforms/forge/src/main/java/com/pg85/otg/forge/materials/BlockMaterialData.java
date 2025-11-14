@@ -11,6 +11,7 @@ import net.minecraft.block.state.IBlockState;
 class BlockMaterialData extends ForgeMaterialData
 {
     private static final Reference2ReferenceMap<Block, BlockMaterialData> INSTANCES = new Reference2ReferenceOpenHashMap<>();
+    private StateMaterialData withDefaultBlockData;
     private final Block block;
 
     private BlockMaterialData(Block block)
@@ -39,7 +40,12 @@ class BlockMaterialData extends ForgeMaterialData
     @Override
     public StateMaterialData withDefaultBlockData()
     {
-        return ForgeMaterialData.ofMinecraftBlockState(this.block.getDefaultState());
+        StateMaterialData withDefaultBlockData;
+        if((withDefaultBlockData = this.withDefaultBlockData) == null)
+        {
+            this.withDefaultBlockData = withDefaultBlockData = StateMaterialData.of(this.getBlockState());
+        }
+        return withDefaultBlockData;
     }
 
     @SuppressWarnings("deprecation")
