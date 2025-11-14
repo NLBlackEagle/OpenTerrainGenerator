@@ -1395,7 +1395,7 @@ public class BukkitWorld implements LocalWorld
     {
         if(y >= PluginStandardValues.WORLD_HEIGHT || y < PluginStandardValues.WORLD_DEPTH)
         {
-            return BukkitMaterialData.ofMinecraftBlockState(Blocks.AIR.getBlockData());
+            return BukkitMaterialData.AIR;
         }
 
         Chunk chunk = null;
@@ -1403,7 +1403,7 @@ public class BukkitWorld implements LocalWorld
         {
             if(!OTG.IsInAreaBeingPopulated(x, z, chunkBeingPopulated))
             {
-                return BukkitMaterialData.ofMinecraftBlockState(Blocks.AIR.getBlockData());
+                return BukkitMaterialData.AIR;
             }
             chunk = this.world.getChunkAt(x >> 4, z >> 4);
         }

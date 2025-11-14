@@ -208,7 +208,7 @@ public class OTGChunkGenerator extends ChunkGenerator
                 {
                     for(int i = 0; i < 16; i++)
                     {
-                        blockColumn[y++] = BukkitMaterialData.ofMinecraftBlockState(Blocks.AIR.getBlockData());
+                        blockColumn[y++] = BukkitMaterialData.AIR;
                     }
                 }
             }

@@ -221,7 +221,7 @@ public class OTGChunkGenerator implements IChunkGenerator
             {
                 for(int i = 0; i < 16; i++)
                 {
-                    blockColumn[y++] = ForgeMaterialData.ofMinecraftBlockState(Blocks.AIR.getDefaultState());
+                    blockColumn[y++] = ForgeMaterialData.AIR;
                 }
             }
         }

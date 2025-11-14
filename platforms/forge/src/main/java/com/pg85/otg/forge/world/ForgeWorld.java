@@ -756,7 +756,7 @@ public class ForgeWorld implements LocalWorld
     {
         if(y >= PluginStandardValues.WORLD_HEIGHT || y < PluginStandardValues.WORLD_DEPTH)
         {
-            return ForgeMaterialData.ofMinecraftBlockState(Blocks.AIR.getDefaultState());
+            return ForgeMaterialData.AIR;
         }
 
         Chunk chunk = null;
@@ -764,7 +764,7 @@ public class ForgeWorld implements LocalWorld
         {
             if(!OTG.IsInAreaBeingPopulated(x, z, chunkBeingPopulated))
             {
-                return ForgeMaterialData.ofMinecraftBlockState(Blocks.AIR.getDefaultState());
+                return ForgeMaterialData.AIR;
             }
             chunk = this.world.getChunk(x >> 4, z >> 4);
         }

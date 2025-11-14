@@ -18,6 +18,7 @@ public abstract class ForgeMaterialData extends LocalMaterialData
 {
     private static final Set<Block> PROBLEMATIC_BLOCKS = ImmutableSet.of(Blocks.PORTAL, Blocks.DISPENSER, Blocks.ACACIA_STAIRS, Blocks.BIRCH_STAIRS, Blocks.BRICK_STAIRS, Blocks.DARK_OAK_STAIRS, Blocks.JUNGLE_STAIRS, Blocks.NETHER_BRICK_STAIRS, Blocks.OAK_STAIRS, Blocks.PURPUR_STAIRS, Blocks.QUARTZ_STAIRS, Blocks.RED_SANDSTONE_STAIRS, Blocks.SANDSTONE_STAIRS, Blocks.SPRUCE_STAIRS, Blocks.STONE_BRICK_STAIRS, Blocks.STONE_STAIRS);
     private static final ForgeMaterialData BLANK = UnknownMaterialData.of(BLANK_NAME);
+    public static final StateMaterialData AIR = ofMinecraftBlockState(Blocks.AIR.getDefaultState());
 
     ForgeMaterialData(int blockId)
     {
