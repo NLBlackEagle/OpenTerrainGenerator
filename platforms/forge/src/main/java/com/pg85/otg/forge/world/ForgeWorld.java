@@ -759,7 +759,7 @@ public class ForgeWorld implements LocalWorld
             return ForgeMaterialData.AIR;
         }
 
-        Chunk chunk = null;
+        Chunk chunk;
         if(chunkBeingPopulated != null)
         {
             if(!OTG.IsInAreaBeingPopulated(x, z, chunkBeingPopulated))

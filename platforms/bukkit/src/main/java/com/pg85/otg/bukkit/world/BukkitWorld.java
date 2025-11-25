@@ -1398,7 +1398,7 @@ public class BukkitWorld implements LocalWorld
             return BukkitMaterialData.AIR;
         }
 
-        Chunk chunk = null;
+        Chunk chunk;
         if(chunkBeingPopulated != null)
         {
             if(!OTG.IsInAreaBeingPopulated(x, z, chunkBeingPopulated))
