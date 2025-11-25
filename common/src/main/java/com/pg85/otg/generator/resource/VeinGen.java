@@ -10,6 +10,7 @@ import com.pg85.otg.util.materials.MaterialHelper;
 import com.pg85.otg.util.materials.MaterialSet;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 public class VeinGen extends Resource
@@ -103,7 +104,7 @@ public class VeinGen extends Resource
     {
         int hash = 3;
         hash = 29 * hash + super.hashCode();
-        hash = 29 * hash + (int) (Double.doubleToLongBits(this.veinRarity) ^ (Double.doubleToLongBits(this.veinRarity) >>> 32));
+        hash = 29 * hash + Double.hashCode(this.veinRarity);
         hash = 29 * hash + this.minRadius;
         hash = 29 * hash + this.maxRadius;
         hash = 29 * hash + this.oreSize;
@@ -111,7 +112,7 @@ public class VeinGen extends Resource
         hash = 29 * hash + this.oreRarity;
         hash = 29 * hash + this.minAltitude;
         hash = 29 * hash + this.maxAltitude;
-        hash = 29 * hash + (this.sourceBlocks != null ? this.sourceBlocks.hashCode() : 0);
+        hash = 29 * hash + Objects.hashCode(this.sourceBlocks);
         return hash;
     }
 
