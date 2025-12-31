@@ -98,14 +98,27 @@ public class BO3Config extends CustomObjectConfigFile
 	 */
 	protected BO3Config(SettingsReaderOTGPlus reader) throws InvalidConfigException
 	{
-		super(reader);
-		init();
+		this(reader, null, null);
 	}
 
-	private void init() throws InvalidConfigException
+	/**
+	 * Creates a BO3Config from a new file, with the provided blocks and branches.
+	 *
+	 * @param reader       The settings of the BO3.
+	 * @param directory    The directory the BO3 is stored in.
+	 * @param otherObjects All other loaded objects by their name.
+	 */
+	protected BO3Config(SettingsReaderOTGPlus reader, List<BO3BlockFunction> blocks, List<BO3BranchFunction> branches) throws InvalidConfigException
 	{
+		super(reader);
 		this.isOTGPlus = false;
 		readConfigSettings();
+		if (blocks != null && !blocks.isEmpty()) {
+			extractBlocks(blocks);
+		}
+		if (branches != null && !branches.isEmpty()) {
+			setBranches(branches);
+		}
 		rotateBlocksAndChecks();
 	}
 

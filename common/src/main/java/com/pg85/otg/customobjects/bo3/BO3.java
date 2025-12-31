@@ -3,6 +3,7 @@ package com.pg85.otg.customobjects.bo3;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 
 import com.pg85.otg.OTG;
@@ -15,6 +16,7 @@ import com.pg85.otg.configuration.world.WorldConfig.ConfigMode;
 import com.pg85.otg.customobjects.bo3.BO3Settings.OutsideSourceBlock;
 import com.pg85.otg.customobjects.bo3.BO3Settings.SpawnHeightEnum;
 import com.pg85.otg.customobjects.bo3.bo3function.BO3BlockFunction;
+import com.pg85.otg.customobjects.bo3.bo3function.BO3BranchFunction;
 import com.pg85.otg.customobjects.bo3.bo3function.BO3EntityFunction;
 import com.pg85.otg.customobjects.bo3.bo3function.BO3ModDataFunction;
 import com.pg85.otg.customobjects.bo3.bo3function.BO3ParticleFunction;
@@ -67,17 +69,22 @@ public class BO3 implements StructuredCustomObject
     @Override
     public boolean onEnable()
     {
-    	if(this.isInvalidConfig)
-    	{
-    		return false;
-    	}
-    	if(this.settings != null)
-    	{
-    		return true;
-    	}
+    	return initSettings(null, null);
+    }
+
+    public boolean initSettings(List<BO3BlockFunction> blocks, List<BO3BranchFunction> branches)
+    {
+        if(this.isInvalidConfig)
+        {
+            return false;
+        }
+        if(this.settings != null)
+        {
+            return true;
+        }
         try
         {
-            this.settings = new BO3Config(new FileSettingsReaderOTGPlus(this.name, this.file));
+            this.settings = new BO3Config(new FileSettingsReaderOTGPlus(this.name, this.file), blocks, branches);
             if (this.settings.settingsMode != ConfigMode.WriteDisable)
             {
                 FileSettingsWriterOTGPlus.writeToFile(this.settings, this.settings.settingsMode);
@@ -85,7 +92,7 @@ public class BO3 implements StructuredCustomObject
         }
         catch (InvalidConfigException ex)
         {
-        	this.isInvalidConfig = true;
+            this.isInvalidConfig = true;
             return false;
         }
         return true;

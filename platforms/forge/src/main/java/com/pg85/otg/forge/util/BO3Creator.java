@@ -271,19 +271,7 @@ public class BO3Creator extends BOCreator
                         bo3 = new BO3(name, new File(OTG.getEngine().getGlobalObjectsDirectory(), name + "C" + x1 + "R" + z1 + ".bo3"));
                     }
 
-                    bo3.onEnable();
-
-                    if (!isStartBO3 || !branch)
-                    {
-                        bo3.getSettings().extractBlocks(blocks);
-                    }
-
-                    if (!branches.isEmpty())
-                    {
-                        bo3.getSettings().setBranches(branches);
-                    }
-
-                    bo3.getSettings().rotateBlocksAndChecks();
+                    bo3.initSettings(!isStartBO3 || !branch ? blocks : null, branches);
 
                     OTG.getCustomObjectManager().registerGlobalObject(bo3);
 

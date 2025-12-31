@@ -18,7 +18,8 @@ import com.pg85.otg.bukkit.util.BO3Creator;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.Selection;
 
-public class ExportCommand extends BaseCommand
+public class
+ExportCommand extends BaseCommand
 {
     private final boolean hasWorldedit;
 
