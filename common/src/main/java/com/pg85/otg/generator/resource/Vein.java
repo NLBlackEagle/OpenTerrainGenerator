@@ -74,47 +74,47 @@ class Vein
 
         float f = rand.nextFloat() * 3.141593F;
 
-        double maxX = x + 8 + MathHelper.sin(f) * maxSize / 8.0F;
-        double minX = x + 8 - MathHelper.sin(f) * maxSize / 8.0F;
-        double maxZ = z + 8 + MathHelper.cos(f) * maxSize / 8.0F;
-        double minZ = z + 8 - MathHelper.cos(f) * maxSize / 8.0F;
+        float maxX = x + 8 + MathHelper.sin(f) * maxSize / 8.0F;
+        float minX = x + 8 - MathHelper.sin(f) * maxSize / 8.0F;
+        float maxZ = z + 8 + MathHelper.cos(f) * maxSize / 8.0F;
+        float minZ = z + 8 - MathHelper.cos(f) * maxSize / 8.0F;
 
-        double maxY = y + rand.nextInt(3) - 2;
-        double minY = y + rand.nextInt(3) - 2;
+        float maxY = y + rand.nextInt(3) - 2;
+        float minY = y + rand.nextInt(3) - 2;
 
         for (int i = 0; i < maxSize; i++)
         {
             float iFactor = (float) i / (float) maxSize;
-            double x1 = maxX + (minX - maxX) * iFactor;
-            double y1 = maxY + (minY - maxY) * iFactor;
-            double z1 = maxZ + (minZ - maxZ) * iFactor;
+            float x1 = maxX + (minX - maxX) * iFactor;
+            float y1 = maxY + (minY - maxY) * iFactor;
+            float z1 = maxZ + (minZ - maxZ) * iFactor;
 
-            double d10 = rand.nextDouble() * maxSize / 16.0D;
-            double d11 = (MathHelper.sin((float) Math.PI * iFactor) + 1.0) * d10 + 1.0;
-            double d12 = (MathHelper.sin((float) Math.PI * iFactor) + 1.0) * d10 + 1.0;
+            float d10 = rand.nextFloat() * maxSize / 16.0F;
+            float d11 = (MathHelper.sin((float) Math.PI * iFactor) + 1.0F) * d10 + 1.0F;
+            float d12 = (MathHelper.sin((float) Math.PI * iFactor) + 1.0F) * d10 + 1.0F;
 
-            int minX1 = MathHelper.floor(x1 - d11 / 2.0D);
-            int minY1 = MathHelper.floor(y1 - d12 / 2.0D);
-            int minZ1 = MathHelper.floor(z1 - d11 / 2.0D);
+            int minX1 = MathHelper.floor(x1 - d11 / 2.0F);
+            int minY1 = MathHelper.floor(y1 - d12 / 2.0F);
+            int minZ1 = MathHelper.floor(z1 - d11 / 2.0F);
 
-            int maxX1 = MathHelper.floor(x1 + d11 / 2.0D);
-            int maxY1 = MathHelper.floor(y1 + d12 / 2.0D);
-            int maxZ1 = MathHelper.floor(z1 + d11 / 2.0D);
+            int maxX1 = MathHelper.floor(x1 + d11 / 2.0F);
+            int maxY1 = MathHelper.floor(y1 + d12 / 2.0F);
+            int maxZ1 = MathHelper.floor(z1 + d11 / 2.0F);
 
             for (int x2 = minX1; x2 <= maxX1; x2++)
             {
-                double dx = (x2 + 0.5D - x1) / (d11 / 2.0D);
-                if (dx * dx < 1.0D)
+                float dx = (x2 + 0.5F - x1) / (d11 / 2.0F);
+                if (dx * dx < 1.0F)
                 {
                     for (int y2 = minY1; y2 <= maxY1; y2++)
                     {
-                        double dy = (y2 + 0.5D - y1) / (d12 / 2.0D);
-                        if (dx * dx + dy * dy < 1.0D)
+                        float dy = (y2 + 0.5F - y1) / (d12 / 2.0F);
+                        if (dx * dx + dy * dy < 1.0F)
                         {
                             for (int z2 = minZ1; z2 <= maxZ1; z2++)
                             {
-                                double dz = (z2 + 0.5D - z1) / (d11 / 2.0D);
-                                if ((dx * dx + dy * dy + dz * dz < 1.0D) && sourceBlocks.contains(world.getMaterial(x2, y2, z2, chunkBeingPopulated)))
+                                float dz = (z2 + 0.5F - z1) / (d11 / 2.0F);
+                                if ((dx * dx + dy * dy + dz * dz < 1.0F) && sourceBlocks.contains(world.getMaterial(x2, y2, z2, chunkBeingPopulated)))
                                 {
                                     world.setBlock(x2, y2, z2, material, null, chunkBeingPopulated, true);
                                 }

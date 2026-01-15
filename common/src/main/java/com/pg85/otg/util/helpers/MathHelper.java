@@ -53,6 +53,13 @@ public class MathHelper
             A[i] = (float) Math.sin(i * 3.141592653589793D * 2.0D / 65536.0D);
     }
 
+    public static int floor(float d0)
+    {
+        int i = (int) d0;
+
+        return d0 < i ? i - 1 : i;
+    }
+
     public static int ceil(float floatNumber)
     {
         int truncated = (int) floatNumber;
