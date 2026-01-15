@@ -263,7 +263,7 @@ public class BO4 implements StructuredCustomObject
     	BO4BlockFunction[] blocks = config.getBlocks();
     	if(blocks != null)
     	{
-	        for (BO4BlockFunction block : config.getBlocks())
+	        for (BO4BlockFunction block : blocks)
 	        {
 	        	if(block instanceof BO4RandomBlockFunction)
 	        	{
