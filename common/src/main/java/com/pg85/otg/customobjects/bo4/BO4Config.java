@@ -44,6 +44,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class BO4Config extends CustomObjectConfigFile
 {
 	public String author;
@@ -1192,7 +1194,7 @@ public class BO4Config extends CustomObjectConfigFile
         this.doReplaceBlocks = readSettings(BO4Settings.DO_REPLACE_BLOCKS);
 
 		String fixedRotation = readSettings(BO4Settings.FIXED_ROTATION);
-		this.fixedRotation = fixedRotation == null || fixedRotation.trim().length() == 0 ? null : Rotation.FromString(fixedRotation);
+		this.fixedRotation = StringUtils.isBlank(fixedRotation) ? null : Rotation.FromString(fixedRotation);
 
         // Read the resources
         readResources();
