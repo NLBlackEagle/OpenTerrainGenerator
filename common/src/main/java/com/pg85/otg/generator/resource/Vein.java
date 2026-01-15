@@ -66,23 +66,23 @@ class Vein
         }
     }
 
-    private void spawnOre(LocalWorld world, Random rand, int x, int y, int z, VeinGen gen, ChunkCoordinate chunkBeingPopulated)
+    private static void spawnOre(LocalWorld world, Random rand, int x, int y, int z, VeinGen gen, ChunkCoordinate chunkBeingPopulated)
     {
         int maxSize = gen.oreSize;
         LocalMaterialData material = gen.material;
         MaterialSet sourceBlocks = gen.sourceBlocks;
 
-        float f = rand.nextFloat() * 3.141593F;
+        float f = rand.nextFloat() * (float) Math.PI;
 
         float maxX = x + 8 + MathHelper.sin(f) * maxSize / 8.0F;
         float minX = x + 8 - MathHelper.sin(f) * maxSize / 8.0F;
         float maxZ = z + 8 + MathHelper.cos(f) * maxSize / 8.0F;
         float minZ = z + 8 - MathHelper.cos(f) * maxSize / 8.0F;
 
-        float maxY = y + rand.nextInt(3) - 2;
-        float minY = y + rand.nextInt(3) - 2;
+        float maxY = y - 2 + rand.nextInt(3);
+        float minY = y - 2 + rand.nextInt(3);
 
-        for (int i = 0; i < maxSize; i++)
+        for(int i = 0; i < maxSize; i++)
         {
             float iFactor = (float) i / (float) maxSize;
             float x1 = maxX + (minX - maxX) * iFactor;
@@ -101,20 +101,20 @@ class Vein
             int maxY1 = MathHelper.floor(y1 + d12 / 2.0F);
             int maxZ1 = MathHelper.floor(z1 + d11 / 2.0F);
 
-            for (int x2 = minX1; x2 <= maxX1; x2++)
+            for(int x2 = minX1; x2 <= maxX1; x2++)
             {
                 float dx = (x2 + 0.5F - x1) / (d11 / 2.0F);
-                if (dx * dx < 1.0F)
+                if(dx * dx < 1.0F)
                 {
-                    for (int y2 = minY1; y2 <= maxY1; y2++)
+                    for(int y2 = minY1; y2 <= maxY1; y2++)
                     {
                         float dy = (y2 + 0.5F - y1) / (d12 / 2.0F);
-                        if (dx * dx + dy * dy < 1.0F)
+                        if(dx * dx + dy * dy < 1.0F)
                         {
-                            for (int z2 = minZ1; z2 <= maxZ1; z2++)
+                            for(int z2 = minZ1; z2 <= maxZ1; z2++)
                             {
                                 float dz = (z2 + 0.5F - z1) / (d11 / 2.0F);
-                                if ((dx * dx + dy * dy + dz * dz < 1.0F) && sourceBlocks.contains(world.getMaterial(x2, y2, z2, chunkBeingPopulated)))
+                                if((dx * dx + dy * dy + dz * dz < 1.0F) && sourceBlocks.contains(world.getMaterial(x2, y2, z2, chunkBeingPopulated)))
                                 {
                                     world.setBlock(x2, y2, z2, material, null, chunkBeingPopulated, true);
                                 }
