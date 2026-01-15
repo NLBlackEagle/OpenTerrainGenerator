@@ -37,7 +37,7 @@ public class BO3MinecraftObjectFunction extends MinecraftObjectFunction<BO3Confi
         rotatedBlock.x(rotatedX);
         rotatedBlock.y(y());
         rotatedBlock.z(rotatedZ);
-        rotatedBlock.rotation = rotation.next();
+        rotatedBlock.rotation = this.rotation.next(rotation);
 
         return rotatedBlock;
     }

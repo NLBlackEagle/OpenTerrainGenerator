@@ -58,7 +58,7 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
             ArrayList<BO4BranchNode> rotatedBranchBranches = new ArrayList<BO4BranchNode>();
             for (BO4BranchNode holder : rotatedBranch.branchesOTGPlus)
             {
-            	rotatedBranchBranches.add(new BO4BranchNode(holder.branchDepth, holder.isRequiredBranch, holder.isWeightedBranch, holder.getRotation().next(), holder.getChance(), holder.getCustomObject(false, null), holder.customObjectName, holder.branchGroup));
+            	rotatedBranchBranches.add(new BO4BranchNode(holder.branchDepth, holder.isRequiredBranch, holder.isWeightedBranch, holder.getRotation().next(rotation), holder.getChance(), holder.getCustomObject(false, null), holder.customObjectName, holder.branchGroup));
             }
             rotatedBranch.branchesOTGPlus = rotatedBranchBranches;
     	}
@@ -180,8 +180,7 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
             if (randomChance <= branch.getChance())
             {
                 BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedCoord(this.x(), this.y(), this.z(), rotation);
-                Rotation newRotation = Rotation.getRotation((rotation.getRotationId() + branch.getRotation().getRotationId()) % 4);
-                return new BO4CustomStructureCoordinate(world, branch.getCustomObject(false, world), branch.customObjectName, newRotation, x + rotatedCoords.getX(), (short)(y + rotatedCoords.getY()), z + rotatedCoords.getZ(), branch.branchDepth, branch.isRequiredBranch, branch.isWeightedBranch, branch.branchGroup);
+                return new BO4CustomStructureCoordinate(world, branch.getCustomObject(false, world), branch.customObjectName, branch.getRotation().next(rotation), x + rotatedCoords.getX(), (short)(y + rotatedCoords.getY()), z + rotatedCoords.getZ(), branch.branchDepth, branch.isRequiredBranch, branch.isWeightedBranch, branch.branchGroup);
             }
         }
         return null;

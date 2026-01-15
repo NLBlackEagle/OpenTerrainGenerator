@@ -89,16 +89,9 @@ public enum Rotation
      * Returns the next rotation. NORTH -> WEST -> SOUTH -> EAST
      * @return The next rotation.
      */
-    public Rotation next()
+    public Rotation next(Rotation rotation)
     {
-        int id = getRotationId();
-        id++;
-        if (id >= values().length)
-        {
-            id = 0;
-        }
-
-        return Rotation.getRotation(id);
+        return values()[(ROTATION_ID + rotation.ROTATION_ID) % values().length];
     }
 
     public static Rotation getRotation(String string) throws InvalidConfigException

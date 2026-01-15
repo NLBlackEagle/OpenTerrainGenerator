@@ -50,7 +50,7 @@ public class BO3BranchFunction extends BranchFunction<BO3Config>
         rotatedBranch.totalChanceSet = totalChanceSet;
         for (BranchNode holder : this.branches)
         {
-            rotatedBranch.branches.add(new BranchNode(holder.getRotation().next(), holder.getChance(), holder.getCustomObject(false, null), holder.customObjectName));
+            rotatedBranch.branches.add(new BranchNode(holder.getRotation().next(rotation), holder.getChance(), holder.getCustomObject(false, null), holder.customObjectName));
         }
         return rotatedBranch;
     }
