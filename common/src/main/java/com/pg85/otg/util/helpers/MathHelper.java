@@ -30,6 +30,12 @@ public class MathHelper
         return d0 < i ? i - 1 : i;
     }
 
+    public static int ceil(double floatNumber)
+    {
+        int truncated = (int) floatNumber;
+        return floatNumber > truncated ? truncated + 1 : truncated;
+    }
+
     public static long floor_double_long(double d)
     {
         long l = (long) d;
