@@ -263,6 +263,24 @@ public class BO4 implements StructuredCustomObject
     	BO4BlockFunction[] blocks = config.getBlocks();
     	if(blocks != null)
     	{
+            Rotation blockRotation;
+            switch(rotation)
+            {
+                case NORTH:
+                    blockRotation = Rotation.NORTH;
+                    break;
+                case WEST:
+                    blockRotation = Rotation.EAST;
+                    break;
+                case SOUTH:
+                    blockRotation = Rotation.SOUTH;
+                    break;
+                case EAST:
+                    blockRotation = Rotation.WEST;
+                    break;
+                default:
+                    throw new IllegalArgumentException();
+            }
 	        for (BO4BlockFunction block : blocks)
 	        {
 	        	if(block instanceof BO4RandomBlockFunction)
@@ -289,9 +307,9 @@ public class BO4 implements StructuredCustomObject
 	            	continue;
 	            }
 	
-	        	if(rotation != Rotation.NORTH)
+	        	if(blockRotation != Rotation.NORTH)
 	        	{
-                    newBlock = block.rotate(rotation);
+                    newBlock = block.rotate(blockRotation);
 	
 	                if(isOnBiomeBorder)
 	                {
