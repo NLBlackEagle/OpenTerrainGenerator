@@ -44,7 +44,7 @@ public class EntitiesCommand extends BaseCommand
                         msg += VALUE_COLOR + " (" + enumcreaturetype.name() + ")";
                     }
                 }
-                OTG.log(LogMarker.INFO, msg.replace("ง2", "").replace("ง", "").replace("งa", ""));
+                OTG.log(LogMarker.INFO, msg.replace("ยง2", "").replace("ยง", "").replace("ยงa", ""));
                 sender.sendMessage(new TextComponentString(MESSAGE_COLOR + "- " + msg));
             } else {
                 // This can happen for LIGHTNING_BOLT since it appears to be added to the
