@@ -124,7 +124,7 @@ public class BO4RandomBlockFunction extends BO4BlockFunction
         String text = "RandomBlock(" + x() + "," + y() + "," + z();
         for (int i = 0; i < blockCount; i++)
         {
-            if (blockContainers[i].hasTag())
+            if (!blockContainers[i].hasTag())
             {
                 text += "," + blockContainers[i].material() + "," + blockChances[i];
             } else
