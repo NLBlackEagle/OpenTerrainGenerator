@@ -300,12 +300,12 @@ public class BO4Config extends CustomObjectConfigFile
     		this.heightMap = new BO4BlockFunction[16][16];
 
             // make heightmap containing the highest or lowest blocks in this chunk
-            boolean smoothStartTop = start.getConfig().overrideChildSettings && this.overrideChildSettings ? start.getConfig().smoothStartTop : this.smoothStartTop;
+            boolean startTop = start.getConfig().overrideChildSettings && overrideChildSettings ? start.getConfig().smoothStartTop : smoothStartTop;
             boolean allowWood = start.getConfig().overrideChildSettings && overrideChildSettings ? start.getConfig().smoothStartWood : smoothStartWood;
             boolean allowLiquid = start.getConfig().spawnUnderWater;
             for(BO4BlockFunction block : blocks)
             {
-                if(!smoothStartTop)
+                if(!startTop)
                 {
                     if(block.y() != getminY())
                     {
