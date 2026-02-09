@@ -8,6 +8,20 @@ minecraft {
     mappings channel: "${forge_mappings_channel}", version: "${forge_mappings_version}"
 
     accessTransformer = file("src/main/resources/META-INF/${forge_access_transformers}")
+
+    runs {
+        client {
+            taskName "runClient ${mod_name} ${minecraft_version}"
+            environment 'MC_VERSION', "${minecraft_version}"
+            property 'fml.coreMods.load', "${forge_plugin_class}"
+        }
+
+        server {
+            taskName "runServer ${mod_name} ${minecraft_version}"
+            environment 'MC_VERSION', "${minecraft_version}"
+            property 'fml.coreMods.load', "${forge_plugin_class}"
+        }
+    }
 }
 
 dependencies {
