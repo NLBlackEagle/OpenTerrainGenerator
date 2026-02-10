@@ -10,15 +10,10 @@ minecraft {
     accessTransformer = file("src/main/resources/META-INF/${forge_access_transformers}")
 }
 
-repositories {
-    maven { url = 'https://maven.enginehub.org/artifactory/repo/' } // worldedit
-}
-
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     implementation project(':common')
-    compileOnly "com.sk89q.worldedit:worldedit-forge-mc1.11:${worldedit_forge_version}"
-    compileOnly "com.sk89q.worldedit:worldedit-core:${worldedit_core_version}"
+    implementation "curse.maven:worldedit-225608:${worldedit_forge_version}"
 }
 
 processResources {

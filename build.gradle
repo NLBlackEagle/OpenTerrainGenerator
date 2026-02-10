@@ -18,6 +18,12 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
+        exclusiveContent {
+            forRepository {
+                maven { url "https://cursemaven.com" }
+            }
+            filter { includeGroup "curse.maven" }
+        }
     }
 
     version = "${minecraft_version}-${mod_version}"
