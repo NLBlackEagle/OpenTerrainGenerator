@@ -3,6 +3,7 @@ package com.pg85.otg.forge.commands;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -120,7 +121,7 @@ public final class OTGCommandHandler implements ICommand
                     .sorted()
                     .collect(Collectors.toList());
         }
-        return new ArrayList<String>();
+        return Collections.emptyList();
     }
 
     @Override
