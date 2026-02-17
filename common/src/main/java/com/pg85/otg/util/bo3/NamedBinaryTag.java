@@ -566,7 +566,6 @@ public class NamedBinaryTag
                         tag.writePayload(out);
                     }
                 }
-                writeType(out, Type.TAG_End);
                 break;
             case TAG_Int_Array:
                 int[] ints = (int[]) value;
