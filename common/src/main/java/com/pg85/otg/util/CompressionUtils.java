@@ -29,6 +29,7 @@ public class CompressionUtils
 
     public static InputStream newGZIPInputStream(Path file) throws IOException
     {
+        @SuppressWarnings("resource")
         SeekableByteChannel channel = Files.newByteChannel(file);
         ByteBuffer buf = ByteBuffer.allocate(2).order(ByteOrder.nativeOrder());
         while(buf.hasRemaining())
@@ -40,7 +41,7 @@ public class CompressionUtils
         }
         channel.position(0);
         InputStream in = Channels.newInputStream(channel);
-        return (buf.getShort(0) & 0xFFFF) == GZIPInputStream.GZIP_MAGIC ? new GZIPInputStream(in) : in;
+        return Short.toUnsignedInt(buf.getShort(0)) == GZIPInputStream.GZIP_MAGIC ? new GZIPInputStream(in) : in;
     }
 
     public static OutputStream newGZIPOutputStream(Path file) throws IOException
