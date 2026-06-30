@@ -4,24 +4,24 @@ import com.pg85.otg.configuration.ErroredFunction;
 import com.pg85.otg.configuration.world.WorldConfig;
 import com.pg85.otg.exception.InvalidConfigException;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class CustomObjectResourcesManager
 {
-    private Map<String, ArrayList<Class<? extends CustomObjectConfigFunction<?>>>> configFunctions = new HashMap<>();
+    private final Map<Class<?>, Map<String, Class<? extends CustomObjectConfigFunction<?>>>> configFunctions = new HashMap<>();
 
     public void registerConfigFunction(String name, Class<? extends CustomObjectConfigFunction<?>> value)
     {
-        ArrayList<Class<? extends CustomObjectConfigFunction<?>>> list = configFunctions.get(name.toLowerCase());
-        if(list == null)
+        try
         {
-            list = new ArrayList<Class<? extends CustomObjectConfigFunction<?>>>();
-            configFunctions.put(name.toLowerCase(), list);
+            configFunctions.computeIfAbsent(value.newInstance().getHolderType(), k -> new HashMap<>()).put(name.toLowerCase(), value);
         }
-        list.add(value);
+        catch(InstantiationException | IllegalAccessException e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -39,55 +39,44 @@ public class CustomObjectResourcesManager
     // It's checked with clazz.getConstructor(holder.getClass(), ...))
     public <T> CustomObjectConfigFunction<T> getConfigFunction(String name, T holder, List<String> args)
     {
+        Map<String, Class<? extends CustomObjectConfigFunction<?>>> m = configFunctions.get(holder.getClass());
+        if(m == null)
+        {
+            return new CustomObjectErroredFunction<T>(name, holder, args, "No config functions registered for holder type " + holder.getClass());
+        }
+
+        name = name.toLowerCase().trim();
+
         // If a Block() tag has the parameters of a RandomBlock tag then transform it into a RandomBlock
         // This allows users to edit Bo3's and change Blocks to RandomBlocks with a simple find/replace.
-        if(name.toLowerCase().trim().equals("block") && args.size() > 5)
+        if(name.equals("block") && args.size() > 5)
         {
-            name = "RandomBlock";
+            name = "randomblock";
         }
 
-        // Get the class of the config function
-        ArrayList<Class<? extends CustomObjectConfigFunction<?>>> clazzes = configFunctions.get(name.toLowerCase());
-        if(clazzes == null)
+        Class<? extends CustomObjectConfigFunction<T>> clazz = (Class<? extends CustomObjectConfigFunction<T>>) m.get(name);
+        if(clazz == null)
         {
-            return new CustomObjectErroredFunction<T>(name, holder, args, "Resource type " + name + " not found");
+            return new CustomObjectErroredFunction<T>(name, holder, args, "No config function registered with name " + name);
         }
 
-        // Get a config function
-        CustomObjectConfigFunction<T> configFunction = null;
-        for(Class<? extends CustomObjectConfigFunction<?>> clazz : clazzes)
+        CustomObjectConfigFunction<T> instance;
+        try
         {
-            try
-            {
-                configFunction = (CustomObjectConfigFunction<T>) clazz.newInstance();
-            }
-            catch(Exception e)
-            {
-                throw new RuntimeException("Reflection error while loading the resources: ", e);
-            }
-
-            // Check if config function is of the right type
-            boolean matchingTypes = holder.getClass().isAssignableFrom(configFunction.getHolderType());
-            if(!matchingTypes)
-            {
-                continue;
-            }
-
-            // Initialize the function
-            try
-            {
-                configFunction.init(holder, args);
-            }
-            catch(InvalidConfigException e)
-            {
-                configFunction = new CustomObjectErroredFunction<>(name, holder, args, e.getMessage());
-            }
-            break;
+            instance = clazz.newInstance();
         }
-        if(configFunction == null)
+        catch(InstantiationException | IllegalAccessException e)
         {
-            return new CustomObjectErroredFunction<T>(name, holder, args, "Resource " + name + " cannot be placed in this config file");
+            throw new RuntimeException(e);
         }
-        return configFunction;
+        try
+        {
+            instance.init(holder, args);
+        }
+        catch(InvalidConfigException e)
+        {
+            return new CustomObjectErroredFunction<>(name, holder, args, e.getMessage());
+        }
+        return instance;
     }
 }
