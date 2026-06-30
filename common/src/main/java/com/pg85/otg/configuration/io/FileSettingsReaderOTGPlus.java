@@ -119,10 +119,6 @@ public class FileSettingsReaderOTGPlus implements SettingsReaderOTGPlus
             String parameters = configFunctionString.substring(bracketIndex + 1, configFunctionString.length() - 1);
             List<String> args = StringHelper.readCommaSeperatedString(parameters);
             CustomObjectConfigFunction<T> function = manager.getConfigFunction(functionName, holder, args);
-            if(function == null)
-            {
-            	function = manager.getConfigFunction(functionName, holder, args);	
-            }
             result.add(function);
             if (!function.isValid() && OTG.getPluginConfig().spawnLog)
             {
