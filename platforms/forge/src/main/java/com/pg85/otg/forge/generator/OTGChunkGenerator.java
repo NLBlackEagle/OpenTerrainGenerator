@@ -39,6 +39,7 @@ import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.datafix.DataFixesManager;
 import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockPos.MutableBlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome.SpawnListEntry;
 import net.minecraft.world.chunk.Chunk;
@@ -58,6 +59,7 @@ public class OTGChunkGenerator implements IChunkGenerator
 	private LRUCache<ChunkCoordinate, Chunk> unloadedChunksCache;
     ForgeChunkBuffer chunkBuffer;
     Object chunkBufferLock = new Object();
+    private final MutableBlockPos pos = new MutableBlockPos();
     //
 
     private	DataFixer dataFixer = DataFixesManager.createFixer();
@@ -302,7 +304,7 @@ public class OTGChunkGenerator implements IChunkGenerator
             return;
         }
 
-        BlockPos pos = new BlockPos(x, y, z);
+        BlockPos pos = this.pos.setPos(x, y, z);
 
         this.world.getWorld().setBlockState(pos, ((ForgeMaterialData) material).getBlockState(), BlockFlags.SEND_TO_CLIENTS | BlockFlags.NO_OBSERVERS);
 

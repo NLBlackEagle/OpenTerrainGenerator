@@ -19,6 +19,7 @@ import com.pg85.otg.util.minecraft.defaults.DefaultMaterial;
 
 import net.minecraft.server.v1_12_R1.Block;
 import net.minecraft.server.v1_12_R1.BlockPosition;
+import net.minecraft.server.v1_12_R1.BlockPosition.MutableBlockPosition;
 import net.minecraft.server.v1_12_R1.Blocks;
 import net.minecraft.server.v1_12_R1.Chunk;
 import net.minecraft.server.v1_12_R1.ChunkSection;
@@ -51,6 +52,7 @@ public class OTGChunkGenerator extends ChunkGenerator
     
     // Caches
 	private LRUCache<ChunkCoordinate, ChunkData> unloadedChunksCache;
+    private final MutableBlockPosition pos = new MutableBlockPosition();
     //
     
     public OTGChunkGenerator(OTGPlugin _plugin, BukkitWorld world)
@@ -157,7 +159,7 @@ public class OTGChunkGenerator extends ChunkGenerator
             return;
         }
 
-        BlockPosition pos = new BlockPosition(x, y, z);
+        BlockPosition pos = this.pos.a(x, y, z);
 
         this.world.getWorld().setTypeAndData(pos, ((BukkitMaterialData) material).getBlockState(), 2 | 16);
 
