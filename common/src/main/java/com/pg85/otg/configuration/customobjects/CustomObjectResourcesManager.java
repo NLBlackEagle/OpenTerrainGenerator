@@ -11,23 +11,17 @@ import java.util.Map;
 
 public class CustomObjectResourcesManager
 {
-    private Map<String, ArrayList<Class<? extends CustomObjectConfigFunction<?>>>> configFunctions;
-
-    public CustomObjectResourcesManager()
-    {
-        // Also store in this class
-        this.configFunctions = new HashMap<String, ArrayList<Class<? extends CustomObjectConfigFunction<?>>>>();
-    }
+    private Map<String, ArrayList<Class<? extends CustomObjectConfigFunction<?>>>> configFunctions = new HashMap<>();
 
     public void registerConfigFunction(String name, Class<? extends CustomObjectConfigFunction<?>> value)
     {
-    	ArrayList<Class<? extends CustomObjectConfigFunction<?>>> list = configFunctions.get(name.toLowerCase());
-    	if(list == null)
-    	{
-    		list = new ArrayList<Class<? extends CustomObjectConfigFunction<?>>>();
-    		configFunctions.put(name.toLowerCase(), list);
-    	}
-    	list.add(value);
+        ArrayList<Class<? extends CustomObjectConfigFunction<?>>> list = configFunctions.get(name.toLowerCase());
+        if(list == null)
+        {
+            list = new ArrayList<Class<? extends CustomObjectConfigFunction<?>>>();
+            configFunctions.put(name.toLowerCase(), list);
+        }
+        list.add(value);
     }
 
     /**
@@ -45,16 +39,16 @@ public class CustomObjectResourcesManager
     // It's checked with clazz.getConstructor(holder.getClass(), ...))
     public <T> CustomObjectConfigFunction<T> getConfigFunction(String name, T holder, List<String> args)
     {
-    	// If a Block() tag has the parameters of a RandomBlock tag then transform it into a RandomBlock
-    	// This allows users to edit Bo3's and change Blocks to RandomBlocks with a simple find/replace.
-    	if(name.toLowerCase().trim().equals("block") && args.size() > 5)
-    	{
-    		name = "RandomBlock";
-    	}
+        // If a Block() tag has the parameters of a RandomBlock tag then transform it into a RandomBlock
+        // This allows users to edit Bo3's and change Blocks to RandomBlocks with a simple find/replace.
+        if(name.toLowerCase().trim().equals("block") && args.size() > 5)
+        {
+            name = "RandomBlock";
+        }
 
         // Get the class of the config function
         ArrayList<Class<? extends CustomObjectConfigFunction<?>>> clazzes = configFunctions.get(name.toLowerCase());
-        if (clazzes == null)
+        if(clazzes == null)
         {
             return new CustomObjectErroredFunction<T>(name, holder, args, "Resource type " + name + " not found");
         }
@@ -63,34 +57,36 @@ public class CustomObjectResourcesManager
         CustomObjectConfigFunction<T> configFunction = null;
         for(Class<? extends CustomObjectConfigFunction<?>> clazz : clazzes)
         {
-	        try
-	        {
-	            configFunction = (CustomObjectConfigFunction<T>) clazz.newInstance();
-	        } catch (Exception e)
-	        {
-	            throw new RuntimeException("Reflection error while loading the resources: ", e);
-	        }
-	
-	        // Check if config function is of the right type
-	        boolean matchingTypes = holder.getClass().isAssignableFrom(configFunction.getHolderType());
-	        if (!matchingTypes)
-	        {
-	        	continue;
-	        }
-	
-	        // Initialize the function
-	        try
-	        {
-	            configFunction.init(holder, args);
-	        } catch (InvalidConfigException e)
-	        {
-	            configFunction = new CustomObjectErroredFunction<>(name, holder, args, e.getMessage());
-	        }
-	        break;
+            try
+            {
+                configFunction = (CustomObjectConfigFunction<T>) clazz.newInstance();
+            }
+            catch(Exception e)
+            {
+                throw new RuntimeException("Reflection error while loading the resources: ", e);
+            }
+
+            // Check if config function is of the right type
+            boolean matchingTypes = holder.getClass().isAssignableFrom(configFunction.getHolderType());
+            if(!matchingTypes)
+            {
+                continue;
+            }
+
+            // Initialize the function
+            try
+            {
+                configFunction.init(holder, args);
+            }
+            catch(InvalidConfigException e)
+            {
+                configFunction = new CustomObjectErroredFunction<>(name, holder, args, e.getMessage());
+            }
+            break;
         }
         if(configFunction == null)
         {
-        	return new CustomObjectErroredFunction<T>(name, holder, args, "Resource " + name + " cannot be placed in this config file");
+            return new CustomObjectErroredFunction<T>(name, holder, args, "Resource " + name + " cannot be placed in this config file");
         }
         return configFunction;
     }
