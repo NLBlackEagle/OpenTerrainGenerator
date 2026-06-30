@@ -232,8 +232,13 @@ public class OTGChunkGenerator implements IChunkGenerator
     
     public LocalMaterialData getMaterialInUnloadedChunk(int x, int y, int z)
     {
-    	LocalMaterialData[] blockColumn = getBlockColumnInUnloadedChunk(x,z);
-        return blockColumn[y];
+        Chunk chunk = this.world.world.getChunkProvider().getLoadedChunk(x >> 4, z >> 4);
+        if(chunk == null)
+        {
+            chunk = this.generateRawChunk(x >> 4, z >> 4);
+        }
+
+        return ForgeMaterialData.ofMinecraftBlockState(chunk.getBlockState(x & 15, y, z & 15));
     }
 
     public int getHighestBlockYInUnloadedChunk(int x, int z, boolean findSolid, boolean findLiquid, boolean ignoreLiquid, boolean ignoreSnow)

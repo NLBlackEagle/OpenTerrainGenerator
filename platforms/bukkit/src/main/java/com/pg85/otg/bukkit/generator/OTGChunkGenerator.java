@@ -228,10 +228,21 @@ public class OTGChunkGenerator extends ChunkGenerator
     	return this.chunkProviderOTG.getBiomeBlocksNoiseValue(blockX, blockZ);
     }    
     
+    @SuppressWarnings("deprecation")
     public LocalMaterialData getMaterialInUnloadedChunk(int x, int y, int z)
     {
-    	LocalMaterialData[] blockColumn = getBlockColumnInUnloadedChunk(x,z);
-        return blockColumn[y];
+        Chunk chunk = this.world.getWorld().getChunkProvider().getLoadedChunkAt(x >> 4, z >> 4);
+        if(chunk != null)
+        {
+            return BukkitMaterialData.ofMinecraftBlockState(chunk.a(x & 15, y, z & 15));
+        }
+        else
+        {
+            ChunkData chunkData = this.generateChunkData(this.world.getWorld().getWorld(), null, x >> 4, z >> 4, null);
+
+            MaterialData materialData = chunkData.getTypeAndData(x & 15, y, z & 15);
+            return BukkitMaterialData.ofMinecraftBlockState(materialData.getItemTypeId(), materialData.getData());
+        }
     }
 
     public int getHighestBlockYInUnloadedChunk(int x, int z, boolean findSolid, boolean findLiquid, boolean ignoreLiquid, boolean ignoreSnow)
