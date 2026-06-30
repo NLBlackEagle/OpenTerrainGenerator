@@ -30,6 +30,7 @@ import com.pg85.otg.util.minecraft.defaults.DefaultMaterial;
 
 import net.minecraft.block.BlockGravel;
 import net.minecraft.block.BlockSand;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
@@ -243,31 +244,55 @@ public class OTGChunkGenerator implements IChunkGenerator
 
     public int getHighestBlockYInUnloadedChunk(int x, int z, boolean findSolid, boolean findLiquid, boolean ignoreLiquid, boolean ignoreSnow)
     {
-    	int height = -1;
-
-    	LocalMaterialData[] blockColumn = getBlockColumnInUnloadedChunk(x,z);
-    	ForgeMaterialData material;
-    	boolean isLiquid;
-    	boolean isSolid;
-    	
-        for(int y = 255; y > -1; y--)
+        Chunk chunk = this.world.world.getChunkProvider().getLoadedChunk(x >> 4, z >> 4);
+        if(chunk == null)
         {
-        	material = (ForgeMaterialData) blockColumn[y];
-        	isLiquid = material.isLiquid();
-        	isSolid = material.isSolid() || (!ignoreSnow && material.isMaterial(DefaultMaterial.SNOW));
-        	if(!(isLiquid && ignoreLiquid))
-        	{
-            	if((findSolid && isSolid) || (findLiquid && isLiquid))
-        		{
-            		return y;
-        		}
-            	if((findSolid && isLiquid) || (findLiquid && isSolid))
-            	{
-            		return -1;
-            	}
-        	}
+            chunk = this.generateRawChunk(x >> 4, z >> 4);
         }
-    	return height;
+
+        ExtendedBlockStorage[] sections = chunk.getBlockStorageArray();
+        for(int i = sections.length - 1; i >= 0; i--)
+        {
+            ExtendedBlockStorage section = sections[i];
+            if(section == null)
+            {
+                continue;
+            }
+
+            for(int j = 15; j >= 0; j--)
+            {
+                int y = section.getYLocation() | j;
+                IBlockState state = section.get(x & 15, j, z & 15);
+                if(state.getMaterial().isLiquid())
+                {
+                    if(ignoreLiquid)
+                    {
+                        continue;
+                    }
+                    if(findLiquid)
+                    {
+                        return y;
+                    }
+                    if(findSolid)
+                    {
+                        return -1;
+                    }
+                }
+                else if(state.getMaterial().isSolid() && state.causesSuffocation() || !ignoreSnow && state.getBlock() == Blocks.SNOW)
+                {
+                    if(findSolid)
+                    {
+                        return y;
+                    }
+                    if(findLiquid)
+                    {
+                        return -1;
+                    }
+                }
+            }
+        }
+
+        return -1;
     }
 
     public void setBlock(int x, int y, int z, LocalMaterialData material, NamedBinaryTag metaDataTag)

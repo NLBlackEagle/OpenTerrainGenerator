@@ -17,6 +17,7 @@ import com.pg85.otg.util.LRUCache;
 import com.pg85.otg.util.bo3.NamedBinaryTag;
 import com.pg85.otg.util.minecraft.defaults.DefaultMaterial;
 
+import net.minecraft.server.v1_12_R1.Block;
 import net.minecraft.server.v1_12_R1.BlockPosition;
 import net.minecraft.server.v1_12_R1.Blocks;
 import net.minecraft.server.v1_12_R1.Chunk;
@@ -24,6 +25,7 @@ import net.minecraft.server.v1_12_R1.ChunkSection;
 import net.minecraft.server.v1_12_R1.DataConverter;
 import net.minecraft.server.v1_12_R1.DataConverterRegistry;
 import net.minecraft.server.v1_12_R1.DataConverterTypes;
+import net.minecraft.server.v1_12_R1.IBlockData;
 import net.minecraft.server.v1_12_R1.NBTTagCompound;
 import net.minecraft.server.v1_12_R1.TileEntity;
 
@@ -245,29 +247,91 @@ public class OTGChunkGenerator extends ChunkGenerator
         }
     }
 
+    @SuppressWarnings("deprecation")
     public int getHighestBlockYInUnloadedChunk(int x, int z, boolean findSolid, boolean findLiquid, boolean ignoreLiquid, boolean ignoreSnow)
     {
-    	int height = -1;
-
-    	LocalMaterialData[] blockColumn = getBlockColumnInUnloadedChunk(x,z);
-
-        for(int y = 255; y > -1; y--)
+        Chunk chunk = this.world.getWorld().getChunkProvider().getLoadedChunkAt(x >> 4, z >> 4);
+        if(chunk != null)
         {
-        	BukkitMaterialData material = (BukkitMaterialData) blockColumn[y];
-        	boolean isLiquid = material.isLiquid();
-        	boolean isSolid = material.isSolid() || (!ignoreSnow && material.isMaterial(DefaultMaterial.SNOW));
-        	if(!(isLiquid && ignoreLiquid))
-        	{
-            	if((findSolid && isSolid) || (findLiquid && isLiquid))
-        		{
-            		return y;
-        		}
-            	if((findSolid && isLiquid) || (findLiquid && isSolid))
-            	{
-            		return -1;
-            	}
-        	}
+            ChunkSection[] sections = chunk.getSections();
+            for(int i = sections.length - 1; i >= 0; i--)
+            {
+                ChunkSection section = sections[i];
+                if(section == null)
+                {
+                    continue;
+                }
+
+                for(int j = 15; j >= 0; j--)
+                {
+                    int y = section.getYPosition() | j;
+                    IBlockData state = section.getType(x & 15, j, z & 15);
+                    if(state.getMaterial().isLiquid())
+                    {
+                        if(ignoreLiquid)
+                        {
+                            continue;
+                        }
+                        if(findLiquid)
+                        {
+                            return y;
+                        }
+                        if(findSolid)
+                        {
+                            return -1;
+                        }
+                    }
+                    else if(state.getMaterial().isSolid() && state.r() || !ignoreSnow && state.getBlock() == Blocks.SNOW)
+                    {
+                        if(findSolid)
+                        {
+                            return y;
+                        }
+                        if(findLiquid)
+                        {
+                            return -1;
+                        }
+                    }
+                }
+            }
         }
-    	return height;
+        else
+        {
+            ChunkData chunkData = this.generateChunkData(this.world.getWorld().getWorld(), null, x >> 4, z >> 4, null);
+
+            for(int y = PluginStandardValues.WORLD_HEIGHT - 1; y >= PluginStandardValues.WORLD_DEPTH; y--)
+            {
+                IBlockData state = Block.getById(chunkData.getTypeId(x & 15, y, z & 15)).fromLegacyData(chunkData.getData(x & 15, y, z & 15));
+
+                if(state.getMaterial().isLiquid())
+                {
+                    if(ignoreLiquid)
+                    {
+                        continue;
+                    }
+                    if(findLiquid)
+                    {
+                        return y;
+                    }
+                    if(findSolid)
+                    {
+                        return -1;
+                    }
+                }
+                else if(state.getMaterial().isSolid() && state.r() || !ignoreSnow && state.getBlock() == Blocks.SNOW)
+                {
+                    if(findSolid)
+                    {
+                        return y;
+                    }
+                    if(findLiquid)
+                    {
+                        return -1;
+                    }
+                }
+            }
+        }
+
+        return -1;
     }
 }
