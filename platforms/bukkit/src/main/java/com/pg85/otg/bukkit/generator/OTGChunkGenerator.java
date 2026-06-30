@@ -12,7 +12,6 @@ import com.pg85.otg.configuration.world.WorldConfig;
 import com.pg85.otg.generator.ChunkProviderOTG;
 import com.pg85.otg.generator.ObjectSpawner;
 import com.pg85.otg.logging.LogMarker;
-import com.pg85.otg.util.BlockPos2D;
 import com.pg85.otg.util.ChunkCoordinate;
 import com.pg85.otg.util.LRUCache;
 import com.pg85.otg.util.bo3.NamedBinaryTag;
@@ -49,7 +48,6 @@ public class OTGChunkGenerator extends ChunkGenerator
     private BukkitWorld world;
     
     // Caches
-	private LRUCache<BlockPos2D, LocalMaterialData[]> unloadedBlockColumnsCache;
 	private LRUCache<ChunkCoordinate, ChunkData> unloadedChunksCache;
     //
     
@@ -60,7 +58,6 @@ public class OTGChunkGenerator extends ChunkGenerator
         this.dataConverter = DataConverterRegistry.a();
         // TODO: Add a setting to the worldconfig for the size of these caches. 
         // Worlds with lots of BO4's and large smoothing areas may want to increase this. 
-        this.unloadedBlockColumnsCache = new LRUCache<BlockPos2D, LocalMaterialData[]>(1024);
         this.unloadedChunksCache = new LRUCache<ChunkCoordinate, ChunkData>(1024); //Changed 128 chunks cache to 1024 chunks cache for customstructures
     }
     
