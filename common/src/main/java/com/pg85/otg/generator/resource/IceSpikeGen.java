@@ -103,7 +103,8 @@ public class IceSpikeGen extends Resource
             y--;
         }
         
-        parseMaterials(world, material, sourceBlocks);
+        material = material.parseForWorld(world);
+        sourceBlocks.parseForWorld(world);
         
         if ((worldMaterial = world.getMaterial(x, y, z, chunkBeingPopulated)) == null || !this.sourceBlocks.contains(worldMaterial))
         {
@@ -145,7 +146,8 @@ public class IceSpikeGen extends Resource
             --y;
         }
         
-        parseMaterials(world, material, sourceBlocks);
+        material = material.parseForWorld(world);
+        sourceBlocks.parseForWorld(world);
 
         if ((worldMaterial = world.getMaterial(x, y, z, chunkBeingPopulated)) == null || !sourceBlocks.contains(worldMaterial))
         {
@@ -238,7 +240,7 @@ public class IceSpikeGen extends Resource
         					(
     							worldMaterial.isAir() || 
     							sourceBlocks.contains(worldMaterial) || 
-    							worldMaterial.equals(this.material)
+    							this.material.matches(worldMaterial)
 							)
             			)
                     	{

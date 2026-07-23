@@ -1,8 +1,9 @@
 package com.pg85.otg.util.bo3;
 
-import com.pg85.otg.exception.InvalidConfigException;
-
 import java.util.Random;
+
+import com.pg85.otg.exception.InvalidConfigException;
+import com.pg85.otg.util.helpers.StringHelper;
 
 /**
  * An enum to help with CustomObject rotation.
@@ -15,6 +16,7 @@ public enum Rotation
     SOUTH(2),
     EAST(3);
 
+    private static final Rotation[] VALUES = values();
     private final int ROTATION_ID;
 
     private Rotation(int id)
@@ -34,26 +36,16 @@ public enum Rotation
 
     public static Rotation FromString(String rotation)
     {
-    	if(rotation.toLowerCase().equals("north"))
-    	{
-    		return NORTH;
-    	}
-    	if(rotation.toLowerCase().equals("east"))
-    	{
-    		return EAST;
-    	}
-    	if(rotation.toLowerCase().equals("south"))
-    	{
-    		return SOUTH;
-    	}
-    	if(rotation.toLowerCase().equals("west"))
-    	{
-    		return WEST;
-    	} else {
-    		return WEST; // WEST is the default
-    	}    	
-    }     
-    
+        try
+        {
+            return Rotation.valueOf(rotation.toUpperCase());
+        }
+        catch(IllegalArgumentException e)
+        {
+            return WEST; // WEST is the default
+        }
+    }
+
     /**
      * Get the rotation with the given id. Returns null if the
      * rotation id isn't found.
@@ -63,12 +55,9 @@ public enum Rotation
      */
     public static Rotation getRotation(int id)
     {
-        for (Rotation rotation : values())
+        if(id >= 0 && id < VALUES.length)
         {
-            if (rotation.ROTATION_ID == id)
-            {
-                return rotation;
-            }
+            return VALUES[id];
         }
 
         return null;
@@ -82,55 +71,47 @@ public enum Rotation
      */
     public static Rotation getRandomRotation(Random random)
     {
-        return values()[random.nextInt(values().length)];
+        return VALUES[random.nextInt(VALUES.length)];
     }
 
     /**
      * Returns the next rotation. NORTH -> WEST -> SOUTH -> EAST
      * @return The next rotation.
      */
-    public Rotation next()
+    public Rotation next(Rotation rotation)
     {
-        int id = getRotationId();
-        id++;
-        if (id >= values().length)
-        {
-            id = 0;
-        }
-
-        return Rotation.getRotation(id);
+        return VALUES[(ROTATION_ID + rotation.ROTATION_ID) % VALUES.length];
     }
 
     public static Rotation getRotation(String string) throws InvalidConfigException
     {
-        Rotation rotation = null;
-        // Try to parse it as a number
-        try
+        if(StringHelper.isNumber(string))
         {
-            rotation = getRotation(Integer.parseInt(string));
-        } catch (NumberFormatException e)
-        {
+            int id;
+            try
+            {
+                id = Integer.parseInt(string);
+            }
+            catch(NumberFormatException e)
+            {
+                throw new InvalidConfigException("Unknown rotation \"" + string + "\"", e);
+            }
+            if(id < 0 || id >= VALUES.length)
+            {
+                throw new InvalidConfigException("Unknown rotation \"" + string + "\"");
+            }
+            return VALUES[id];
         }
-
-        if (rotation != null)
+        else
         {
-            return rotation;
+            try
+            {
+                return valueOf(string.toUpperCase());
+            }
+            catch(IllegalArgumentException e)
+            {
+                throw new InvalidConfigException("Unknown rotation \"" + string + "\"", e);
+            }
         }
-
-        // Try to parse it as a String
-        try
-        {
-            rotation = Rotation.valueOf(string.toUpperCase());
-        } catch (IllegalArgumentException e)
-        {
-        }
-
-        if (rotation != null)
-        {
-            return rotation;
-        }
-
-        // Failed
-        throw new InvalidConfigException("Unknown rotation: " + string);
     }
 }

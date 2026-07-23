@@ -119,7 +119,7 @@ public class UndergroundLakeGen extends Resource
                     for (int zLake = (int) (zAdjusted - horizontalSize / 2.0D); zLake <= (int) (zAdjusted + horizontalSize / 2.0D); zLake++)
                     {
                         LocalMaterialData material = world.getMaterial(xLake, yLake, zLake, chunkBeingPopulated);
-                        if (material == null || material.isEmptyOrAir() || material.isMaterial(DefaultMaterial.BEDROCK))
+                        if (material == null || material.isAir() || material.isMaterial(DefaultMaterial.BEDROCK))
                         {
                             // Don't replace air or bedrock
                             continue;

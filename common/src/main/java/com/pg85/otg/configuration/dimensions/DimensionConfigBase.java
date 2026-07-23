@@ -1,7 +1,5 @@
 package com.pg85.otg.configuration.dimensions;
 
-import java.util.ArrayList;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,13 +58,10 @@ public abstract class DimensionConfigBase
 		this.Settings.DimensionAboveHeight = worldConfig.dimensionAboveHeight;
 		this.Settings.DimensionBelow = worldConfig.dimensionBelow;
 		this.Settings.DimensionBelowHeight = worldConfig.dimensionBelowHeight;
-		LocalMaterialData[] portalMats = worldConfig.dimensionPortalMaterials.toArray(new LocalMaterialData[0]);
-		ArrayList<String> portalMaterials = new ArrayList<String>();
-		for(LocalMaterialData mat : portalMats)
-		{
-			portalMaterials.add(mat.getName().toUpperCase());
-		}
-		this.Settings.DimensionPortalMaterials = portalMaterials.toArray(new String[0]);
+		this.Settings.DimensionPortalMaterials = worldConfig.dimensionPortalMaterials.stream()
+		        .map(LocalMaterialData::getName)
+		        .map(String::toUpperCase)
+		        .toArray(String[]::new);
 		this.Settings.PortalColor = worldConfig.portalColor;
 		this.Settings.PortalParticleType = worldConfig.portalParticleType; 
 		this.Settings.PortalMobType = worldConfig.portalMobType;

@@ -9,15 +9,15 @@ import com.pg85.otg.util.bo3.NamedBinaryTag;
 import com.pg85.otg.util.minecraft.defaults.EntityNames;
 
 import java.io.*;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
  * Represents an entity in a BO3.
  */
-public abstract class EntityFunction<T extends CustomObjectConfigFile> extends CustomObjectConfigFunction<T>
+public abstract class EntityFunction<T extends CustomObjectConfigFile> extends ExtendedFunction<T>
 {
-    public int y;
-
     public String name = "";
     public int groupSize = 1;
     public String nameTagOrNBTFileName = "";
@@ -27,20 +27,16 @@ public abstract class EntityFunction<T extends CustomObjectConfigFile> extends C
     public int rotation = 0;
 
     @Override
-    public void load(List<String> args) throws InvalidConfigException
+    public void load(T holder, List<String> args) throws InvalidConfigException
     {
         assureSize(5, args);
-        // Those limits are arbitrary, LocalWorld.setBlock will limit it
-        // correctly based on what chunks can be accessed
-		x = readInt(args.get(0), -100, 100);
-        y = readInt(args.get(1), -1000, 1000);
-        z = readInt(args.get(2), -100, 100);
+        readXYZ(args, 0);
         processEntityName(args.get(3));
         groupSize = readInt(args.get(4), 0, Integer.MAX_VALUE);
 
         if(args.size() > 5)
         {
-            processNameTagOrFileName(args.get(5));
+            processNameTagOrFileName(holder, args.get(5));
         }
     }
 
@@ -61,30 +57,31 @@ public abstract class EntityFunction<T extends CustomObjectConfigFile> extends C
         this.name = resourceLocation.split(":")[1];
     }
 
-    public void processNameTagOrFileName(String s) {
+    public void processNameTagOrFileName(T holder, String s) {
         originalNameTagOrNBTFileName = s;
 
         if(originalNameTagOrNBTFileName != null && originalNameTagOrNBTFileName.toLowerCase().trim().endsWith(".txt"))
         {
-            nameTagOrNBTFileName = getHolder().getFile().getParentFile().getAbsolutePath() + File.separator + originalNameTagOrNBTFileName;
+            nameTagOrNBTFileName = holder.getFile().getParentFile().getAbsolutePath() + File.separator + originalNameTagOrNBTFileName;
         }
         else if(originalNameTagOrNBTFileName != null && originalNameTagOrNBTFileName.toLowerCase().trim().endsWith(".nbt"))
         {
-            nameTagOrNBTFileName = getHolder().getFile().getParentFile().getAbsolutePath() + File.separator + originalNameTagOrNBTFileName;
+            nameTagOrNBTFileName = holder.getFile().getParentFile().getAbsolutePath() + File.separator + originalNameTagOrNBTFileName;
             if (namedBinaryTag == null) {
                 // load NBT data from .nbt file
                 try {
-                    FileInputStream stream = new FileInputStream(nameTagOrNBTFileName);
-                    namedBinaryTag = NamedBinaryTag.readFrom(stream, true);
-                } catch (FileNotFoundException e) {
+                    namedBinaryTag = NamedBinaryTag.readFrom(Paths.get(nameTagOrNBTFileName));
+                } catch (NoSuchFileException e) {
                     if(OTG.getPluginConfig().spawnLog)
                     {
                         OTG.log(LogMarker.WARN, "Could not find file: "+nameTagOrNBTFileName);
                     }
                     // Set it to null so we don't go looking for this later
                     nameTagOrNBTFileName = null;
-                } catch (IOException e) {
+                } catch (IOException | InvalidConfigException e) {
                     e.printStackTrace();
+                    // Set it to null so we don't go looking for this later
+                    nameTagOrNBTFileName = null;
                 }
 
             }
@@ -99,7 +96,7 @@ public abstract class EntityFunction<T extends CustomObjectConfigFile> extends C
     @Override
     public String makeString()
     {
-        return "Entity(" + x + ',' + y + ',' + z + ',' + resourceLocation + ',' + groupSize + (originalNameTagOrNBTFileName != null && originalNameTagOrNBTFileName.length() > 0 ? ',' + originalNameTagOrNBTFileName : "") + ')';
+        return "Entity(" + x() + ',' + y() + ',' + z() + ',' + resourceLocation + ',' + groupSize + (originalNameTagOrNBTFileName != null && originalNameTagOrNBTFileName.length() > 0 ? ',' + originalNameTagOrNBTFileName : "") + ')';
     }
 
     private String metaDataTag;
@@ -145,7 +142,7 @@ public abstract class EntityFunction<T extends CustomObjectConfigFile> extends C
             return false;
         }
         EntityFunction<T> block = (EntityFunction<T>) other;
-        return block.x == x && block.y == y && block.z == z && block.resourceLocation.equalsIgnoreCase(resourceLocation) && block.groupSize == groupSize && block.originalNameTagOrNBTFileName.equalsIgnoreCase(originalNameTagOrNBTFileName);
+        return block.x() == x() && block.y() == y() && block.z() == z() && block.resourceLocation.equalsIgnoreCase(resourceLocation) && block.groupSize == groupSize && block.originalNameTagOrNBTFileName.equalsIgnoreCase(originalNameTagOrNBTFileName);
     }
 
 	public abstract EntityFunction<T> createNewInstance();

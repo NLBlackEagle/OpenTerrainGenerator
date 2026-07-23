@@ -22,7 +22,6 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -89,7 +88,7 @@ public class BO4Creator extends BOCreator
                             data = BukkitMaterialData.ofBukkitBlock(block);
 
                             // If we have a match for the center block, update values and end the loop
-                            if (centerBlock.equals(data)) {
+                            if (centerBlock.matches(data)) {
                                 centerPointX = x + start.getBlockX();
                                 centerPointY = y + start.getBlockY();
                                 centerPointZ = z + start.getBlockZ();
@@ -119,7 +118,6 @@ public class BO4Creator extends BOCreator
         NamedBinaryTag tag;
         String tileEntityName;
         File tileEntityFile;
-        FileOutputStream fos;
 
         for (int x = start.getBlockX(); x <= end.getBlockX(); x++)
         {
@@ -182,13 +180,8 @@ public class BO4Creator extends BOCreator
                             tileEntityCount++;
                             try
                             {
-                                tileEntityFile.createNewFile();
-                                fos = new FileOutputStream(tileEntityFile);
-                                tag.writeTo(fos);
-                                fos.flush();
-                                fos.close();
-                                blockFunction.metaDataTag = tag;
-                                blockFunction.metaDataName = name + "/" + tileEntityName;
+                                tag.writeTo(tileEntityFile.toPath());
+                                blockFunction.blockContainer = material.blockContainer(tileEntitiesFolder.getParentFile().toPath(), name + "/" + tileEntityName);
                             } catch (IOException e)
                             {
                                 throw new RuntimeException(e);

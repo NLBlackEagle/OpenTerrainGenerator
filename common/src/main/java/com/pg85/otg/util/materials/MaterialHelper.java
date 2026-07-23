@@ -4,14 +4,14 @@ import com.pg85.otg.OTG;
 import com.pg85.otg.OTGEngine;
 import com.pg85.otg.common.LocalMaterialData;
 import com.pg85.otg.exception.InvalidConfigException;
-import com.pg85.otg.util.FifoMap;
+import com.pg85.otg.util.LRUCache;
 import com.pg85.otg.util.minecraft.defaults.DefaultMaterial;
 
 //TODO: Clean up and optimise ForgeMaterialData/BukkitMaterialData/LocalMaterialData/MaterialHelper/OTGEngine.readMaterial
 public class MaterialHelper
 {
 	// Materials are stored in a cache for fast parsing from config (txt) files, each material should exist only once.
-    private static FifoMap<String, LocalMaterialData> CachedMaterials = new FifoMap<String, LocalMaterialData>(4096); // TODO: This is probably too large, makes lookups slow.
+    private static LRUCache<String, LocalMaterialData> CachedMaterials = new LRUCache<String, LocalMaterialData>(4096); // TODO: This is probably too large, makes lookups slow.
     
     public static final LocalMaterialData AIR = MaterialHelper.toLocalMaterialData(DefaultMaterial.AIR, 0);
     public static final LocalMaterialData SANDSTONE = MaterialHelper.toLocalMaterialData(DefaultMaterial.SANDSTONE, 0);

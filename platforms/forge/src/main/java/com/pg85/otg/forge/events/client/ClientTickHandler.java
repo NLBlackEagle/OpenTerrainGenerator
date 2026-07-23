@@ -35,9 +35,9 @@ public class ClientTickHandler
             	lastSpawnedTimeIn100Ms = currentTimeIn100Ms;
         		for(ParticleFunction<?> particleData : particleFunctions)
             	{           			        			
-                    double x = (double)particleData.x + 0.5F;
-                    double y = (double)particleData.y;
-                    double z = (double)particleData.z + 0.5F;
+                    double x = (double)particleData.x() + 0.5F;
+                    double y = (double)particleData.y();
+                    double z = (double)particleData.z() + 0.5F;
        			
     				String particleName = particleData.particleName;	                    
                     double interval = particleData.interval * 10;

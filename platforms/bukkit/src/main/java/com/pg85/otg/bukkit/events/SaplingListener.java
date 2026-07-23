@@ -33,7 +33,7 @@ class SaplingListener
         // Need the event location for later - might also need the material
         Location location = event.getLocation();
         IBlockData blockData = world.getWorld().getType(new BlockPosition(location.getBlockX(), location.getBlockY(), location.getBlockZ()));
-        BukkitMaterialData material = BukkitMaterialData.ofMinecraftBlockData(blockData);
+        BukkitMaterialData material = BukkitMaterialData.ofMinecraftBlockState(blockData);
         SaplingGen sapling;
 
         // Get sapling type

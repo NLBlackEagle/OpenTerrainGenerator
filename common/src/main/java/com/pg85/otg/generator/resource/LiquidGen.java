@@ -81,7 +81,8 @@ public class LiquidGen extends Resource
     	
         int y = RandomHelper.numberInRange(rand, minAltitude, maxAltitude);
         
-        parseMaterials(world, material, sourceBlocks);
+        material = material.parseForWorld(world);
+        sourceBlocks.parseForWorld(world);
 
         LocalMaterialData worldMaterial = world.getMaterial(x, y + 1, z, chunkBeingPopulated);
         if (worldMaterial == null || !sourceBlocks.contains(worldMaterial))

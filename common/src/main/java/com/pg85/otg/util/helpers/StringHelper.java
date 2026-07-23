@@ -1,35 +1,28 @@
 package com.pg85.otg.util.helpers;
 
-import com.pg85.otg.exception.InvalidConfigException;
-
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import com.pg85.otg.exception.InvalidConfigException;
 
 /**
  * Some methods for string parsing and printing.
- * 
  */
 public abstract class StringHelper
 {
     public static String join(final Collection<?> coll, final String glue)
     {
-        return join(coll.toArray(new Object[coll.size()]), glue);
+        return coll.stream().map(Object::toString).collect(Collectors.joining(glue));
     }
 
     public static String join(final Object[] list, final String glue)
     {
-        StringBuilder ret = new StringBuilder(100);
-        for (int i = 0; i < list.length; i++)
-        {
-            if (i != 0)
-            {
-                ret.append(glue);
-            }
-            ret.append(list[i]);
-        }
-        return ret.toString();
-    }    
+        return Arrays.stream(list).map(Object::toString).collect(Collectors.joining(glue));
+    }
 
     /**
      * Turns the given name into a name suitable for computers, so without
@@ -40,11 +33,13 @@ public abstract class StringHelper
     public static String toComputerFriendlyName(String name)
     {
         char[] charArray = name.toCharArray();
-        for (int i = 0; i < charArray.length; i++) {
-            if (!Character.isJavaIdentifierPart(charArray[i]))
+        for(int i = 0; i < charArray.length; i++)
+        {
+            if(!Character.isJavaIdentifierPart(charArray[i]))
             {
                 charArray[i] = '_';
-            } else
+            }
+            else
             {
                 charArray[i] = Character.toLowerCase(charArray[i]);
             }
@@ -70,18 +65,76 @@ public abstract class StringHelper
         try
         {
             int number = Integer.parseInt(string);
-            if (number < minValue)
+            if(number < minValue)
             {
                 return minValue;
             }
-            if (number > maxValue)
+            if(number > maxValue)
             {
                 return maxValue;
             }
             return number;
-        } catch (NumberFormatException e)
+        }
+        catch(NumberFormatException e)
         {
-            throw new InvalidConfigException("Incorrect number: " + string);
+            throw new InvalidConfigException("Incorrect number: " + string, e);
+        }
+    }
+
+    public static boolean isNumber(String s)
+    {
+        boolean digitFound = false;
+        boolean dotFound = false;
+        for(int i = 0; i < s.length(); i++)
+        {
+            char c = s.charAt(i);
+            if(i == 0 && c == '-')
+                continue;
+            if(c == '.')
+            {
+                if(dotFound)
+                    return false;
+                dotFound = true;
+                continue;
+            }
+            if(!Character.isDigit(c))
+                return false;
+            digitFound = true;
+        }
+        return digitFound;
+    }
+
+    /**
+     * Parses the string and returns a number between minValue and maxValue.
+     * 
+     * @param string
+     *            The string to parse.
+     * @param minValue
+     *            The minimum value, inclusive.
+     * @param maxValue
+     *            The maximum value, inclusive.
+     * @return The number in the String, capped at the minValue and maxValue.
+     * @throws InvalidConfigException
+     *             If the number is invalid.
+     */
+    public static long readLong(String string, long minValue, long maxValue) throws InvalidConfigException
+    {
+        try
+        {
+            long number = Long.parseLong(string);
+            if(number < minValue)
+            {
+                return minValue;
+            }
+            if(number > maxValue)
+            {
+                return maxValue;
+            }
+            return number;
+        }
+        catch(NumberFormatException e)
+        {
+            throw new InvalidConfigException("Incorrect number: " + string, e);
         }
     }
 
@@ -103,18 +156,19 @@ public abstract class StringHelper
         try
         {
             double number = Double.parseDouble(string);
-            if (number < minValue)
+            if(number < minValue)
             {
                 return minValue;
             }
-            if (number > maxValue)
+            if(number > maxValue)
             {
                 return maxValue;
             }
             return number;
-        } catch (NumberFormatException e)
+        }
+        catch(NumberFormatException e)
         {
-            throw new InvalidConfigException("Incorrect number: " + string);
+            throw new InvalidConfigException("Incorrect number: " + string, e);
         }
     }
 
@@ -138,107 +192,50 @@ public abstract class StringHelper
      *            The line to parse.
      * @return The parts of the string.
      */
-    public static String[] readCommaSeperatedString(String line)
+    public static List<String> readCommaSeperatedString(String line)
     {
-        if (line.trim().isEmpty())
+        line = line.trim();
+        if(line.isEmpty())
         {
-            // Empty lines have no elements, not one empty element
-            return new String[0];
+            return Collections.emptyList();
         }
 
-        List<String> buffer = new LinkedList<String>();
-
-        int index = 0;
-        int lastFound = 0;
-        int inBracer = 0;
-
-        for (char c : line.toCharArray())
+        int i = indexOf(line, ',', 0);
+        if(i < 0)
         {
-            if (c == ',' && inBracer == 0)
-            {
-                buffer.add(line.substring(lastFound, index).trim());
-                lastFound = index + 1;
-            }
-
-            if (c == '(')
-                inBracer++;
-            if (c == ')')
-                inBracer--;
-
-            index++;
+            return Collections.singletonList(line);
         }
-        buffer.add(line.substring(lastFound, index).trim());
 
-        String[] output = new String[0];
-
-        if (inBracer == 0)
-            output = buffer.toArray(output);
-
-        return output;
+        List<String> list = new ArrayList<>();
+        int j = 0;
+        while(i >= 0)
+        {
+            list.add(line.substring(j, i).trim());
+            j = i + 1;
+            i = indexOf(line, ',', i + 1);
+        }
+        list.add(line.substring(j, line.length()).trim());
+        return list;
     }
 
-    /**
-     * Gets whether the input specifies which block data should be used.
-     * <p>
-     * A few examples: "WOOL" doesn't specify block data, while "WOOL:0" does.
-     * "buildcraft:blockRedLaser" doesn't specify block data, even though it
-     * contains a colon. However, "buildcraft:blockRedLaser:0" does specify
-     * block data.
-     * 
-     * @param materialString
-     *            The input.
-     * @return True if the input specifies block data, false otherwise.
-     */
-    public static boolean specifiesBlockData(String materialString) {
-        int indexOfColon = materialString.lastIndexOf(":");
-        if (indexOfColon > 0)
+    private static int indexOf(String s, char c, int start)
+    {
+        for(int i = start; i < s.length(); i++)
         {
-            String blockDataString = materialString.substring(indexOfColon + 1);
-            try {
-                Integer.parseInt(blockDataString);
-                // If we have reached this point, the text after the last colon
-                // was numeric, so it was indeed block data
-                return true;
-            } catch (NumberFormatException e) {
+            char c1 = s.charAt(i);
+            if(c1 == c)
+            {
+                return i;
+            }
+            if(c1 == '(')
+            {
+                i = indexOf(s, ')', i + 1);
+                if(i < 0)
+                {
+                    return -1;
+                }
             }
         }
-        return false;
-    }
-
-    private StringHelper()
-    {
-    }
-
-    /**
-     * Parses the string and returns a number between minValue and maxValue.
-     * 
-     * @param string
-     *            The string to parse.
-     * @param minValue
-     *            The minimum value, inclusive.
-     * @param maxValue
-     *            The maximum value, inclusive.
-     * @return The number in the String, capped at the minValue and maxValue.
-     * @throws InvalidConfigException
-     *             If the number is invalid.
-     */
-    public static long readLong(String string, long minValue, long maxValue) throws InvalidConfigException
-    {
-        try
-        {
-            long number = Long.parseLong(string);
-            if (number < minValue)
-            {
-                return minValue;
-            }
-            if (number > maxValue)
-            {
-                return maxValue;
-            }
-            return number;
-        } catch (NumberFormatException e)
-        {
-            throw new InvalidConfigException("Incorrect number: " + string);
-        }
+        return -1;
     }
 }

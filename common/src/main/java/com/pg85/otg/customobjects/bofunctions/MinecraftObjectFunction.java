@@ -29,18 +29,14 @@ public abstract class MinecraftObjectFunction<T extends CustomObjectConfigFile> 
     public MinecraftObjectFunction(BO3Config config, List<String> args) throws InvalidConfigException
     {
         assureSize(4, args);
-        // Those limits are arbitrary, LocalWorld.setBlock will limit it
-        // correctly based on what chunks can be accessed
-        x = readInt(args.get(0), -100, 100);
-        y = (short) readInt(args.get(1), -1000, 1000);
-        z = readInt(args.get(2), -100, 100);
+        readXYZ(args, 0);
         structurePart = DefaultStructurePart.getDefaultStructurePart(args.get(3));
     }
 
     @Override
     public String makeString()
     {
-        return "MinecraftObject(" + x + ',' + y + ',' + z + ',' + structurePart + ')';
+        return "MinecraftObject(" + x() + ',' + y() + ',' + z() + ',' + structurePart + ')';
     }
 
     @Override
@@ -59,6 +55,6 @@ public abstract class MinecraftObjectFunction<T extends CustomObjectConfigFile> 
             return false;
         }
         MinecraftObjectFunction<T> block = (MinecraftObjectFunction<T>) other;
-        return block.x == x && block.y == y && block.z == z;
+        return block.x() == x() && block.y() == y() && block.z() == z();
     }
 }

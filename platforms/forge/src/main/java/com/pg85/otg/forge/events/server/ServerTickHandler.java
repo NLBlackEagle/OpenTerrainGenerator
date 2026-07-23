@@ -138,7 +138,7 @@ public class ServerTickHandler
 			                    		{
 			                    			for(ModDataFunction<?> modData : modNameAndData.getValue())
 			                    			{
-			                    				messageString += "[" + modData.x + "," + modData.y + "," + modData.z + "," + modData.modData + "]";
+			                    				messageString += "[" + modData.x() + "," + modData.y() + "," + modData.z() + "," + modData.modData + "]";
 			                    			}
 			                    		}
 			                    	}
@@ -208,14 +208,14 @@ public class ServerTickHandler
 		    									} else {
 		    										entityFunc = new BO3EntityFunction();
 		    									} 
-		    									entityFunc.x = modDataBlockX;
-		    									entityFunc.y = modDataBlockY;
-		    									entityFunc.z = modDataBlockZ;
+		    									entityFunc.x(modDataBlockX);
+		    									entityFunc.y(modDataBlockY);
+		    									entityFunc.z(modDataBlockZ);
 
 		    									entityFunc.processEntityName(paramString2[1]);
 		    									entityFunc.groupSize = paramString2.length > 2 ? Integer.parseInt(paramString2[2]) : 1;
 												if (paramString2.length > 5)
-													entityFunc.processNameTagOrFileName(paramString2[5]);
+													entityFunc.processNameTagOrFileName(null, paramString2[5]);
 												else
 												{
 													entityFunc.nameTagOrNBTFileName = null;
@@ -366,9 +366,9 @@ public class ServerTickHandler
 
                 			for (int a = 0; a < playerCoords.size(); ++a)
                             {
-                		        float f = (float)((Double)playerCoords.get(a)[0] - spawnerData.x);
-                		        float f1 = (float)((Double)playerCoords.get(a)[1] - spawnerData.y);
-                		        float f2 = (float)((Double)playerCoords.get(a)[2] - spawnerData.z);
+                		        float f = (float)((Double)playerCoords.get(a)[0] - spawnerData.x());
+                		        float f1 = (float)((Double)playerCoords.get(a)[1] - spawnerData.y());
+                		        float f2 = (float)((Double)playerCoords.get(a)[2] - spawnerData.z());
                 		        double distance = f * f + f1 * f1 + f2 * f2;
 
                             	if(distance < distToClosestPlayer)
@@ -493,12 +493,12 @@ public class ServerTickHandler
 			            if (entity1.getClass() == entityClass && entity1.getEntityData().hasKey("OTG"))
 			            {
 			            	if(
-		            			entity1.posX >= spawnerData.x - mobCountRadius &&
-		            			entity1.posX <= spawnerData.x + mobCountRadius &&
-            					entity1.posY >= spawnerData.y - mobCountRadius &&
-								entity1.posY <= spawnerData.y + mobCountRadius &&
-		            			entity1.posZ >= spawnerData.z - mobCountRadius &&
-		            			entity1.posZ <= spawnerData.z + mobCountRadius
+		            			entity1.posX >= spawnerData.x() - mobCountRadius &&
+		            			entity1.posX <= spawnerData.x() + mobCountRadius &&
+            					entity1.posY >= spawnerData.y() - mobCountRadius &&
+								entity1.posY <= spawnerData.y() + mobCountRadius &&
+		            			entity1.posZ >= spawnerData.z() - mobCountRadius &&
+		            			entity1.posZ <= spawnerData.z() + mobCountRadius
 	            			)
 			            	{
 				            	worldMobCount++;
@@ -511,9 +511,9 @@ public class ServerTickHandler
 			        	continue;
 					}
 
-                    int j1 = spawnerData.x;
-                    int k1 = spawnerData.y;
-                    int l1 = spawnerData.z;
+                    int j1 = spawnerData.x();
+                    int k1 = spawnerData.y();
+                    int l1 = spawnerData.z();
 
                     float x = (float)j1 + 0.5F;
                     float y = (float)k1;
@@ -720,14 +720,14 @@ public class ServerTickHandler
                     	{
                     		for(ParticleFunction<?> particleData : particleDataForOTG)
                     		{
-                		        float f = (float)((Double)playerCoords.get(a)[0] - particleData.x);
-                		        float f1 = (float)((Double)playerCoords.get(a)[1] - particleData.y);
-                		        float f2 = (float)((Double)playerCoords.get(a)[2] - particleData.z);
+                		        float f = (float)((Double)playerCoords.get(a)[0] - particleData.x());
+                		        float f1 = (float)((Double)playerCoords.get(a)[1] - particleData.y());
+                		        float f2 = (float)((Double)playerCoords.get(a)[2] - particleData.z());
                 		        double distance = f * f + f1 * f1 + f2 * f2;
 
                                 if(distance > 0 && distance < maxDistToClosestPlayerSq)
                                 {
-                                	if(!worldServer.getBlockState(new BlockPos(particleData.x, particleData.y, particleData.z)).getMaterial().isSolid())
+                                	if(!worldServer.getBlockState(new BlockPos(particleData.x(), particleData.y(), particleData.z())).getMaterial().isSolid())
                                 	{
                                 		particleDataForOTGPerPlayer.add(particleData);
                                 	} else {

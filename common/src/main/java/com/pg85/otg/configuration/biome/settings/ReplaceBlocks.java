@@ -53,7 +53,7 @@ public class ReplaceBlocks
         json = json.replace('{', '(');
         json = json.replace('}', ')');
 
-        String[] groups = StringHelper.readCommaSeperatedString(json);
+        List<String> groups = StringHelper.readCommaSeperatedString(json);
 
         for (String group : groups)
         {
@@ -66,7 +66,7 @@ public class ReplaceBlocks
     private static ReplaceBlocks readSingleGroup(String json) throws InvalidConfigException
     {
         String group = removeFirstAndLastChar(json.trim());
-        String[] groupParts = StringHelper.readCommaSeperatedString(group);
+        List<String> groupParts = StringHelper.readCommaSeperatedString(group);
         String sourceBlock = null;
         String targetBlock = null;
 

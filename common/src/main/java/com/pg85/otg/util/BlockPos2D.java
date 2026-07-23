@@ -2,28 +2,36 @@ package com.pg85.otg.util;
 
 public class BlockPos2D
 {
-	final int x;
-	final int z;
-	
-	public BlockPos2D(int x, int z)
-	{
-		this.x = x;
-		this.z = z;
-	}
-	
-	public boolean equals(Object other)
-	{
-		if(this == other)
-		{
-			return true;
-		}
-		if(other instanceof BlockPos2D)
-		{
-			if(((BlockPos2D)other).x == this.x && ((BlockPos2D)other).z == this.z)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
+    public final int x;
+    public final int z;
+
+    public BlockPos2D(int x, int z)
+    {
+        this.x = x;
+        this.z = z;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int hash = 1;
+        hash = hash * 31 + this.x;
+        hash = hash * 31 + this.z;
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if(this == obj)
+        {
+            return true;
+        }
+        if(obj instanceof BlockPos2D)
+        {
+            BlockPos2D other = (BlockPos2D) obj;
+            return this.x == other.x && this.z == other.z;
+        }
+        return false;
+    }
 }

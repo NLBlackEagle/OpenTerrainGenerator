@@ -834,7 +834,7 @@ public class OTGTeleporter
                         int k10 = k2 + k8;
                         int k11 = k6 + (l7 - 1) * i3 - j7 * l6;
                         boolean flag = k8 < 0;
-                        destinationWorld.setBlockState(new BlockPos(k9, k10, k11), flag ? portalMaterial.internalBlock() : Blocks.AIR.getDefaultState());
+                        destinationWorld.setBlockState(new BlockPos(k9, k10, k11), flag ? portalMaterial.getBlockState() : Blocks.AIR.getDefaultState());
                     }
                 }
             }
@@ -852,7 +852,7 @@ public class OTGTeleporter
                     int l11 = k2 + l9;
                     int k12 = k6 + (l8 - 1) * i3;
                     boolean flag1 = l8 == 0 || l8 == 3 || l9 == -1 || l9 == 3;
-                    destinationWorld.setBlockState(new BlockPos(l10, l11, k12), flag1 ? portalMaterial.internalBlock() : iblockstate, 2);
+                    destinationWorld.setBlockState(new BlockPos(l10, l11, k12), flag1 ? portalMaterial.getBlockState() : iblockstate, 2);
                 }
             }
         }

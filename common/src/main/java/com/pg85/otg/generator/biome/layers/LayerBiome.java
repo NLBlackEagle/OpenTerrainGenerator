@@ -5,9 +5,7 @@ import com.pg85.otg.common.LocalWorld;
 import com.pg85.otg.configuration.biome.BiomeGroup;
 import com.pg85.otg.configuration.biome.BiomeGroupManager;
 import com.pg85.otg.generator.biome.ArraysCache;
-
-import java.util.Map.Entry;
-import java.util.SortedMap;
+import com.pg85.otg.util.WeightedList;
 
 public class LayerBiome extends Layer
 {
@@ -15,13 +13,13 @@ public class LayerBiome extends Layer
     private int depth;
     private double freezeTemp;
 
-    LayerBiome(long seed, int defaultOceanId, Layer childLayer, BiomeGroupManager groupManager, int depth, double freezeTemp)
+    LayerBiome(long seed, LocalWorld world, Layer childLayer, BiomeGroupManager groupManager, int depth)
     {
-        super(seed, defaultOceanId);
+        super(seed, world);
         this.child = childLayer;
         this.manager = groupManager;
         this.depth = depth;
-        this.freezeTemp = freezeTemp;
+        this.freezeTemp = world.getConfigs().getWorldConfig().frozenOceanTemperature;
     }
 
     @Override
@@ -30,10 +28,7 @@ public class LayerBiome extends Layer
         int[] childInts = this.child.getInts(world, cache, x, z, xSize, zSize);
         int[] thisInts = cache.getArray(xSize * zSize);
 
-        SortedMap<Integer, LocalBiome> possibleBiomes;
-        BiomeGroup group;
         int currentPiece;
-        int newBiomeRarity;
         
         for (int i = 0; i < zSize; i++)
         {
@@ -44,28 +39,18 @@ public class LayerBiome extends Layer
 
                 if ((currentPiece & BiomeGroupBits) != 0 && ((currentPiece & BiomeBitsAreSetBit) == 0 || (currentPiece & BiomeBits) == this.defaultOceanId))    // has biomegroup bits but not biome bits
                 {
-                    group = manager.getGroupById((currentPiece & BiomeGroupBits) >> BiomeGroupShift);
-                    possibleBiomes = group.getDepthMapOrHigher(depth);
-                    // Get Max Rarity
-                    if (!possibleBiomes.isEmpty())
+                    BiomeGroup group = manager.getGroupById((currentPiece & BiomeGroupBits) >> BiomeGroupShift);
+                    WeightedList<LocalBiome> weightedBiomes = group.getDepthMapOrHigher(depth);
+                    if(!weightedBiomes.isEmpty())
                     {
-                        newBiomeRarity = nextInt(BiomeGroupManager.getMaxRarityFromPossibles(possibleBiomes));
-                        // Spawn the biome based on the rarity spectrum
-                        for (Entry<Integer, LocalBiome> biome : possibleBiomes.entrySet())
-                        {
-                            if (newBiomeRarity < biome.getKey())
-                            {
-                                if (biome.getValue() != null && biome.getValue().getBiomeConfig().biomeSize == this.depth)
-                                {
-                                    currentPiece |= biome.getValue().getIds().getOTGBiomeId() |
-                                        // Set IceBit based on Biome Temperature
-                                        (biome.getValue().getBiomeConfig().biomeTemperature <= freezeTemp ? IceBit : 0) |
-                                        // Set BiomeBitsAreSetBit
-                                        BiomeBitsAreSetBit
-                                        ;
-                                }
-                                break;
-                            }
+                        LocalBiome biome = weightedBiomes.getRandom(this::nextInt);
+                        if (biome != null) {
+                            currentPiece |= biome.getIds().getOTGBiomeId() |
+                                // Set IceBit based on Biome Temperature
+                                (biome.getBiomeConfig().biomeTemperature <= freezeTemp ? IceBit : 0) |
+                                // Set BiomeBitsAreSetBit
+                                BiomeBitsAreSetBit
+                                ;
                         }
                     }
                 }

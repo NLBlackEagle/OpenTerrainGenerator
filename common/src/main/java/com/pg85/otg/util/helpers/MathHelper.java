@@ -30,6 +30,12 @@ public class MathHelper
         return d0 < i ? i - 1 : i;
     }
 
+    public static int ceil(double floatNumber)
+    {
+        int truncated = (int) floatNumber;
+        return floatNumber > truncated ? truncated + 1 : truncated;
+    }
+
     public static long floor_double_long(double d)
     {
         long l = (long) d;
@@ -53,6 +59,13 @@ public class MathHelper
             A[i] = (float) Math.sin(i * 3.141592653589793D * 2.0D / 65536.0D);
     }
 
+    public static int floor(float d0)
+    {
+        int i = (int) d0;
+
+        return d0 < i ? i - 1 : i;
+    }
+
     public static int ceil(float floatNumber)
     {
         int truncated = (int) floatNumber;
@@ -64,18 +77,22 @@ public class MathHelper
         return check > max ? max : (check < min ? min : check);
     }
     
-    /*
-     * Modulus, rather than java's modulo (%)
-     * which does a remainder operation.
-     */
-    public static int mod(int x, int y)
+    public static int floorDiv(int x, int y)
     {
-        int result = x % y;
-        if (result < 0)
-        {
-            result += y;
-        }
-        return result;
+        int i = x / y;
+        return x < 0 != y < 0 && x != y * i ? i - 1 : i;
+    }
+    
+    public static int floorMod(int x, int y)
+    {
+        return x - floorDiv(x, y) * y;
+    }
+    
+    public static int transformMirror(int x, int y)
+    {
+        int i = floorDiv(x, y);
+        int r = x - i * y;
+        return (i & 1) == 1 ? y - r : r;
     }
     
     public static boolean tryParseInt(String value)

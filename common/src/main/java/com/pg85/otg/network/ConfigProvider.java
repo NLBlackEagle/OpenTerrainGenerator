@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.pg85.otg.common.LocalBiome;
 import com.pg85.otg.configuration.world.WorldConfig;
+import com.pg85.otg.worldsave.WorldSaveData;
 
 /**
  * Provides the configuration objects of a world. This includes:
@@ -49,4 +50,6 @@ public interface ConfigProvider
      * method does nothing.
      */
     void reload();
+
+    WorldSaveData getWorldSaveData();
 }

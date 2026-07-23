@@ -14,13 +14,15 @@ import com.pg85.otg.customobjects.structures.bo4.CustomStructurePlotter;
 import com.pg85.otg.generator.resource.CustomStructureGen;
 import com.pg85.otg.logging.LogMarker;
 import com.pg85.otg.util.ChunkCoordinate;
-import com.pg85.otg.util.FifoMap;
+import com.pg85.otg.util.LRUCache;
 import com.pg85.otg.util.helpers.RandomHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
 import java.util.Random;
 
 // TODO: spawners/particles/moddata for customobjects also use this, so not just structures. refactor?
@@ -32,7 +34,7 @@ public class CustomStructureCache
 	public static final int REGION_SIZE = 100;
 	
 	// BO3
-	private FifoMap<ChunkCoordinate, BO3CustomStructure> bo3StructureCache;
+	private LRUCache<ChunkCoordinate, BO3CustomStructure> bo3StructureCache;
 	
 	// BO4
 	
@@ -56,7 +58,7 @@ public class CustomStructureCache
         this.world = world;
         this.worldInfoChunks = new HashMap<ChunkCoordinate, StructureDataRegion>();
         this.plotter = new CustomStructurePlotter();
-        this.bo3StructureCache = new FifoMap<ChunkCoordinate, BO3CustomStructure>(400);
+        this.bo3StructureCache = new LRUCache<ChunkCoordinate, BO3CustomStructure>(400);
         loadStructureCache();
     }
     
@@ -235,41 +237,36 @@ public class CustomStructureCache
 
     public void saveToDisk()
     {
-    	OTG.log(LogMarker.INFO, "Saving structure and pregenerator data.");
-    	boolean firstLog = false;
-    	long starTime = System.currentTimeMillis();
-		while(true)
-		{
-			// TODO: Make this prettier
-			synchronized(this.world.getObjectSpawner().lockingObject)
-			{
-				if(!this.world.getObjectSpawner().populating)
-				{
-					this.world.getObjectSpawner().saving = true;
-					break;
-				}
-			}
-			if(firstLog)
-			{
-				OTG.log(LogMarker.WARN, "SaveToDisk waiting on Populate. Although other mods could be causing this and there may not be any problem, this can potentially cause an endless loop!");
-				firstLog = false;
-			}
-			int interval = 300;
-			if(System.currentTimeMillis() - starTime > (interval * 1000))
-			{
-				OTG.log(LogMarker.FATAL, "SaveToDisk waited on populate longer than " + interval + " seconds, something went wrong!");
-				throw new RuntimeException("SaveToDisk waited on populate longer than " + interval + " seconds, something went wrong!");
-			}
-		}
+        OTG.log(LogMarker.INFO, "Saving structure and pregenerator data.");
 
-		saveStructureCache();
+        int maxWaitTime = 30;
+        try
+        {
+            if(this.world.getObjectSpawner().lock.tryLock(maxWaitTime, TimeUnit.SECONDS))
+            {
+                try
+                {
+                    saveStructureCache();
+                    this.world.getObjectSpawner().saveRequired = false;
+                }
+                finally
+                {
+                    this.world.getObjectSpawner().lock.unlock();
+                }
+            }
+            else
+            {
+                OTG.log(LogMarker.FATAL, "SaveToDisk waited on populate longer than " + maxWaitTime + " seconds, something went wrong!");
+                throw new RuntimeException("SaveToDisk waited on populate longer than " + maxWaitTime + " seconds, something went wrong!");
+            }
+        }
+        catch(InterruptedException e)
+        {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("SaveToDisk interrupted while trying to acquiring lock.", e);
+        }
 
-		synchronized(this.world.getObjectSpawner().lockingObject)
-		{
-			this.world.getObjectSpawner().saveRequired = false;
-			this.world.getObjectSpawner().saving = false;
-		}
-		OTG.log(LogMarker.INFO, "Structure and pregenerator data saved.");
+        OTG.log(LogMarker.INFO, "Structure and pregenerator data saved.");
     }
 
     private void saveStructureCache()
@@ -288,7 +285,7 @@ public class CustomStructureCache
 
         this.worldInfoChunks = new HashMap<ChunkCoordinate, StructureDataRegion>();
 		
-    	Map<CustomStructure, ArrayList<ChunkCoordinate>> loadedStructures = CustomStructureFileManager.loadStructureData(this.world);
+    	Map<CustomStructure, List<ChunkCoordinate>> loadedStructures = CustomStructureFileManager.loadStructureData(this.world);
 		if(loadedStructures != null)
 		{
 	        if(this.world.isBo4Enabled())
@@ -296,7 +293,7 @@ public class CustomStructureCache
 	        	this.plotter.loadStructureCache(this.world, loadedStructures);
 	        }
 
-			for(Entry<CustomStructure, ArrayList<ChunkCoordinate>> loadedStructure : loadedStructures.entrySet())
+			for(Entry<CustomStructure, List<ChunkCoordinate>> loadedStructure : loadedStructures.entrySet())
 			{
 				if(loadedStructure == null)
 				{
@@ -310,17 +307,17 @@ public class CustomStructureCache
 	
 				for(ModDataFunction<?> modDataFunc : loadedStructure.getKey().modDataManager.modData)
 				{
-					addToWorldInfoChunks(loadedStructure.getKey(), ChunkCoordinate.fromBlockCoords(modDataFunc.x, modDataFunc.z), false);
+					addToWorldInfoChunks(loadedStructure.getKey(), ChunkCoordinate.fromBlockCoords(modDataFunc.x(), modDataFunc.z()), false);
 				}
 	
 				for(SpawnerFunction<?> spawnerFunc : loadedStructure.getKey().spawnerManager.spawnerData)
 				{
-					addToWorldInfoChunks(loadedStructure.getKey(), ChunkCoordinate.fromBlockCoords(spawnerFunc.x, spawnerFunc.z), false);
+					addToWorldInfoChunks(loadedStructure.getKey(), ChunkCoordinate.fromBlockCoords(spawnerFunc.x(), spawnerFunc.z()), false);
 				}
 	
 				for(ParticleFunction<?> particleFunc : loadedStructure.getKey().particlesManager.particleData)
 				{
-					addToWorldInfoChunks(loadedStructure.getKey(), ChunkCoordinate.fromBlockCoords(particleFunc.x, particleFunc.z), false);
+					addToWorldInfoChunks(loadedStructure.getKey(), ChunkCoordinate.fromBlockCoords(particleFunc.x(), particleFunc.z()), false);
 				}
 			}
 		}

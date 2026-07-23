@@ -72,7 +72,7 @@ public class WeightedMobSpawnGroup
         json = json.replace('{', '(');
         json = json.replace('}', ')');
 
-        String[] groups = StringHelper.readCommaSeperatedString(json);
+        List<String> groups = StringHelper.readCommaSeperatedString(json);
 
         for (String group : groups)
         {
@@ -85,7 +85,7 @@ public class WeightedMobSpawnGroup
     private static WeightedMobSpawnGroup readSingleGroup(String json) throws InvalidConfigException
     {
         String group = removeFirstAndLastChar(json.trim());
-        String[] groupParts = StringHelper.readCommaSeperatedString(group);
+        List<String> groupParts = StringHelper.readCommaSeperatedString(group);
         String mobName = null;
         int weight = -1;
         int min = -1;

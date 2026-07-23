@@ -8,15 +8,15 @@ public class LayerIce extends Layer
 
     private int rarity = 10;
 
-    LayerIce(long seed, int defaultOceanId, Layer childLayer)
+    LayerIce(long seed, LocalWorld world, Layer childLayer)
     {
-        super(seed, defaultOceanId);
+        super(seed, world);
         this.child = childLayer;
     }
 
-    LayerIce(long seed, int defaultOceanId, Layer childLayer, int _rarity)
+    LayerIce(long seed, LocalWorld world, Layer childLayer, int _rarity)
     {
-        super(seed, defaultOceanId);
+        super(seed, world);
         this.child = childLayer;
         this.rarity = 101 - _rarity;
     }

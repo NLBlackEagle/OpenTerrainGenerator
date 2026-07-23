@@ -1,8 +1,9 @@
 package com.pg85.otg.customobjects.bo4.bo4function;
 
+import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+
 import com.pg85.otg.customobjects.bo4.BO4Config;
 import com.pg85.otg.customobjects.bofunctions.SpawnerFunction;
 import com.pg85.otg.customobjects.structures.bo4.BO4CustomStructureCoordinate;
@@ -14,22 +15,42 @@ import com.pg85.otg.util.helpers.StreamHelper;
  */
 public class BO4SpawnerFunction extends SpawnerFunction<BO4Config>
 {	
-	public BO4SpawnerFunction() { }
-	
-	public BO4SpawnerFunction(BO4Config holder)
-	{
-		this.holder = holder;
-	}
+    public static BO4SpawnerFunction read(DataInput in) throws IOException
+    {
+        BO4SpawnerFunction spawnerFunction = new BO4SpawnerFunction();
+
+        spawnerFunction.x(in.readInt());
+        spawnerFunction.y(in.readInt());
+        spawnerFunction.z(in.readInt());
+        spawnerFunction.mobName = StreamHelper.readStringFromStream(in);
+        spawnerFunction.originalnbtFileName = StreamHelper.readStringFromStream(in);
+        spawnerFunction.nbtFileName = StreamHelper.readStringFromStream(in);
+        spawnerFunction.groupSize = in.readInt();
+        spawnerFunction.interval = in.readInt();
+        spawnerFunction.spawnChance = in.readInt();
+        spawnerFunction.maxCount = in.readInt();
+        spawnerFunction.despawnTime = in.readInt();
+        spawnerFunction.velocityX = in.readDouble();
+        spawnerFunction.velocityY = in.readDouble();
+        spawnerFunction.velocityZ = in.readDouble();
+        spawnerFunction.velocityXSet = in.readByte() != 0;
+        spawnerFunction.velocityYSet = in.readByte() != 0;
+        spawnerFunction.velocityZSet = in.readByte() != 0;
+        spawnerFunction.yaw = in.readFloat();
+        spawnerFunction.pitch = in.readFloat();
+
+        return spawnerFunction;
+    }
 	
     public BO4SpawnerFunction rotate(Rotation rotation)
     {
-    	BO4SpawnerFunction rotatedBlock = new BO4SpawnerFunction(this.getHolder());
+    	BO4SpawnerFunction rotatedBlock = new BO4SpawnerFunction();
 
-        BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedBO3CoordsJustified(x, y, z, rotation);
+        BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedBO3CoordsJustified(x(), y(), z(), rotation);
 
-        rotatedBlock.x = rotatedCoords.getX();
-        rotatedBlock.y = rotatedCoords.getY();
-        rotatedBlock.z = rotatedCoords.getZ();
+        rotatedBlock.x(rotatedCoords.getX());
+        rotatedBlock.y(rotatedCoords.getY());
+        rotatedBlock.z(rotatedCoords.getZ());
 
         rotatedBlock.velocityX = velocityX;
         rotatedBlock.velocityY = velocityY;
@@ -88,14 +109,14 @@ public class BO4SpawnerFunction extends SpawnerFunction<BO4Config>
 	@Override
 	public SpawnerFunction<BO4Config> getNewInstance()
 	{
-		return new BO4SpawnerFunction(this.getHolder());
+		return new BO4SpawnerFunction();
 	}
 	
     public void writeToStream(DataOutput stream) throws IOException
     {
-        stream.writeInt(this.x);
-        stream.writeInt(this.y);
-        stream.writeInt(this.z);
+        stream.writeInt(this.x());
+        stream.writeInt(this.y());
+        stream.writeInt(this.z());
 
         stream.writeBoolean(this.firstSpawn);
 
@@ -128,43 +149,43 @@ public class BO4SpawnerFunction extends SpawnerFunction<BO4Config>
         stream.writeBoolean(this.metaDataProcessed);
     }
     
-    public static BO4SpawnerFunction fromStream(BO4Config holder, ByteBuffer buffer) throws IOException
+    public static BO4SpawnerFunction fromStream(BO4Config holder, DataInput in) throws IOException
     {
-    	BO4SpawnerFunction spawnerFunction = new BO4SpawnerFunction(holder);
+    	BO4SpawnerFunction spawnerFunction = new BO4SpawnerFunction();
     	
-    	spawnerFunction.x = buffer.getInt();
-    	spawnerFunction.y = buffer.getInt();
-    	spawnerFunction.z = buffer.getInt();
+    	spawnerFunction.x(in.readInt());
+    	spawnerFunction.y(in.readInt());
+    	spawnerFunction.z(in.readInt());
     	
-    	spawnerFunction.firstSpawn = buffer.get() != 0;
+    	spawnerFunction.firstSpawn = in.readByte() != 0;
 
-    	spawnerFunction.mobName = StreamHelper.readStringFromBuffer(buffer);
+    	spawnerFunction.mobName = StreamHelper.readStringFromStream(in);
 
-    	spawnerFunction.nbtFileName = StreamHelper.readStringFromBuffer(buffer);
-    	spawnerFunction.originalnbtFileName = StreamHelper.readStringFromBuffer(buffer);
-    	spawnerFunction.groupSize = buffer.getInt();
+    	spawnerFunction.nbtFileName = StreamHelper.readStringFromStream(in);
+    	spawnerFunction.originalnbtFileName = StreamHelper.readStringFromStream(in);
+    	spawnerFunction.groupSize = in.readInt();
     	
-    	spawnerFunction.interval = buffer.getInt();
-    	spawnerFunction.intervalOffset = buffer.getInt();
+    	spawnerFunction.interval = in.readInt();
+    	spawnerFunction.intervalOffset = in.readInt();
     	
-    	spawnerFunction.spawnChance = buffer.getInt();
-    	spawnerFunction.maxCount = buffer.getInt();
+    	spawnerFunction.spawnChance = in.readInt();
+    	spawnerFunction.maxCount = in.readInt();
 
-    	spawnerFunction.despawnTime = buffer.getInt();
+    	spawnerFunction.despawnTime = in.readInt();
     	
-    	spawnerFunction.velocityX = buffer.getDouble();
-    	spawnerFunction.velocityY = buffer.getDouble();
-    	spawnerFunction.velocityZ = buffer.getDouble();
+    	spawnerFunction.velocityX = in.readDouble();
+    	spawnerFunction.velocityY = in.readDouble();
+    	spawnerFunction.velocityZ = in.readDouble();
     	
-    	spawnerFunction.yaw = buffer.getFloat();
-    	spawnerFunction.pitch = buffer.getFloat();
+    	spawnerFunction.yaw = in.readFloat();
+    	spawnerFunction.pitch = in.readFloat();
     	
-    	spawnerFunction.velocityXSet = buffer.get() != 0;
-    	spawnerFunction.velocityYSet = buffer.get() != 0;
-    	spawnerFunction.velocityZSet = buffer.get() != 0;
+    	spawnerFunction.velocityXSet = in.readByte() != 0;
+    	spawnerFunction.velocityYSet = in.readByte() != 0;
+    	spawnerFunction.velocityZSet = in.readByte() != 0;
     	
-    	spawnerFunction.metaDataTag = StreamHelper.readStringFromBuffer(buffer);
-    	spawnerFunction.metaDataProcessed = buffer.get() != 0;
+    	spawnerFunction.metaDataTag = StreamHelper.readStringFromStream(in);
+    	spawnerFunction.metaDataProcessed = in.readByte() != 0;
     	
     	return spawnerFunction;
     }

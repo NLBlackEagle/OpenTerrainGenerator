@@ -32,7 +32,7 @@ public class AboveWaterGen extends Resource
             return;
 		}
 
-        parseMaterials(world, material, null);
+        material = material.parseForWorld(world);
         
         int j;
         int k;

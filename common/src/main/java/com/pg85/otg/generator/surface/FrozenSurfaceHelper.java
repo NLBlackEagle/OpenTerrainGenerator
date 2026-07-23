@@ -3,7 +3,6 @@ package com.pg85.otg.generator.surface;
 import com.pg85.otg.common.LocalBiome;
 import com.pg85.otg.common.LocalMaterialData;
 import com.pg85.otg.common.LocalWorld;
-import com.pg85.otg.configuration.biome.BiomeConfig;
 import com.pg85.otg.configuration.standard.PluginStandardValues;
 import com.pg85.otg.configuration.standard.WorldStandardValues;
 import com.pg85.otg.configuration.world.WorldConfig;
@@ -148,76 +147,37 @@ public class FrozenSurfaceHelper
      */
     private void startSnowFall(int x, int y, int z, LocalBiome biome, ChunkCoordinate chunkBeingPopulated)
     {
-        int decreaseFactor = 0;
-        BiomeConfig biomeConfig = biome.getBiomeConfig();
+        int snowHeight = this.worldConfig.betterSnowFall ? biome.getBiomeConfig().getSnowHeight(biome.getTemperatureAt(x, y, z)) : 0;
 
-        float tempAtBlockToFreeze;
-        int snowHeight;
-        LocalMaterialData materialToSnowAt = null;
-        LocalMaterialData materialToSnowOn = null;
-        if(this.worldConfig.betterSnowFall)
+        while(y > PluginStandardValues.WORLD_DEPTH && snowHeight >= 0)
         {
-	        tempAtBlockToFreeze = biome.getTemperatureAt(x, y, z);
-	        snowHeight = biomeConfig.getSnowHeight(tempAtBlockToFreeze);
-        } else {
-        	snowHeight = 0;
-        }        
-    	while (
-			y > PluginStandardValues.WORLD_DEPTH + 1 && 
-			decreaseFactor < 8 &&
-			snowHeight - decreaseFactor >= 0
-		)
-        {
-            materialToSnowAt = world.getMaterial(x, y, z, chunkBeingPopulated);
-            materialToSnowOn = world.getMaterial(x, y - 1, z, chunkBeingPopulated);            
-            if (
-        		materialToSnowAt != null &&
-        		materialToSnowOn != null &&
-        		materialToSnowAt.isAir() &&
-        		materialToSnowOn.canSnowFallOn()
-    		)
+            LocalMaterialData materialAt = world.getMaterial(x, y, z, chunkBeingPopulated);
+            if(materialAt.isMaterial(DefaultMaterial.LEAVES))
             {
-            	// If we've spawned all snow layers, exit.
-                if(this.setSnowFallAtLocation(x, y, z, snowHeight - decreaseFactor, materialToSnowOn, chunkBeingPopulated))
-                {
-                	break;
-                }
-                // Spawned on leaves, which can only carry maxLayersOnLeaves snow layers. 
-                // We have more snow layers to spawn.
-                decreaseFactor += maxLayersOnLeaves;
+                y--;
+                continue;
             }
-            if(materialToSnowOn == null || materialToSnowOn.isSolid())
+            if(!materialAt.isAir())
             {
-            	break;
+                break;
             }
-            y--;
-        }
-    }
 
-    /**
-     * Applied snow to a location
-     * @param x Location X
-     * @param y Location Y
-     * @param z Location Z
-     * @param baseSnowHeight The base height snow should be
-     * @param materialToSnowOn The material that might have snow applied
-     */
-    private boolean setSnowFallAtLocation(int x, int y, int z, int baseSnowHeight, LocalMaterialData materialToSnowOn, ChunkCoordinate chunkBeingPopulated)
-    {
-        LocalMaterialData snowMass;
-        if (materialToSnowOn.isMaterial(DefaultMaterial.LEAVES) || materialToSnowOn.isMaterial(DefaultMaterial.LEAVES_2))
-        {
-            // Snow Layer(s) for trees, let each leaf carry maxLayersOnLeaves or less layers of snow,
-        	// any remaining layers will fall through.
-        	snowMass = MaterialHelper.toLocalMaterialData(DefaultMaterial.SNOW, baseSnowHeight <= maxLayersOnLeaves - 1 ? baseSnowHeight : maxLayersOnLeaves - 1);
-            world.setBlock(x, y, z, snowMass, null, chunkBeingPopulated, true);
-            return baseSnowHeight <= maxLayersOnLeaves - 1;
+            LocalMaterialData materialOn = world.getMaterial(x, y - 1, z, chunkBeingPopulated);
+            if(materialOn.isAir())
+            {
+                y--;
+                continue;
+            }
+            if(!world.canPlaceSnowAt(x, y, z, chunkBeingPopulated))
+            {
+                break;
+            }
+
+            int placedSnowHeight = materialOn.isLeaves() ? Math.min(snowHeight, maxLayersOnLeaves - 1) : snowHeight;
+            world.setBlock(x, y, z, MaterialHelper.toLocalMaterialData(DefaultMaterial.SNOW, placedSnowHeight), null, chunkBeingPopulated, true);
+            snowHeight -= placedSnowHeight + 1;
+            y -= 2;
         }
-        
-        // Basic Snow Layer(s)
-        snowMass = MaterialHelper.toLocalMaterialData(DefaultMaterial.SNOW, baseSnowHeight);
-        world.setBlock(x, y, z, snowMass, null, chunkBeingPopulated, true);
-        return true;
     }
 
     /**

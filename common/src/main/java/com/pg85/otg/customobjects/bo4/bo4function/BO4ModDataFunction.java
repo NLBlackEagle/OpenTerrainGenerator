@@ -1,8 +1,9 @@
 package com.pg85.otg.customobjects.bo4.bo4function;
 
+import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+
 import com.pg85.otg.customobjects.bo4.BO4Config;
 import com.pg85.otg.customobjects.bofunctions.ModDataFunction;
 import com.pg85.otg.customobjects.structures.bo4.BO4CustomStructureCoordinate;
@@ -14,22 +15,28 @@ import com.pg85.otg.util.helpers.StreamHelper;
  */
 public class BO4ModDataFunction extends ModDataFunction<BO4Config>
 {
-	public BO4ModDataFunction() { }
-	
-	public BO4ModDataFunction(BO4Config holder)
-	{
-		this.holder = holder;
-	}
+    public static BO4ModDataFunction read(DataInput in) throws IOException
+    {
+        BO4ModDataFunction modDataFunction = new BO4ModDataFunction();
+
+        modDataFunction.x(in.readInt());
+        modDataFunction.y(in.readInt());
+        modDataFunction.z(in.readInt());
+        modDataFunction.modId = StreamHelper.readStringFromStream(in);
+        modDataFunction.modData = StreamHelper.readStringFromStream(in);
+
+        return modDataFunction;
+    }
 	
     public BO4ModDataFunction rotate(Rotation rotation)
     {
-    	BO4ModDataFunction rotatedBlock = new BO4ModDataFunction(this.getHolder());
+    	BO4ModDataFunction rotatedBlock = new BO4ModDataFunction();
 
-        BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedBO3CoordsJustified(x, y, z, rotation);
+        BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedBO3CoordsJustified(x(), y(), z(), rotation);
 
-        rotatedBlock.x = rotatedCoords.getX();
-        rotatedBlock.y = rotatedCoords.getY();
-        rotatedBlock.z = rotatedCoords.getZ();
+        rotatedBlock.x(rotatedCoords.getX());
+        rotatedBlock.y(rotatedCoords.getY());
+        rotatedBlock.z(rotatedCoords.getZ());
 
         rotatedBlock.modId = modId;
         rotatedBlock.modData = modData;
@@ -46,29 +53,29 @@ public class BO4ModDataFunction extends ModDataFunction<BO4Config>
 	@Override
 	public ModDataFunction<BO4Config> getNewInstance()
 	{
-		return new BO4ModDataFunction(this.getHolder());
+		return new BO4ModDataFunction();
 	}
 	
     public void writeToStream(DataOutput stream) throws IOException
     {
-        stream.writeInt(this.x);
-        stream.writeInt(this.y);
-        stream.writeInt(this.z);
+        stream.writeInt(this.x());
+        stream.writeInt(this.y());
+        stream.writeInt(this.z());
         
         StreamHelper.writeStringToStream(stream, this.modId);
         StreamHelper.writeStringToStream(stream, this.modData);
     }
     
-    public static BO4ModDataFunction fromStream(BO4Config holder, ByteBuffer buffer) throws IOException
+    public static BO4ModDataFunction fromStream(BO4Config holder, DataInput in) throws IOException
     {
-    	BO4ModDataFunction modDataFunction = new BO4ModDataFunction(holder);
+    	BO4ModDataFunction modDataFunction = new BO4ModDataFunction();
     	
-    	modDataFunction.x = buffer.getInt();
-    	modDataFunction.y = buffer.getInt();
-    	modDataFunction.z = buffer.getInt();
+    	modDataFunction.x(in.readInt());
+    	modDataFunction.y(in.readInt());
+    	modDataFunction.z(in.readInt());
     	
-    	modDataFunction.modId = StreamHelper.readStringFromBuffer(buffer);
-    	modDataFunction.modData = StreamHelper.readStringFromBuffer(buffer);
+    	modDataFunction.modId = StreamHelper.readStringFromStream(in);
+    	modDataFunction.modData = StreamHelper.readStringFromStream(in);
     	
     	return modDataFunction;
     }

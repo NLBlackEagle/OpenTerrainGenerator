@@ -1,24 +1,25 @@
 package com.pg85.otg.customobjects.bofunctions;
 
-import com.pg85.otg.OTG;
-import com.pg85.otg.configuration.customobjects.CustomObjectConfigFile;
-import com.pg85.otg.configuration.customobjects.CustomObjectConfigFunction;
-import com.pg85.otg.exception.InvalidConfigException;
-import com.pg85.otg.logging.LogMarker;
 import java.io.BufferedReader;
+import java.io.DataOutput;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
+import com.pg85.otg.OTG;
+import com.pg85.otg.configuration.customobjects.CustomObjectConfigFile;
+import com.pg85.otg.configuration.customobjects.CustomObjectConfigFunction;
+import com.pg85.otg.exception.InvalidConfigException;
+import com.pg85.otg.logging.LogMarker;
+import com.pg85.otg.util.helpers.StreamHelper;
+
 /**
  * Represents a block in a BO3.
  */
-public abstract class SpawnerFunction<T extends CustomObjectConfigFile> extends CustomObjectConfigFunction<T>
+public abstract class SpawnerFunction<T extends CustomObjectConfigFile> extends ExtendedFunction<T>
 {
-    public int y;
-
     public Boolean firstSpawn = true;
     public String mobName = "";
     public String nbtFileName = "";
@@ -45,15 +46,34 @@ public abstract class SpawnerFunction<T extends CustomObjectConfigFile> extends 
     protected String metaDataTag;
     protected boolean metaDataProcessed = false;
     
+    public static void write(DataOutput out, SpawnerFunction<?> spawnerFunction) throws IOException
+    {
+        out.writeInt(spawnerFunction.x());
+        out.writeInt(spawnerFunction.y());
+        out.writeInt(spawnerFunction.z());
+        StreamHelper.writeStringToStream(out, spawnerFunction.mobName.replace(":", "&#58;").replace(" ", "&nbsp;"));
+        StreamHelper.writeStringToStream(out, spawnerFunction.originalnbtFileName.replace(":", "&#58;").replace(" ", "&nbsp;"));
+        StreamHelper.writeStringToStream(out, spawnerFunction.nbtFileName.replace(":", "&#58;").replace(" ", "&nbsp;"));
+        out.writeInt(spawnerFunction.groupSize);
+        out.writeInt(spawnerFunction.interval);
+        out.writeInt(spawnerFunction.spawnChance);
+        out.writeInt(spawnerFunction.maxCount);
+        out.writeInt(spawnerFunction.despawnTime);
+        out.writeDouble(spawnerFunction.velocityX);
+        out.writeDouble(spawnerFunction.velocityY);
+        out.writeDouble(spawnerFunction.velocityZ);
+        out.writeBoolean(spawnerFunction.velocityXSet);
+        out.writeBoolean(spawnerFunction.velocityYSet);
+        out.writeBoolean(spawnerFunction.velocityZSet);
+        out.writeFloat(spawnerFunction.yaw);
+        out.writeFloat(spawnerFunction.pitch);
+    }
+    
     @Override
-    public void load(List<String> args) throws InvalidConfigException
+    public void load(T holder, List<String> args) throws InvalidConfigException
     {
         assureSize(8, args);
-        // Those limits are arbitrary, LocalWorld.setBlock will limit it
-        // correctly based on what chunks can be accessed
-		x = readInt(args.get(0), -100, 100);
-        y = readInt(args.get(1), -1000, 1000);
-        z = readInt(args.get(2), -100, 100);
+        readXYZ(args, 0);
         mobName = args.get(3);
 
         boolean param4isNBT = false;
@@ -70,7 +90,7 @@ public abstract class SpawnerFunction<T extends CustomObjectConfigFile> extends 
 
         if(originalnbtFileName != null && originalnbtFileName.toLowerCase().trim().endsWith(".txt"))
         {
-        	nbtFileName = getHolder().getFile().getParentFile().getAbsolutePath() + File.separator + originalnbtFileName;
+        	nbtFileName = holder.getFile().getParentFile().getAbsolutePath() + File.separator + originalnbtFileName;
         }
 
         if(param4isNBT)
@@ -223,7 +243,7 @@ public abstract class SpawnerFunction<T extends CustomObjectConfigFile> extends 
     @Override
     public String makeString()
     {
-        return "Spawner(" + x + ',' + y + ',' + z + ',' + mobName + (originalnbtFileName != null && originalnbtFileName.length() > 0 ? "," + originalnbtFileName : "") + ',' + groupSize + ',' + interval + ',' + spawnChance + ',' + maxCount + ',' + despawnTime + ',' + velocityX + ',' + velocityY + ',' + velocityZ + ',' + yaw + ',' + pitch + ')';
+        return "Spawner(" + x() + ',' + y() + ',' + z() + ',' + mobName + (originalnbtFileName != null && originalnbtFileName.length() > 0 ? "," + originalnbtFileName : "") + ',' + groupSize + ',' + interval + ',' + spawnChance + ',' + maxCount + ',' + despawnTime + ',' + velocityX + ',' + velocityY + ',' + velocityZ + ',' + yaw + ',' + pitch + ')';
     }
 
     @Override
@@ -234,7 +254,7 @@ public abstract class SpawnerFunction<T extends CustomObjectConfigFile> extends 
             return false;
         }
         SpawnerFunction<T> block = (SpawnerFunction<T>) other;
-        return block.x == x && block.y == y && block.z == z && block.mobName.equalsIgnoreCase(mobName) && block.originalnbtFileName.equalsIgnoreCase(originalnbtFileName) && block.groupSize == groupSize && block.interval == interval && block.spawnChance == spawnChance && block.maxCount == maxCount && block.despawnTime == despawnTime && block.velocityX == velocityX && block.velocityY == velocityY && block.velocityZ == velocityZ && block.yaw == yaw && block.pitch == pitch;
+        return block.x() == x() && block.y() == y() && block.z() == z() && block.mobName.equalsIgnoreCase(mobName) && block.originalnbtFileName.equalsIgnoreCase(originalnbtFileName) && block.groupSize == groupSize && block.interval == interval && block.spawnChance == spawnChance && block.maxCount == maxCount && block.despawnTime == despawnTime && block.velocityX == velocityX && block.velocityY == velocityY && block.velocityZ == velocityZ && block.yaw == yaw && block.pitch == pitch;
     }
     
     public abstract SpawnerFunction<T> getNewInstance();

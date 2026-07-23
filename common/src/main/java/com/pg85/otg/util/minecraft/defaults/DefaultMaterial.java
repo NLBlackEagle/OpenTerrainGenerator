@@ -1,10 +1,11 @@
 package com.pg85.otg.util.minecraft.defaults;
 
 import com.pg85.otg.common.LocalMaterialData;
-import com.pg85.otg.common.LocalWorld;
 
+import java.util.Arrays;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Enum of the materials the server will at least support.
@@ -13,25 +14,25 @@ import java.util.TreeMap;
  */
 public enum DefaultMaterial
 {
-    AIR(0, false),
+    AIR(0),
     STONE(1),
     GRASS(2),
     DIRT(3),
     COBBLESTONE(4),
     WOOD(5),
-    SAPLING(6, false),
+    SAPLING(6),
     BEDROCK(7),
-    WATER(8, false),
-    STATIONARY_WATER(9, false),
-    LAVA(10, false),
-    STATIONARY_LAVA(11, false),
+    WATER(8),
+    STATIONARY_WATER(9),
+    LAVA(10),
+    STATIONARY_LAVA(11),
     SAND(12),
     GRAVEL(13),
     GOLD_ORE(14),
     IRON_ORE(15),
     COAL_ORE(16),
     LOG(17),
-    LEAVES(18, false),
+    LEAVES(18),
     SPONGE(19),
     GLASS(20),
     LAPIS_ORE(21),
@@ -39,190 +40,190 @@ public enum DefaultMaterial
     DISPENSER(23),
     SANDSTONE(24),
     NOTE_BLOCK(25),
-    BED_BLOCK(26, false),
-    POWERED_RAIL(27, false),
-    DETECTOR_RAIL(28, false),
-    PISTON_STICKY_BASE(29, false),
-    WEB(30, false),
-    LONG_GRASS(31, false),
-    DEAD_BUSH(32, false),
+    BED_BLOCK(26),
+    POWERED_RAIL(27),
+    DETECTOR_RAIL(28),
+    PISTON_STICKY_BASE(29),
+    WEB(30),
+    LONG_GRASS(31),
+    DEAD_BUSH(32),
     PISTON_BASE(33),
-    PISTON_EXTENSION(34, false),
+    PISTON_EXTENSION(34),
     WOOL(35),
-    PISTON_MOVING_PIECE(36, false),
-    YELLOW_FLOWER(37, false),
-    RED_ROSE(38, false),
-    BROWN_MUSHROOM(39, false),
-    RED_MUSHROOM(40, false),
+    PISTON_MOVING_PIECE(36),
+    YELLOW_FLOWER(37),
+    RED_ROSE(38),
+    BROWN_MUSHROOM(39),
+    RED_MUSHROOM(40),
     GOLD_BLOCK(41),
     IRON_BLOCK(42),
     DOUBLE_STEP(43),
-    STEP(44, false), // stone_slab
+    STEP(44), // stone_slab
     BRICK(45),
     TNT(46),
     BOOKSHELF(47),
     MOSSY_COBBLESTONE(48),
     OBSIDIAN(49),
-    TORCH(50, false),
-    FIRE(51, false),
+    TORCH(50),
+    FIRE(51),
     MOB_SPAWNER(52),
     WOOD_STAIRS(53),
-    CHEST(54, false),
-    REDSTONE_WIRE(55, false),
+    CHEST(54),
+    REDSTONE_WIRE(55),
     DIAMOND_ORE(56),
     DIAMOND_BLOCK(57),
     WORKBENCH(58),
-    CROPS(59, false),
+    CROPS(59),
     SOIL(60),
     FURNACE(61),
     BURNING_FURNACE(62),
-    SIGN_POST(63, false),
-    WOODEN_DOOR(64, false),
-    LADDER(65, false),
-    RAILS(66, false),
+    SIGN_POST(63),
+    WOODEN_DOOR(64),
+    LADDER(65),
+    RAILS(66),
     COBBLESTONE_STAIRS(67),
-    WALL_SIGN(68, false),
-    LEVER(69, false),
-    STONE_PLATE(70, false),
-    IRON_DOOR_BLOCK(71, false),
-    WOOD_PLATE(72, false),
+    WALL_SIGN(68),
+    LEVER(69),
+    STONE_PLATE(70),
+    IRON_DOOR_BLOCK(71),
+    WOOD_PLATE(72),
     REDSTONE_ORE(73),
     GLOWING_REDSTONE_ORE(74),
-    REDSTONE_TORCH_OFF(75, false),
-    REDSTONE_TORCH_ON(76, false),
-    STONE_BUTTON(77, false),
-    SNOW(78, false),
+    REDSTONE_TORCH_OFF(75),
+    REDSTONE_TORCH_ON(76),
+    STONE_BUTTON(77),
+    SNOW(78),
     ICE(79),
     SNOW_BLOCK(80),
     CACTUS(81),
     CLAY(82),
     SUGAR_CANE_BLOCK(83),
-    JUKEBOX(84, false),
-    FENCE(85, false),
+    JUKEBOX(84),
+    FENCE(85),
     PUMPKIN(86),
     NETHERRACK(87),
     SOUL_SAND(88),
     GLOWSTONE(89),
-    PORTAL(90, false),
+    PORTAL(90),
     JACK_O_LANTERN(91),
     CAKE_BLOCK(92),
-    DIODE_BLOCK_OFF(93, false),
-    DIODE_BLOCK_ON(94, false),
-    STAINED_GLASS(95, false),
-    TRAP_DOOR(96, false),
+    DIODE_BLOCK_OFF(93),
+    DIODE_BLOCK_ON(94),
+    STAINED_GLASS(95),
+    TRAP_DOOR(96),
     MONSTER_EGGS(97),
     SMOOTH_BRICK(98),
     HUGE_MUSHROOM_1(99),
     HUGE_MUSHROOM_2(100),
-    IRON_FENCE(101, false),
-    THIN_GLASS(102, false),
+    IRON_FENCE(101),
+    THIN_GLASS(102),
     MELON_BLOCK(103),
-    PUMPKIN_STEM(104, false),
-    MELON_STEM(105, false),
-    VINE(106, false),
-    FENCE_GATE(107, false),
+    PUMPKIN_STEM(104),
+    MELON_STEM(105),
+    VINE(106),
+    FENCE_GATE(107),
     BRICK_STAIRS(108),
     SMOOTH_STAIRS(109),
-    MYCEL(110, true),
-    WATER_LILY(111, false),
+    MYCEL(110),
+    WATER_LILY(111),
     NETHER_BRICK(112),
-    NETHER_FENCE(113, false),
+    NETHER_FENCE(113),
     NETHER_BRICK_STAIRS(114),
-    NETHER_WARTS(115, false),
-    ENCHANTMENT_TABLE(116, false),
-    BREWING_STAND(117, false),
+    NETHER_WARTS(115),
+    ENCHANTMENT_TABLE(116),
+    BREWING_STAND(117),
     CAULDRON(118),
-    ENDER_PORTAL(119, false),
-    ENDER_PORTAL_FRAME(120, false),
+    ENDER_PORTAL(119),
+    ENDER_PORTAL_FRAME(120),
     ENDER_STONE(121),
     DRAGON_EGG(122),
     REDSTONE_LAMP_OFF(123),
     REDSTONE_LAMP_ON(124),
     WOOD_DOUBLE_STEP(125),
     WOOD_STEP(126),
-    COCOA(127, false),
+    COCOA(127),
     SANDSTONE_STAIRS(128),
     EMERALD_ORE(129),
     ENDER_CHEST(130),
-    TRIPWIRE_HOOK(131, false),
-    TRIPWIRE(132, false),
+    TRIPWIRE_HOOK(131),
+    TRIPWIRE(132),
     EMERALD_BLOCK(133),
     SPRUCE_WOOD_STAIRS(134),
     BIRCH_WOOD_STAIRS(135),
     JUNGLE_WOOD_STAIRS(136),
     COMMAND(137),
     BEACON(138),
-    COBBLE_WALL(139, false),
-    FLOWER_POT(140, false),
-    CARROT(141, false),
-    POTATO(142, false),
-    WOOD_BUTTON(143, false),
-    SKULL(144, false),
-    ANVIL(145, false),
+    COBBLE_WALL(139),
+    FLOWER_POT(140),
+    CARROT(141),
+    POTATO(142),
+    WOOD_BUTTON(143),
+    SKULL(144),
+    ANVIL(145),
     TRAPPED_CHEST(146),
-    GOLD_PLATE(147, false),
-    IRON_PLATE(148, false),
-    REDSTONE_COMPARATOR_OFF(149, false),
-    REDSTONE_COMPARATOR_ON(150, false),
-    DAYLIGHT_DETECTOR(151, false),
+    GOLD_PLATE(147),
+    IRON_PLATE(148),
+    REDSTONE_COMPARATOR_OFF(149),
+    REDSTONE_COMPARATOR_ON(150),
+    DAYLIGHT_DETECTOR(151),
     REDSTONE_BLOCK(152),
     QUARTZ_ORE(153),
     HOPPER(154),
     QUARTZ_BLOCK(155),
     QUARTZ_STAIRS(156),
-    ACTIVATOR_RAIL(157, false),
+    ACTIVATOR_RAIL(157),
     DROPPER(158),
     STAINED_CLAY(159),
-    STAINED_GLASS_PANE(160, false),
-    LEAVES_2(161, false),
+    STAINED_GLASS_PANE(160),
+    LEAVES_2(161),
     LOG_2(162),
     ACACIA_STAIRS(163),
     DARK_OAK_STAIRS(164),
     SLIME_BLOCK(165),
     BARRIER(166),
-    IRON_TRAPDOOR(167, false),
+    IRON_TRAPDOOR(167),
     PRISMARINE(168),
     SEA_LANTERN(169),
     HAY_BLOCK(170),
-    CARPET(171, false),
+    CARPET(171),
     HARD_CLAY(172),
     COAL_BLOCK(173),
     PACKED_ICE(174),
-    DOUBLE_PLANT(175, false),
-    STANDING_BANNER(176, false),
-    WALL_BANNER(177, false),
-    DAYLIGHT_DETECTOR_INVERTED(178, false),
+    DOUBLE_PLANT(175),
+    STANDING_BANNER(176),
+    WALL_BANNER(177),
+    DAYLIGHT_DETECTOR_INVERTED(178),
     RED_SANDSTONE(179),
     RED_SANDSTONE_STAIRS(180),
     DOUBLE_STONE_SLAB2(181),
-    STONE_SLAB2(182, false),
-    SPRUCE_FENCE_GATE(183, false),
-    BIRCH_FENCE_GATE(184, false),
-    JUNGLE_FENCE_GATE(185, false),
-    DARK_OAK_FENCE_GATE(186, false),
-    ACACIA_FENCE_GATE(187, false),
-    SPRUCE_FENCE(188, false),
-    BIRCH_FENCE(189, false),
-    JUNGLE_FENCE(190, false),
-    DARK_OAK_FENCE(191, false),
-    ACACIA_FENCE(192, false),
-    SPRUCE_DOOR(193, false),
-    BIRCH_DOOR(194, false),
-    JUNGLE_DOOR(195, false),
-    ACACIA_DOOR(196, false),
-    DARK_OAK_DOOR(197, false),
-    END_ROD(198, false),
-    CHORUS_PLANT(199, false),
-    CHORUS_FLOWER(200, false),
+    STONE_SLAB2(182),
+    SPRUCE_FENCE_GATE(183),
+    BIRCH_FENCE_GATE(184),
+    JUNGLE_FENCE_GATE(185),
+    DARK_OAK_FENCE_GATE(186),
+    ACACIA_FENCE_GATE(187),
+    SPRUCE_FENCE(188),
+    BIRCH_FENCE(189),
+    JUNGLE_FENCE(190),
+    DARK_OAK_FENCE(191),
+    ACACIA_FENCE(192),
+    SPRUCE_DOOR(193),
+    BIRCH_DOOR(194),
+    JUNGLE_DOOR(195),
+    ACACIA_DOOR(196),
+    DARK_OAK_DOOR(197),
+    END_ROD(198),
+    CHORUS_PLANT(199),
+    CHORUS_FLOWER(200),
     PURPUR_BLOCK(201),
     PURPUR_PILLAR(202),
     PURPUR_STAIRS(203),
     PURPUR_DOUBLE_SLAB(204),
-    PURPUR_SLAB(205, false),
+    PURPUR_SLAB(205),
     END_BRICKS(206),
-    BEETROOT_BLOCK(207, false),
-    GRASS_PATH(208, false),
-    END_GATEWAY(209, false),
+    BEETROOT_BLOCK(207),
+    GRASS_PATH(208),
+    END_GATEWAY(209),
     COMMAND_REPEATING(210),
     COMMAND_CHAIN(211),
     FROSTED_ICE(212),
@@ -230,7 +231,7 @@ public enum DefaultMaterial
     NETHER_WART_BLOCK(214),
     RED_NETHER_BRICK(215),
     BONE_BLOCK(216),
-    STRUCTURE_VOID(217, false),
+    STRUCTURE_VOID(217),
     OBSERVER(218),
     WHITE_SHULKER_BOX(219),
     ORANGE_SHULKER_BOX(220),
@@ -240,7 +241,7 @@ public enum DefaultMaterial
     LIME_SHULKER_BOX(224),
     PINK_SHULKER_BOX(225),
     GRAY_SHULKER_BOX(226),
-    SILVER_SHULKER_BOX(228),
+    SILVER_SHULKER_BOX(227),
     CYAN_SHULKER_BOX(228),
     PURPLE_SHULKER_BOX(229),
     BLUE_SHULKER_BOX(230),
@@ -248,39 +249,42 @@ public enum DefaultMaterial
     GREEN_SHULKER_BOX(232),
     RED_SHULKER_BOX(233),
     BLACK_SHULKER_BOX(234),
+    WHITE_GLAZED_TERRACOTTA(235),
+    ORANGE_GLAZED_TERRACOTTA(236),
+    MAGENTA_GLAZED_TERRACOTTA(237),
+    LIGHT_BLUE_GLAZED_TERRACOTTA(238),
+    YELLOW_GLAZED_TERRACOTTA(239),
+    LIME_GLAZED_TERRACOTTA(240),
+    PINK_GLAZED_TERRACOTTA(241),
+    GRAY_GLAZED_TERRACOTTA(242),
+    SILVER_GLAZED_TERRACOTTA(243),
+    CYAN_GLAZED_TERRACOTTA(244),
+    PURPLE_GLAZED_TERRACOTTA(245),
+    BLUE_GLAZED_TERRACOTTA(246),
+    BROWN_GLAZED_TERRACOTTA(247),
+    GREEN_GLAZED_TERRACOTTA(248),
+    RED_GLAZED_TERRACOTTA(249),
+    BLACK_GLAZED_TERRACOTTA(250),
     CONCRETE(251),
     CONCRETE_POWDER(252),
-    UNKNOWN_BLOCK(254),
-    STRUCTURE_BLOCK(255, false);
+    STRUCTURE_BLOCK(255);
 	
     /**
      * A DefaultMaterial lookup table with the material ID as the index
      */
-    private static DefaultMaterial[] LookupID;
+    private static final DefaultMaterial[] LookupID = new DefaultMaterial[Arrays.stream(DefaultMaterial.values()).mapToInt(m -> m.id + 1).max().orElse(0)];
+    static
+    {
+        for(DefaultMaterial m : DefaultMaterial.values())
+        {
+            LookupID[m.id] = m;
+        }
+    }
 	
     /**
      * The ID of the material
      */
     public final int id;
-    /**
-     * Whether or not a material is solid. If set to false, it will prevent
-     * snowfall. Note: this isn't always equal to what Minecraft calls solid.
-     */
-    private final boolean solid;
-    
-    /**
-     * Creates a new material.
-     *
-     * @param id Id of the material.
-     * @param solid Whether the material is solid. If set to false, it will
-     *            prevent snowfall. Note: this isn't always equal to what
-     *            Minecraft calls solid.
-     */
-    private DefaultMaterial(int id, boolean solid)
-    {
-        this.id = id;
-        this.solid = solid;
-    }
 
     /**
      * Creates a new solid material where snow will fall on.
@@ -290,66 +294,12 @@ public enum DefaultMaterial
     private DefaultMaterial(int id)
     {
         this.id = id;
-        this.solid = true;
-    }
-    
-    public boolean isAir()
-    {
-    	return this == AIR;
-    }
-
-    /**
-     * Returns true only if this material is flowing or stationary Water
-     *
-     * @return boolean whether or not this material is flowing or stationary
-     *         Water
-     */
-    public boolean isLiquid()
-    {
-        return this == WATER || this == STATIONARY_WATER || this == LAVA || this == STATIONARY_LAVA;
-    }
-
-    /**
-     * Gets whether this material is solid. Materials that aren't solid are
-     * nonexistant for {@link LocalWorld#getSolidHeight(int, int)}. Note: this
-     * isn't always equal to what Minecraft calls solid.
-     *
-     * @return boolean Whether or not the material is considered solid
-     */
-    public boolean isSolid()
-    {
-        return this.solid;
-    }
-
-    /**
-     * Gets whether snow can fall on this block.
-     *
-     * @return Whether snow can fall on this block.
-     */
-    public boolean canSnowFallOn()
-    {
-        // Exceptions for nonsolid leaves
-        // IF we get much more exceptions, we may want to make this a
-        // parameter in the constructor instead.
-        return this == LEAVES || this == LEAVES_2 || (this.solid && this != PACKED_ICE && this != ICE);
     }
 
     /**
      * A DefaultMaterial lookup table with the material name as the index
      */
-    private static Map<String, DefaultMaterial> lookupName;
-
-    static
-    {
-        LookupID = new DefaultMaterial[256];
-        lookupName = new TreeMap<String, DefaultMaterial>(String.CASE_INSENSITIVE_ORDER);
-
-        for (DefaultMaterial material : DefaultMaterial.values())
-        {
-            LookupID[material.id] = material;
-            lookupName.put(material.name(), material);
-        }
-    }
+    private static final Map<String, DefaultMaterial> lookupName = Arrays.stream(DefaultMaterial.values()).collect(Collectors.toMap(Enum::name, Function.identity()));
 
     /**
      * Returns a DefaultMaterial object with the given material name. Name is
@@ -367,7 +317,7 @@ public enum DefaultMaterial
     		return null;
     	}
     	
-        DefaultMaterial defaultMaterial = lookupName.get(blockName);
+        DefaultMaterial defaultMaterial = lookupName.get(blockName.toUpperCase());
         if (defaultMaterial != null)
         {
             return defaultMaterial;
@@ -411,7 +361,7 @@ public enum DefaultMaterial
      */
     public static DefaultMaterial getMaterial(int id)
     {
-        if (id < 256 && id > -1 && LookupID[id] != null)
+        if (id >= 0 && id < LookupID.length)
         {
             return LookupID[id];
         }
@@ -430,7 +380,7 @@ public enum DefaultMaterial
      */
     public static boolean contains(int id)
     {
-        return id < 256 && LookupID[id] != null;
+        return id >= 0 && id < LookupID.length && LookupID[id] != null;
     }
 
 }

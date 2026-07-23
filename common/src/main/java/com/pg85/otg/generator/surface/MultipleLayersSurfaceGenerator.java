@@ -18,19 +18,19 @@ public class MultipleLayersSurfaceGenerator extends SimpleSurfaceGenerator
     // Must be sorted based on the noise field
     private List<LayerChoice> layerChoices;
 
-    public MultipleLayersSurfaceGenerator(String[] args) throws InvalidConfigException
+    public MultipleLayersSurfaceGenerator(List<String> args) throws InvalidConfigException
     {
-        if (args.length < 2)
+        if (args.size() < 2)
         {
             throw new InvalidConfigException("Needs at least two arguments");
         }
 
         layerChoices = new ArrayList<LayerChoice>();
-        for (int i = 0; i < args.length - 2; i += 3)
+        for (int i = 0; i < args.size() - 2; i += 3)
         {
-            LocalMaterialData surfaceBlock = MaterialHelper.readMaterial(args[i]);
-            LocalMaterialData groundBlock = MaterialHelper.readMaterial(args[i+1]);
-            float maxNoise = (float) StringHelper.readDouble(args[i + 2], -20, 20);
+            LocalMaterialData surfaceBlock = MaterialHelper.readMaterial(args.get(i));
+            LocalMaterialData groundBlock = MaterialHelper.readMaterial(args.get(i+1));
+            float maxNoise = (float) StringHelper.readDouble(args.get(i + 2), -20, 20);
             layerChoices.add(new LayerChoice(surfaceBlock, groundBlock, maxNoise));
         }
         Collections.sort(layerChoices);

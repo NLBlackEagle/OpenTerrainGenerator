@@ -31,6 +31,7 @@ import com.pg85.otg.util.minecraft.defaults.DefaultMaterial;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class BiomeConfig extends ConfigFile
 {
@@ -274,27 +275,24 @@ public class BiomeConfig extends ConfigFile
      */
     public int getSnowHeight(float temp)
     {
-    	// OTG biome temperature is between 0.0 and 2.0.
-    	// Judging by WorldStandardValues.SNOW_AND_ICE_MAX_TEMP, snow should appear below 0.15.
-    	// According to the configs, snow and ice should appear between 0.2 (at y > 90) and 0.1 (entire biome covered in ice).
-    	// Let's make sure that at 0.2, snow layers start with thickness 0 at y 90 and thickness 7 around y 255.
-    	// In a 0.2 temp biome, y90 temp is 0.156, y255 temp is -0.12
-    	   	
-    	float snowTemp = WorldStandardValues.SNOW_AND_ICE_TEMP;
-    	if(temp <= snowTemp)
-    	{
-        	float maxColdTemp = WorldStandardValues.SNOW_AND_ICE_MAX_TEMP;
-        	float maxThickness = 7.0f;
-        	if(temp < maxColdTemp)
-        	{
-        		return (int)maxThickness;
-        	}
-        	float range = Math.abs(maxColdTemp - snowTemp);
-        	float fraction = Math.abs(maxColdTemp - temp);
-    		return (int)Math.floor((1.0f - (fraction / range)) * maxThickness);
-    	}
+        // OTG biome temperature is between 0.0 and 2.0.
+        // Judging by WorldStandardValues.SNOW_AND_ICE_MAX_TEMP, snow should appear below 0.15.
+        // According to the configs, snow and ice should appear between 0.2 (at y > 90) and 0.1 (entire biome covered in ice).
+        // Let's make sure that at 0.2, snow layers start with thickness 0 at y 90 and thickness 7 around y 255.
+        // In a 0.2 temp biome, y90 temp is 0.156, y255 temp is -0.12
 
-    	return  0;
+        float startTemp = WorldStandardValues.SNOW_AND_ICE_TEMP;
+        float maxTemp = WorldStandardValues.SNOW_AND_ICE_MAX_TEMP;
+        int maxThickness = 7;
+        if(temp > startTemp)
+        {
+            return 0;
+        }
+        if(temp < maxTemp)
+        {
+            return maxThickness;
+        }
+        return (int) Math.floor((temp - startTemp) / (maxTemp - startTemp) * maxThickness);
     }
 
     public SaplingGen getSaplingGen(SaplingType type)
@@ -837,7 +835,7 @@ public class BiomeConfig extends ConfigFile
             "TreeTypeChance: similar to Rarity. Example:",
             "                Tree(10,Taiga1,35,Taiga2,100) - plugin tries 10 times, for each attempt it tries to place Taiga1 (35% chance),",
             "                if that fails, it attempts to place Taiga2 (100% chance).",
-            "PlantType:      one of the plant types: " + StringHelper.join(PlantType.values(), ", "),
+            "PlantType:      one of the plant types: " + StringHelper.join(PlantType.values().stream().sorted(Comparator.comparing(PlantType::getName, String.CASE_INSENSITIVE_ORDER)).collect(Collectors.toList()), ", "),
             "                or simply a BlockName",
             "IceSpikeType:   one of the ice spike types: " + StringHelper.join(IceSpikeGen.SpikeType.values(), ","),
             "Object:         can be a any kind of custom object (bo2 or bo3) but without the file extension. You can",

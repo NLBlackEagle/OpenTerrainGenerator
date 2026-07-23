@@ -12,9 +12,9 @@ import com.pg85.otg.util.bo3.Rotation;
 import com.pg85.otg.util.helpers.StreamHelper;
 import com.pg85.otg.util.helpers.StringHelper;
 
+import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.*;
 
 /**
@@ -27,20 +27,13 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
     String branchGroup = "";
     boolean isRequiredBranch = false;
    
-    public BO4BranchFunction() { }
-    
-    public BO4BranchFunction(BO4Config holder)
-    {
-    	this.holder = holder;
-    }
-    
     public BO4BranchFunction rotate(Rotation rotation)
     {
-    	BO4BranchFunction rotatedBranch = new BO4BranchFunction(this.getHolder());
+    	BO4BranchFunction rotatedBranch = new BO4BranchFunction();
 
-    	rotatedBranch.x = x;
-    	rotatedBranch.y = y;
-    	rotatedBranch.z = z;
+    	rotatedBranch.x(x());
+    	rotatedBranch.y(y());
+    	rotatedBranch.z(z());
 
         rotatedBranch.totalChance = totalChance;
         rotatedBranch.totalChanceSet = totalChanceSet;
@@ -50,28 +43,22 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
 
         rotatedBranch.branchesOTGPlus = branchesOTGPlus; // TODO: Make sure this won't cause problems
 
-        rotatedBranch.holder = holder;
-        rotatedBranch.valid = valid;
-        rotatedBranch.inputName = inputName;
-        rotatedBranch.inputArgs = inputArgs;
-        rotatedBranch.error = error;
-
-        int newX = rotatedBranch.x;
-        int newZ = rotatedBranch.z;
+        int newX = rotatedBranch.x();
+        int newZ = rotatedBranch.z();
 
     	for(int i = 0; i < rotation.getRotationId(); i++)
     	{
-            newX = rotatedBranch.z;
-            newZ = -rotatedBranch.x;
+            newX = rotatedBranch.z();
+            newZ = -rotatedBranch.x();
 
-            rotatedBranch.x = newX;
-            rotatedBranch.y = rotatedBranch.y;
-            rotatedBranch.z = newZ;
+            rotatedBranch.x(newX);
+            rotatedBranch.y(rotatedBranch.y());
+            rotatedBranch.z(newZ);
 
             ArrayList<BO4BranchNode> rotatedBranchBranches = new ArrayList<BO4BranchNode>();
             for (BO4BranchNode holder : rotatedBranch.branchesOTGPlus)
             {
-            	rotatedBranchBranches.add(new BO4BranchNode(holder.branchDepth, holder.isRequiredBranch, holder.isWeightedBranch, holder.getRotation().next(), holder.getChance(), holder.getCustomObject(false, null), holder.customObjectName, holder.branchGroup));
+            	rotatedBranchBranches.add(new BO4BranchNode(holder.branchDepth, holder.isRequiredBranch, holder.isWeightedBranch, holder.getRotation().next(rotation), holder.getChance(), holder.getCustomObject(false, null), holder.customObjectName, holder.branchGroup));
             }
             rotatedBranch.branchesOTGPlus = rotatedBranchBranches;
     	}
@@ -80,7 +67,7 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
     }
 
     @Override
-    public void load(List<String> args) throws InvalidConfigException
+    public void load(BO4Config holder, List<String> args) throws InvalidConfigException
     {
         branchesOTGPlus = new ArrayList<BO4BranchNode>();
         readArgs(args, false);
@@ -93,9 +80,7 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
 		// assureSize only returns false if size() < size
 		assureSize(8, args);
 
-        x = readInt(args.get(0), -10000, 10000);
-        y = readInt(args.get(1), -255, 255);
-        z = readInt(args.get(2), -10000, 10000);
+        readXYZ(args, 0);
         isRequiredBranch = readBoolean(args.get(3));
 
         int i;
@@ -159,9 +144,9 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
     {
         StringBuilder output = new StringBuilder(getConfigName())
             .append('(')
-            .append(x).append(',')
-            .append(y).append(',')
-            .append(z).append(',');
+            .append(x()).append(',')
+            .append(y()).append(',')
+            .append(z()).append(',');
 
     	output.append(isRequiredBranch);
         for (Iterator<BO4BranchNode> it = branchesOTGPlus.iterator(); it.hasNext();)
@@ -194,9 +179,8 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
             double randomChance = random.nextDouble() * totalChance;
             if (randomChance <= branch.getChance())
             {
-                BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedCoord(this.x, this.y, this.z, rotation);
-                Rotation newRotation = Rotation.getRotation((rotation.getRotationId() + branch.getRotation().getRotationId()) % 4);
-                return new BO4CustomStructureCoordinate(world, branch.getCustomObject(false, world), branch.customObjectName, newRotation, x + rotatedCoords.getX(), (short)(y + rotatedCoords.getY()), z + rotatedCoords.getZ(), branch.branchDepth, branch.isRequiredBranch, branch.isWeightedBranch, branch.branchGroup);
+                BO4CustomStructureCoordinate rotatedCoords = BO4CustomStructureCoordinate.getRotatedCoord(this.x(), this.y(), this.z(), rotation);
+                return new BO4CustomStructureCoordinate(world, branch.getCustomObject(false, world), branch.customObjectName, branch.getRotation().next(rotation), x + rotatedCoords.getX(), (short)(y + rotatedCoords.getY()), z + rotatedCoords.getZ(), branch.branchDepth, branch.isRequiredBranch, branch.isWeightedBranch, branch.branchGroup);
             }
         }
         return null;
@@ -213,14 +197,14 @@ public class BO4BranchFunction extends BranchFunction<BO4Config>
         StreamHelper.writeStringToStream(stream, makeString());
     }
     
-    public static BO4BranchFunction fromStream(BO4Config holder, ByteBuffer buffer) throws IOException, InvalidConfigException
+    public static BO4BranchFunction fromStream(BO4Config holder, DataInput in) throws IOException, InvalidConfigException
     {
-    	BO4BranchFunction branchFunction = new BO4BranchFunction(holder);    	
-        String configFunctionString = StreamHelper.readStringFromBuffer(buffer);
+    	BO4BranchFunction branchFunction = new BO4BranchFunction();    	
+        String configFunctionString = StreamHelper.readStringFromStream(in);
         int bracketIndex = configFunctionString.indexOf('(');
         String parameters = configFunctionString.substring(bracketIndex + 1, configFunctionString.length() - 1);
-        List<String> args = Arrays.asList(StringHelper.readCommaSeperatedString(parameters));        
-		branchFunction.load(args);
+        List<String> args = StringHelper.readCommaSeperatedString(parameters);        
+		branchFunction.load(holder, args);
     	return branchFunction;
     }
 }

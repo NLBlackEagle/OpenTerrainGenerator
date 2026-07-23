@@ -6,14 +6,14 @@ class BlockCoordsAndNeighbours
 {
     public BO4CustomStructureCoordinate bO3;
     public int blockX;
-    public short blockY;
+    public int blockY;
     public int blockZ;
     public boolean smoothInDirection1;
     public boolean smoothInDirection2;
     public boolean smoothInDirection3;
     public boolean smoothInDirection4;
     
-    public BlockCoordsAndNeighbours(BO4CustomStructureCoordinate bO3, int blockX, short blockY, int blockZ, boolean smoothInDirection1, boolean smoothInDirection2, boolean smoothInDirection3, boolean smoothInDirection4)
+    public BlockCoordsAndNeighbours(BO4CustomStructureCoordinate bO3, int blockX, int blockY, int blockZ, boolean smoothInDirection1, boolean smoothInDirection2, boolean smoothInDirection3, boolean smoothInDirection4)
     {
         this.bO3 = bO3;
         this.blockX = blockX;

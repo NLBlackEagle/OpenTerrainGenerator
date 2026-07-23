@@ -71,13 +71,12 @@ import net.minecraft.world.gen.structure.StructureOceanMonument;
 import net.minecraft.world.gen.structure.template.Template;
 import net.minecraft.world.gen.structure.template.TemplateManager;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.relauncher.ReflectionHelper.UnableToFindMethodException;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import org.apache.commons.lang3.RandomUtils;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -755,45 +754,30 @@ public class ForgeWorld implements LocalWorld
     @Override
     public LocalMaterialData getMaterial(int x, int y, int z, ChunkCoordinate chunkBeingPopulated)
     {
-        if (y >= PluginStandardValues.WORLD_HEIGHT || y < PluginStandardValues.WORLD_DEPTH)
+        if(y >= PluginStandardValues.WORLD_HEIGHT || y < PluginStandardValues.WORLD_DEPTH)
         {
-        	return null;
+            return ForgeMaterialData.AIR;
         }
 
-        // If the chunk exists or is inside the area being populated, fetch it normally.
-        Chunk chunk = null;
-    	if(
-			(chunkBeingPopulated != null && OTG.IsInAreaBeingPopulated(x, z, chunkBeingPopulated)) 
-			//|| getChunkGenerator().chunkExists(x, z)			
-		)
-    	{
-    		chunk = getChunkGenerator().getChunk(x, z);
-    	}
-    	
-		// If the chunk doesn't exist and we're doing something outside the
-    	// population sequence, return the material without loading the chunk.
-    	if(chunk == null && chunkBeingPopulated == null)
-		{
-    		// If the chunk has already been loaded, no need to use fake chunks.
-    		if(world.isBlockLoaded(new BlockPos(x,255,z)))
-    		{
-    			chunk = getChunkGenerator().getChunk(x, z);
-    		} else {
-    			// Calculate the material without loading the chunk.
-    			return generator.getMaterialInUnloadedChunk(x,y,z);
-    		}
-    	}
-    	
-		// Tried to query an unloaded chunk outside the area being populated
-    	if(chunk == null)
-    	{
-            return null;
-    	}
-    	
-		// Get internal coordinates for block in chunk
-        int internalX = x & 0xF;
-        int internalZ = z & 0xF;
-        return ForgeMaterialData.ofMinecraftBlockState(chunk.getBlockState(internalX, y, internalZ));		               
+        Chunk chunk;
+        if(chunkBeingPopulated != null)
+        {
+            if(!OTG.IsInAreaBeingPopulated(x, z, chunkBeingPopulated))
+            {
+                return ForgeMaterialData.AIR;
+            }
+            chunk = this.world.getChunk(x >> 4, z >> 4);
+        }
+        else
+        {
+            chunk = this.world.getChunkProvider().getLoadedChunk(x >> 4, z >> 4);
+            if(chunk == null)
+            {
+                return this.generator.getMaterialInUnloadedChunk(x, y, z);
+            }
+        }
+
+        return ForgeMaterialData.ofMinecraftBlockState(chunk.getBlockState(x & 15, y, z & 15));
     }
     
     @Override
@@ -1053,87 +1037,33 @@ public class ForgeWorld implements LocalWorld
     		(worldConfig.woodLandMansionsEnabled && isStructureInRadius(chunkCoord, this.woodLandMansionGen, 4))
 		;
 	}
-	
-	
-	private static boolean inited = false;
-	private static Method canSpawnStructureAtCoordsMethodObf = null;
-	private static Method canSpawnStructureAtCoordsMethodDeObf = null;
+
+    private static final Field worldField = ObfuscationReflectionHelper.findField(MapGenBase.class, "field_75039_c");
+    private static final Method canSpawnStructureAtCoordsMethod = ObfuscationReflectionHelper.findMethod(MapGenStructure.class, "func_75047_a", boolean.class, int.class, int.class);
+
     public boolean isStructureInRadius(ChunkCoordinate startChunk, MapGenStructure structure, int radiusInChunks)
     {
-    	if(!inited)
-    	{   
-    		inited = true;
-    		try
-    		{
-    			canSpawnStructureAtCoordsMethodObf = ObfuscationReflectionHelper.findMethod(MapGenStructure.class, "func_75047_a", boolean.class, int.class, int.class);
-    		} catch(UnableToFindMethodException ex) { }
-    		try
-    		{
-    			canSpawnStructureAtCoordsMethodDeObf = ObfuscationReflectionHelper.findMethod(MapGenStructure.class, "canSpawnStructureAtCoords", boolean.class, int.class, int.class);
-    		} catch(UnableToFindMethodException ex) { }
-    		
-        	if(canSpawnStructureAtCoordsMethodObf == null && canSpawnStructureAtCoordsMethodDeObf == null)
-        	{
-    			OTG.log(LogMarker.ERROR, "Error, could not reflect MapGenStructure.canSpawnStructureAtCoords, BO4's may not be able to detect default/modded structures. OTG may not fully support your Forge version or modded structures.");
-    			return false;
-        	}
-    	}
-    	
-    	if(canSpawnStructureAtCoordsMethodObf == null && canSpawnStructureAtCoordsMethodDeObf == null)
-    	{
-			return false;
-    	}
-    	
-        int chunkX = startChunk.getChunkX();
-        int chunkZ = startChunk.getChunkZ();
-        for (int cycle = 0; cycle <= radiusInChunks; ++cycle)
+        try
         {
-            for (int xRadius = -cycle; xRadius <= cycle; ++xRadius)
+            worldField.set(structure, this.world);
+            for(int x = -radiusInChunks; x <= radiusInChunks; x++)
             {
-                for (int zRadius = -cycle; zRadius <= cycle; ++zRadius)
+                for(int z = -radiusInChunks; z <= radiusInChunks; z++)
                 {
-                    int distance = (int)Math.floor(Math.sqrt(Math.pow (xRadius, 2) + Math.pow (zRadius, 2)));                    
-                    if (distance == cycle)
+                    if((boolean) canSpawnStructureAtCoordsMethod.invoke(structure, startChunk.getChunkX() + x, startChunk.getChunkZ() + z))
                     {
-                    	boolean canSpawnStructureAtCoords = false;
-						
-                    	try
-						{
-							if(canSpawnStructureAtCoordsMethodObf != null)
-							{
-								canSpawnStructureAtCoords = (boolean) canSpawnStructureAtCoordsMethodObf.invoke(structure, chunkX + xRadius, chunkZ + zRadius);
-		                    	if(canSpawnStructureAtCoords)
-		                    	{
-		                    		return true;
-		                    	}
-		                    	continue;
-							}
-						}
-						catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) { }
-						
-						try
-						{
-							if(canSpawnStructureAtCoordsMethodDeObf != null)
-							{
-								canSpawnStructureAtCoords = (boolean) canSpawnStructureAtCoordsMethodDeObf.invoke(structure, chunkX + xRadius, chunkZ + zRadius);
-		                    	if(canSpawnStructureAtCoords)
-		                    	{
-		                    		return true;
-		                    	}
-							}
-						}
-						catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
-						{
-							OTG.log(LogMarker.ERROR, "Error, could not reflect MapGenStructure.canSpawnStructureAtCoords, BO4's may not be able to detect default/modded structures. OTG may not fully support your Forge version or modded structures.");
-							return false;
-						}
+                        return true;
                     }
                 }
             }
+            return false;
         }
-        return false;
+        catch(ReflectiveOperationException e)
+        {
+            throw new UnsupportedOperationException(e);
+        }
     }
-	
+
 	// TODO: No clue what this is used for, leads to some MC advancements "test" code. 
     public boolean isInsideStructure(String structureName, BlockPos pos)
     {
@@ -1323,7 +1253,7 @@ public class ForgeWorld implements LocalWorld
 	                            			}
 			                            	if(instruction.getFrom().getBlockId() == blockId)
 			                            	{	                            		
-			                                    section.set(sectionX, sectionY, sectionZ, ((ForgeMaterialData)instruction.getTo()).internalBlock());                            		
+			                                    section.set(sectionX, sectionY, sectionZ, ((ForgeMaterialData)instruction.getTo()).getBlockState());                            		
 			                            	}
 	                            		}
 	                            	}
@@ -1388,9 +1318,9 @@ public class ForgeWorld implements LocalWorld
     {
         if(OTG.getPluginConfig().spawnLog)
         {
-            OTG.log(LogMarker.DEBUG, "Attempting to spawn BO3 Entity() " + entityData.groupSize + " x " + entityData.name + " at " + entityData.x + " " + entityData.y + " " + entityData.z);
+            OTG.log(LogMarker.DEBUG, "Attempting to spawn BO3 Entity() " + entityData.groupSize + " x " + entityData.name + " at " + entityData.x() + " " + entityData.y() + " " + entityData.z());
         }
-        if (chunkBeingPopulated != null && !OTG.IsInAreaBeingPopulated((int) Math.floor(entityData.x), (int) Math.floor(entityData.z), chunkBeingPopulated)) {
+        if (chunkBeingPopulated != null && !OTG.IsInAreaBeingPopulated((int) Math.floor(entityData.x()), (int) Math.floor(entityData.z()), chunkBeingPopulated)) {
             // If outside area being populated, abort and remove entity
             if(OTG.getPluginConfig().spawnLog)
             {
@@ -1398,7 +1328,7 @@ public class ForgeWorld implements LocalWorld
             }
             return;
         }
-        if (entityData.y < 0 || entityData.y >= 256) {
+        if (entityData.y() < 0 || entityData.y() >= 256) {
             if(OTG.getPluginConfig().spawnLog)
             {
                 OTG.log(LogMarker.ERROR, "Failed to spawn mob "+entityData.name +", spawn position out of bounds");
@@ -1412,9 +1342,9 @@ public class ForgeWorld implements LocalWorld
         if (entity == null) return;
 
         // If either the block is a full block, or entity is a fish out of water, then we cancel
-        if (world.isBlockNormalCube(new BlockPos(entityData.x, entityData.y, entityData.z), false)
+        if (world.isBlockNormalCube(new BlockPos(entityData.x(), entityData.y(), entityData.z()), false)
                 || ((entity.isCreatureType(EnumCreatureType.WATER_CREATURE, false) || entity instanceof EntityGuardian)
-                    && world.getBlockState(new BlockPos(entityData.x, entityData.y, entityData.z)).getMaterial() != Material.WATER))
+                    && world.getBlockState(new BlockPos(entityData.x(), entityData.y(), entityData.z())).getMaterial() != Material.WATER))
         {
             world.removeEntity(entity);
             return;
@@ -1500,15 +1430,15 @@ public class ForgeWorld implements LocalWorld
             }
 
             // Spawn entity, with potential passengers
-            entity = AnvilChunkLoader.readWorldEntityPos(nbttagcompound, world, entityData.x+0.5, entityData.y, entityData.z+0.5, true);
+            entity = AnvilChunkLoader.readWorldEntityPos(nbttagcompound, world, entityData.x()+0.5, entityData.y(), entityData.z()+0.5, true);
             if (entity == null) return null;
         } else {
             // Create a default entity from the given mob type
             nbttagcompound.setString("id", entityData.resourceLocation);
-            entity = AnvilChunkLoader.readWorldEntityPos(nbttagcompound, world, entityData.x + 0.5, entityData.y, entityData.z + 0.5, true);
+            entity = AnvilChunkLoader.readWorldEntityPos(nbttagcompound, world, entityData.x() + 0.5, entityData.y(), entityData.z() + 0.5, true);
             if (entity instanceof EntityLiving) {
                 ((EntityLiving)entity).onInitialSpawn(world.getDifficultyForLocation(
-                                new BlockPos(entityData.x, entityData.y, entityData.z)),(IEntityLivingData)null);
+                                new BlockPos(entityData.x(), entityData.y(), entityData.z())),(IEntityLivingData)null);
             }
             if (entity == null)
                 return null;
@@ -1556,4 +1486,14 @@ public class ForgeWorld implements LocalWorld
 		}
 		return isOTGPlus;
 	}
+
+    @Override
+    public boolean canPlaceSnowAt(int x, int y, int z, ChunkCoordinate chunkBeingPopulated)
+    {
+        if(chunkBeingPopulated != null && OTG.IsInAreaBeingPopulated(x, z, chunkBeingPopulated))
+        {
+            return false;
+        }
+        return Blocks.SNOW_LAYER.canPlaceBlockAt(world, new BlockPos(x, y, z));
+    }
 }

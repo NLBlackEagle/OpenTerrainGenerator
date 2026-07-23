@@ -31,7 +31,7 @@ class StringListSetting extends Setting<List<String>>
     @Override
     public List<String> read(String string) throws InvalidConfigException
     {
-        return Arrays.asList(StringHelper.readCommaSeperatedString(string));
+        return StringHelper.readCommaSeperatedString(string);
     }
 
     @Override

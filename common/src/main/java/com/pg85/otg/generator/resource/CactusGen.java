@@ -40,7 +40,8 @@ public class CactusGen extends Resource
     	
         int y = RandomHelper.numberInRange(rand, minAltitude, maxAltitude);
         
-        parseMaterials(world, material, sourceBlocks);
+        material = material.parseForWorld(world);
+        sourceBlocks.parseForWorld(world);
         LocalMaterialData worldMaterial;
         int cactusX;
         int cactusBaseY;

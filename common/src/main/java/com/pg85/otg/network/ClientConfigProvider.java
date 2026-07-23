@@ -15,6 +15,7 @@ import com.pg85.otg.util.BiomeIds;
 import com.pg85.otg.util.helpers.StreamHelper;
 import com.pg85.otg.util.minecraft.defaults.BiomeRegistryNames;
 import com.pg85.otg.util.minecraft.defaults.DefaultBiome;
+import com.pg85.otg.worldsave.WorldSaveData;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -40,6 +41,8 @@ public final class ClientConfigProvider implements ConfigProvider
      */
     private LocalBiome[] biomesByOTGId; // For the server, OTGBiomeIds are used, for the client only non-virtual biomes are known and saved Id's are used
     private LocalBiome[] biomesBySavedId; // For the server, OTGBiomeIds are used, for the client only non-virtual biomes are known and saved Id's are used    
+
+    private WorldSaveData worldSaveData;
 
     public ClientConfigProvider(DataInputStream stream, LocalWorld world) throws IOException
     {
@@ -98,6 +101,8 @@ public final class ClientConfigProvider implements ConfigProvider
 
         	OTG.getEngine().setOTGBiomeId(world.getName(), otgBiomeId, config, true);
         }
+
+        worldSaveData = new WorldSaveData(stream.readInt());
     }
 
     @Override
@@ -161,4 +166,10 @@ public final class ClientConfigProvider implements ConfigProvider
         
 		return outputBiomes;
 	}
+
+    @Override
+    public WorldSaveData getWorldSaveData()
+    {
+        return worldSaveData;
+    }
 }

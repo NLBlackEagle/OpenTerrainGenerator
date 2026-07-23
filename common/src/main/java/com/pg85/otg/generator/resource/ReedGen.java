@@ -97,7 +97,8 @@ public class ReedGen extends Resource
             return;
         }
         
-        parseMaterials(world, material, sourceBlocks);
+        material = material.parseForWorld(world);
+        sourceBlocks.parseForWorld(world);
         
         LocalMaterialData worldMaterial = world.getMaterial(x, y - 1, z, chunkBeingPopulated);        
         if (worldMaterial == null || !this.sourceBlocks.contains(worldMaterial))

@@ -6,9 +6,9 @@ import com.pg85.otg.generator.biome.ArraysCache;
 public class LayerRiverInit extends Layer
 {
 
-    LayerRiverInit(long paramLong, int defaultOceanId, Layer paramGenLayer)
+    LayerRiverInit(long seed, LocalWorld world, Layer paramGenLayer)
     {
-        super(paramLong, defaultOceanId);
+        super(seed, world);
         this.child = paramGenLayer;
     }
 

@@ -8,17 +8,26 @@ minecraft {
     mappings channel: "${forge_mappings_channel}", version: "${forge_mappings_version}"
 
     accessTransformer = file("src/main/resources/META-INF/${forge_access_transformers}")
-}
 
-repositories {
-    maven { url = 'https://maven.enginehub.org/artifactory/repo/' } // worldedit
+    runs {
+        client {
+            taskName "runClient ${mod_name} ${minecraft_version}"
+            environment 'MC_VERSION', "${minecraft_version}"
+            property 'fml.coreMods.load', "${forge_plugin_class}"
+        }
+
+        server {
+            taskName "runServer ${mod_name} ${minecraft_version}"
+            environment 'MC_VERSION', "${minecraft_version}"
+            property 'fml.coreMods.load', "${forge_plugin_class}"
+        }
+    }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     implementation project(':common')
-    compileOnly "com.sk89q.worldedit:worldedit-forge-mc1.11:${worldedit_forge_version}"
-    compileOnly "com.sk89q.worldedit:worldedit-core:${worldedit_core_version}"
+    implementation "curse.maven:worldedit-225608:${worldedit_forge_version}"
 }
 
 processResources {

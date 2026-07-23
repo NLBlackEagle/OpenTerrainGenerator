@@ -1,8 +1,15 @@
 package com.pg85.otg.util.bo3;
 
-import java.io.*;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Arrays;
+
+import com.pg85.otg.exception.InvalidConfigException;
+import com.pg85.otg.util.CompressionUtils;
 
 /**
  * NBT IO class
@@ -34,7 +41,10 @@ public class NamedBinaryTag
         TAG_String,
         TAG_List,
         TAG_Compound,
-        TAG_Int_Array
+        TAG_Int_Array,
+        TAG_Long_Array;
+
+        public static final Type[] VALUES = Type.values();
     }
 
     /**
@@ -129,6 +139,10 @@ public class NamedBinaryTag
                 if (!(value instanceof int[]))
                     throw new IllegalArgumentException();
                 break;
+            case TAG_Long_Array:
+                if (!(value instanceof long[]))
+                    throw new IllegalArgumentException();
+                break;
             default:
                 throw new IllegalArgumentException();
         }
@@ -209,6 +223,10 @@ public class NamedBinaryTag
                 break;
             case TAG_Int_Array:
                 if (!(value instanceof int[]))
+                    throw new IllegalArgumentException();
+                break;
+            case TAG_Long_Array:
+                if (!(value instanceof long[]))
                     throw new IllegalArgumentException();
                 break;
             default:
@@ -360,232 +378,219 @@ public class NamedBinaryTag
         return (NamedBinaryTag[]) value;
     }
 
+    public static NamedBinaryTag readFrom(Path file) throws IOException, InvalidConfigException
+    {
+        try(DataInputStream in = new DataInputStream(new BufferedInputStream(CompressionUtils.newGZIPInputStream(file))))
+        {
+            return readFrom(in);
+        }
+    }
+
     /**
-     * Read a tag and its nested tags from an InputStream.
+     * Read a tag and its nested tags from a {@link DataInputStream}
      *
-     * @param is stream to read from, like a FileInputStream
-     * @param compressed True if the stream is GZIP-compressed, false otherwise.
+     * @param in stream to read from
      * @return NBT tag or structure read from the InputStream
      * @throws IOException if there was no valid NBT structure in the
      *             InputStream or if another IOException occurred.
      */
-    public static NamedBinaryTag readFrom(InputStream is, boolean compressed) throws IOException
+    public static NamedBinaryTag readFrom(DataInputStream in) throws IOException, InvalidConfigException
     {
-        DataInputStream dis = null;
-        if (compressed)
+        try
         {
-            dis = new DataInputStream(new GZIPInputStream(is));
-        } else
-        {
-            dis = new DataInputStream(is);
+            Type type = readType(in);
+            if(type == Type.TAG_End)
+            {
+                return new NamedBinaryTag(type, null, null);
+            }
+            return new NamedBinaryTag(type, in.readUTF(), readPayload(in, type));
         }
-
-        byte type = dis.readByte();
-        NamedBinaryTag tag = null;
-
-        if (type == 0)
+        catch(IOException e)
         {
-            tag = new NamedBinaryTag(Type.TAG_End, null, null);
-        } else
-        {
-        	try
-        	{
-        		tag = new NamedBinaryTag(Type.values()[type], dis.readUTF(), readPayload(dis, type));
-        	}
-        	catch(IndexOutOfBoundsException ex)
-        	{
-        		// Incorrect NBT structure, NBT may need to be updated for use with this MC version. MC 1.11.2 changed nbt data structure for chests. 
-        	}
+            throw e;
         }
-
-        dis.close();
-
-        return tag;
+        catch(Exception e)
+        {
+            throw new InvalidConfigException(null, e);
+        }
     }
 
-    private static Object readPayload(DataInputStream dis, byte type) throws IOException
+    private static Type readType(DataInputStream in) throws IOException
     {
-        switch (type)
-        {
-            case 0:
-                return null;
-            case 1:
-                return dis.readByte();
-            case 2:
-                return dis.readShort();
-            case 3:
-                return dis.readInt();
-            case 4:
-                return dis.readLong();
-            case 5:
-                return dis.readFloat();
-            case 6:
-                return dis.readDouble();
-            case 7:
-                int length = dis.readInt();
-                byte[] ba = new byte[length];
-                dis.readFully(ba);
-                return ba;
-            case 8:
-                return dis.readUTF();
-            case 9:
-                byte lt = dis.readByte();
-                int ll = dis.readInt();
-                NamedBinaryTag[] lo = new NamedBinaryTag[ll];
-                for (int i = 0; i < ll; i++)
-                {
-                    lo[i] = new NamedBinaryTag(Type.values()[lt], null, readPayload(dis, lt));
-                }
-                if (lo.length == 0)
-                    return Type.values()[lt];
-                else
-                    return lo;
-            case 10:
-                byte stt;
-                NamedBinaryTag[] tags = new NamedBinaryTag[0];
-                do
-                {
-                    stt = dis.readByte();
-                    String name = null;
-                    if (stt != 0)
-                    {
-                        name = dis.readUTF();
-                    }
-                    NamedBinaryTag[] newTags = new NamedBinaryTag[tags.length + 1];
-                    System.arraycopy(tags, 0, newTags, 0, tags.length);
-                    newTags[tags.length] = new NamedBinaryTag(Type.values()[stt], name, readPayload(dis, stt));
-                    tags = newTags;
-                } while (stt != 0);
-                return tags;
-            case 11:
-                int len = dis.readInt();
-                int[] ia = new int[len];
-                for (int i = 0; i < len; i++)
-                    ia[i] = dis.readInt();
-                return ia;
+        return Type.VALUES[in.readByte()];
+    }
 
+    private static Object readPayload(DataInputStream in, Type type) throws IOException
+    {
+        switch(type)
+        {
+            case TAG_End:
+                return null;
+            case TAG_Byte:
+                return in.readByte();
+            case TAG_Short:
+                return in.readShort();
+            case TAG_Int:
+                return in.readInt();
+            case TAG_Long:
+                return in.readLong();
+            case TAG_Float:
+                return in.readFloat();
+            case TAG_Double:
+                return in.readDouble();
+            case TAG_Byte_Array:
+                byte[] bytes = new byte[in.readInt()];
+                in.readFully(bytes);
+                return bytes;
+            case TAG_String:
+                return in.readUTF();
+            case TAG_List:
+                Type elementType = readType(in);
+                int size = in.readInt();
+                if(size == 0)
+                {
+                    return elementType;
+                }
+                NamedBinaryTag[] elements = new NamedBinaryTag[size];
+                for(int i = 0; i < size; i++)
+                {
+                    elements[i] = new NamedBinaryTag(elementType, null, readPayload(in, elementType));
+                }
+                return elements;
+            case TAG_Compound:
+                NamedBinaryTag[] tags = new NamedBinaryTag[0];
+                Type tagType;
+                while((tagType = readType(in)) != Type.TAG_End)
+                {
+                    tags = Arrays.copyOf(tags, tags.length + 1);
+                    tags[tags.length - 1] = new NamedBinaryTag(tagType, in.readUTF(), readPayload(in, tagType));
+                }
+                return tags;
+            case TAG_Int_Array:
+                int[] ints = new int[in.readInt()];
+                for(int i = 0; i < ints.length; i++)
+                {
+                    ints[i] = in.readInt();
+                }
+                return ints;
+            case TAG_Long_Array:
+                long[] longs = new long[in.readInt()];
+                for(int i = 0; i < longs.length; i++)
+                {
+                    longs[i] = in.readLong();
+                }
+                return longs;
+            default:
+                throw new IllegalArgumentException();
         }
-        return null;
+    }
+
+    public void writeTo(Path file) throws IOException
+    {
+        try(DataOutputStream out = new DataOutputStream(new BufferedOutputStream(CompressionUtils.newGZIPOutputStream(file))))
+        {
+            writeTo(out);
+        }
     }
 
     /**
-     * Read a tag and its nested tags from an InputStream.
+     * Write a tag and its nested tags to a {@link DataOutputStream}
      *
-     * @param os stream to write to, like a FileOutputStream
+     * @param out stream to write to
      * @throws IOException if this is not a valid NBT structure or if any
      *             IOException occurred.
      */
-    public void writeTo(OutputStream os) throws IOException
+    public void writeTo(DataOutputStream out) throws IOException
     {
-        GZIPOutputStream gzos;
-        DataOutputStream dos = new DataOutputStream(gzos = new GZIPOutputStream(os));
-        dos.writeByte(type.ordinal());
-        if (type != Type.TAG_End)
+        writeType(out, type);
+        if(type != Type.TAG_End)
         {
-            dos.writeUTF(name);
-            writePayload(dos);
+            out.writeUTF("");
+            writePayload(out);
         }
-        gzos.flush();
-        gzos.close();
     }
 
-    private void writePayload(DataOutputStream dos) throws IOException
+    private void writeType(DataOutputStream out, Type type) throws IOException
     {
-        switch (type)
+        out.writeByte(type.ordinal());
+    }
+
+    private void writePayload(DataOutputStream out) throws IOException
+    {
+        switch(type)
         {
             case TAG_End:
                 break;
             case TAG_Byte:
-                dos.writeByte((Byte) value);
+                out.writeByte((byte) value);
                 break;
             case TAG_Short:
-                dos.writeShort((Short) value);
+                out.writeShort((short) value);
                 break;
             case TAG_Int:
-                dos.writeInt((Integer) value);
+                out.writeInt((int) value);
                 break;
             case TAG_Long:
-                dos.writeLong((Long) value);
+                out.writeLong((long) value);
                 break;
             case TAG_Float:
-                dos.writeFloat((Float) value);
+                out.writeFloat((float) value);
                 break;
             case TAG_Double:
-                dos.writeDouble((Double) value);
+                out.writeDouble((double) value);
                 break;
             case TAG_Byte_Array:
-                byte[] ba = (byte[]) value;
-                dos.writeInt(ba.length);
-                dos.write(ba);
+                byte[] bytes = (byte[]) value;
+                out.writeInt(bytes.length);
+                out.write(bytes);
                 break;
             case TAG_String:
-                dos.writeUTF((String) value);
+                out.writeUTF((String) value);
                 break;
             case TAG_List:
-                NamedBinaryTag[] list = (NamedBinaryTag[]) value;
-                dos.writeByte(getListType().ordinal());
-                dos.writeInt(list.length);
-                for (NamedBinaryTag tt : list)
+                NamedBinaryTag[] elements = (NamedBinaryTag[]) value;
+                writeType(out, listType);
+                out.writeInt(elements.length);
+                for(NamedBinaryTag element : elements)
                 {
-                    tt.writePayload(dos);
+                    element.writePayload(out);
                 }
                 break;
             case TAG_Compound:
-                NamedBinaryTag[] subtags = (NamedBinaryTag[]) value;
-                for (NamedBinaryTag st : subtags)
+                for(NamedBinaryTag tag : (NamedBinaryTag[]) value)
                 {
-                    Type type = st.getType();
-                    dos.writeByte(type.ordinal());
-                    if (type != Type.TAG_End)
+                    writeType(out, tag.type);
+                    if(tag.type != Type.TAG_End)
                     {
-                        dos.writeUTF(st.getName());
-                        st.writePayload(dos);
+                        out.writeUTF(tag.name);
+                        tag.writePayload(out);
                     }
                 }
                 break;
             case TAG_Int_Array:
-                int[] ia = (int[]) value;
-                dos.writeInt(ia.length);
-                for (int anIa : ia)
+                int[] ints = (int[]) value;
+                out.writeInt(ints.length);
+                for(int i : ints)
                 {
-                    dos.writeInt(anIa);
+                    out.writeInt(i);
                 }
                 break;
-
+            case TAG_Long_Array:
+                long[] longs = (long[]) value;
+                out.writeInt(longs.length);
+                for(long l : longs)
+                {
+                    out.writeLong(l);
+                }
+                break;
+            default:
+                throw new IllegalStateException();
         }
     }
 
     private String getTypeString(Type type)
     {
-        switch (type)
-        {
-            case TAG_End:
-                return "TAG_End";
-            case TAG_Byte:
-                return "TAG_Byte";
-            case TAG_Short:
-                return "TAG_Short";
-            case TAG_Int:
-                return "TAG_Int";
-            case TAG_Long:
-                return "TAG_Long";
-            case TAG_Float:
-                return "TAG_Float";
-            case TAG_Double:
-                return "TAG_Double";
-            case TAG_Byte_Array:
-                return "TAG_Byte_Array";
-            case TAG_String:
-                return "TAG_String";
-            case TAG_List:
-                return "TAG_List";
-            case TAG_Compound:
-                return "TAG_Compound";
-            case TAG_Int_Array:
-                return "TAG_Int_Array";
-
-        }
-        return null;
+        return type.name();
     }
 
     private void indent(int indent)

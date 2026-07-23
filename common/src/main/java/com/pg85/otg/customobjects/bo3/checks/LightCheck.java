@@ -4,6 +4,7 @@ import com.pg85.otg.common.LocalWorld;
 import com.pg85.otg.customobjects.bo3.BO3Config;
 import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.util.ChunkCoordinate;
+import com.pg85.otg.util.bo3.Rotation;
 
 import java.util.List;
 
@@ -36,12 +37,10 @@ public class LightCheck extends BO3Check
     }
 
     @Override
-    public void load(List<String> args) throws InvalidConfigException
+    public void load(BO3Config holder, List<String> args) throws InvalidConfigException
     {
         assureSize(5, args);
-		x = readInt(args.get(0), -100, 100);
-        y = readInt(args.get(1), -100, 100);
-        z = readInt(args.get(2), -100, 100);
+        readXYZ(args, 0);
         minLightLevel = readInt(args.get(3), 0, 16);
         maxLightLevel = readInt(args.get(4), minLightLevel, 16);
     }
@@ -49,16 +48,37 @@ public class LightCheck extends BO3Check
     @Override
     public String makeString()
     {
-        return "LightCheck(" + x + ',' + y + ',' + z + ',' + minLightLevel + ',' + maxLightLevel + ')';
+        return "LightCheck(" + x() + ',' + y() + ',' + z() + ',' + minLightLevel + ',' + maxLightLevel + ')';
     }
 
     @Override
-    public BO3Check rotate()
+    public BO3Check rotate(Rotation rotation)
     {
+        int rotatedX;
+        int rotatedZ;
+        switch(rotation)
+        {
+            case NORTH:
+                return this;
+            case WEST:
+                rotatedX = z();
+                rotatedZ = -x();
+                break;
+            case SOUTH:
+                rotatedX = -x();
+                rotatedZ = -z();
+                break;
+            case EAST:
+                rotatedX = -z();
+                rotatedZ = x();
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
         LightCheck rotatedCheck = new LightCheck();
-        rotatedCheck.x = z;
-        rotatedCheck.y = y;
-        rotatedCheck.z = -x;
+        rotatedCheck.x(rotatedX);
+        rotatedCheck.y(y());
+        rotatedCheck.z(rotatedZ);
         rotatedCheck.minLightLevel = minLightLevel;
         rotatedCheck.maxLightLevel = maxLightLevel;
 

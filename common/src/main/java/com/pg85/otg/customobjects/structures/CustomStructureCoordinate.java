@@ -1,10 +1,13 @@
 package com.pg85.otg.customobjects.structures;
 
+import java.io.DataOutput;
+import java.io.IOException;
+
 import com.pg85.otg.OTG;
+import com.pg85.otg.customobjects.CustomObject;
 import com.pg85.otg.logging.LogMarker;
 import com.pg85.otg.util.bo3.Rotation;
-import com.pg85.otg.util.helpers.MathHelper;
-import com.pg85.otg.customobjects.CustomObject;
+import com.pg85.otg.util.helpers.StreamHelper;
 
 /**
  * Represents an object along with its location in the world.
@@ -17,17 +20,26 @@ public abstract class CustomStructureCoordinate
     protected transient StructuredCustomObject object;
     public Rotation rotation;
     public int x;
-    public short y;
+    public int y;
     public int z;
 	
     protected CustomStructureCoordinate() { } 
+
+    public static void write(DataOutput out, CustomStructureCoordinate structureCoordinate) throws IOException
+    {
+        StreamHelper.writeStringToStream(out, structureCoordinate.bo3Name);
+        out.writeInt(structureCoordinate.rotation.getRotationId());
+        out.writeInt(structureCoordinate.getX());
+        out.writeInt(structureCoordinate.getY());
+        out.writeInt(structureCoordinate.getZ());
+    }
             
     public int getX()
     {
         return x;
     }
 
-    public short getY()
+    public int getY()
     {
         return y;
     }
@@ -44,12 +56,12 @@ public abstract class CustomStructureCoordinate
     
     public final int getChunkX()
     {
-    	return (int)MathHelper.floor(x / (double)16); 
+    	return x >> 4; 
     }
     
     public final int getChunkZ()
     {
-    	return (int)MathHelper.floor(z / (double)16);
+    	return z >> 4;
     }
     
     /**
@@ -83,7 +95,13 @@ public abstract class CustomStructureCoordinate
     @Override
     public int hashCode()
     {
-        return (x >> 13) ^ (y >> 7) ^ z ^ object.getName().hashCode() ^ rotation.toString().hashCode();
+        int result = 1;
+        result = 31 * result + object.getName().hashCode();
+        result = 31 * result + rotation.hashCode();
+        result = 31 * result + x;
+        result = 31 * result + y;
+        result = 31 * result + z;
+        return result;
     }
     
     @Override

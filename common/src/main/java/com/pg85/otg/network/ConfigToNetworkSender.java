@@ -75,5 +75,7 @@ public final class ConfigToNetworkSender
             stream.writeInt(biome.getIds().getSavedId());
             biome.getBiomeConfig().writeToStream(stream, isSinglePlayer);
         }
+
+        stream.writeInt(configProvider.getWorldSaveData().version);
     }
 }

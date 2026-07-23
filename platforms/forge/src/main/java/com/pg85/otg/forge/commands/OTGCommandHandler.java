@@ -3,8 +3,10 @@ package com.pg85.otg.forge.commands;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
@@ -113,16 +115,13 @@ public final class OTGCommandHandler implements ICommand
     {
         if (args.length == 1)
         {
-            List<String> commands = new ArrayList<String>();
-
-            for (BaseCommand command : commandHashMap.values())
-            {
-                commands.add(command.name);
-            }
-
-            return commands;
+            return commandHashMap.keySet()
+                    .stream()
+                    .filter(name -> name.startsWith(args[0]))
+                    .sorted()
+                    .collect(Collectors.toList());
         }
-        return new ArrayList<String>();
+        return Collections.emptyList();
     }
 
     @Override

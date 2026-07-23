@@ -1,7 +1,7 @@
 package com.pg85.otg.bukkit.world;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -647,54 +647,47 @@ public class BukkitWorld implements LocalWorld
     		(worldConfig.woodLandMansionsEnabled && isStructureInRadius(chunkCoord, this.woodLandMansionGen, 4))
 		;
 	}
-	
-	static Method canSpawnStructureAtCoordsMethod;
-    public boolean isStructureInRadius(ChunkCoordinate startChunk, StructureGenerator structure, int radiusInChunks)
-    {    	
-        if(canSpawnStructureAtCoordsMethod == null)
+
+    private static final Field worldField;
+    private static final Method canSpawnStructureAtCoordsMethod;
+    static
+    {
+        try
         {
-	        try
-	        {
-	        	canSpawnStructureAtCoordsMethod = StructureGenerator.class.getDeclaredMethod("a", int.class, int.class);
-	        	canSpawnStructureAtCoordsMethod.setAccessible(true);
-	        } catch (NoSuchMethodException | SecurityException e) {
-	        	OTG.log(LogMarker.ERROR, "Error, could not reflect canSpawnStructureAtCoords, BO4's may not be able to detect default/modded structures. OTG may not fully support your Spigot/Bukkit version.");
-	        	e.printStackTrace();
-	        }
+            worldField = WorldGenBase.class.getDeclaredField("g");
+            worldField.setAccessible(true);
+            canSpawnStructureAtCoordsMethod = StructureGenerator.class.getDeclaredMethod("a", int.class, int.class);
+            canSpawnStructureAtCoordsMethod.setAccessible(true);
         }
-    	    	
-        int chunkX = startChunk.getChunkX();
-        int chunkZ = startChunk.getChunkZ();        
-        for (int cycle = 0; cycle <= radiusInChunks; ++cycle)
+        catch(ReflectiveOperationException e)
         {
-            for (int xRadius = -cycle; xRadius <= cycle; ++xRadius)
+            throw new UnsupportedOperationException(e);
+        }
+    }
+
+    public boolean isStructureInRadius(ChunkCoordinate startChunk, StructureGenerator structure, int radiusInChunks)
+    {
+        try
+        {
+            worldField.set(structure, this.world);
+            for(int x = -radiusInChunks; x <= radiusInChunks; x++)
             {
-                for (int zRadius = -cycle; zRadius <= cycle; ++zRadius)
+                for(int z = -radiusInChunks; z <= radiusInChunks; z++)
                 {
-                    int distance = (int)Math.floor(Math.sqrt(Math.pow (chunkX-chunkX + xRadius, 2) + Math.pow (chunkZ-chunkZ + zRadius, 2)));                    
-                    if (distance == cycle)
+                    if((boolean) canSpawnStructureAtCoordsMethod.invoke(structure, startChunk.getChunkX() + x, startChunk.getChunkZ() + z))
                     {
-                    	boolean canSpawnStructureAtCoords = false;
-						try
-						{
-							canSpawnStructureAtCoords = (boolean) canSpawnStructureAtCoordsMethod.invoke(structure, chunkX + xRadius, chunkZ + zRadius);
-						}
-						catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
-						{
-							OTG.log(LogMarker.ERROR, "Error, could not reflect canSpawnStructureAtCoords, BO4's may not be able to detect default/modded structures. OTG may not fully support your Spigot/Bukkit version.");
-							e.printStackTrace();
-						}
-                    	if(canSpawnStructureAtCoords)
-                    	{
-                    		return true;
-                    	}
+                        return true;
                     }
                 }
             }
+            return false;
         }
-        return false;
+        catch(ReflectiveOperationException e)
+        {
+            throw new UnsupportedOperationException(e);
+        }
     }
-    
+
     @Override
     public boolean placeDefaultStructures(Random random, ChunkCoordinate chunkCoord)
     {
@@ -837,7 +830,7 @@ public class BukkitWorld implements LocalWorld
 	                            			}
 			                            	if(instruction.getFrom().getBlockId() == blockId)
 			                            	{
-			                                    section.setType(sectionX, sectionY, sectionZ, ((BukkitMaterialData)instruction.getTo()).internalBlock());                            		
+			                                    section.setType(sectionX, sectionY, sectionZ, ((BukkitMaterialData)instruction.getTo()).getBlockState());                            		
 			                            	}
 	                            		}
 	                            	}
@@ -1250,9 +1243,9 @@ public class BukkitWorld implements LocalWorld
 	{
         if(OTG.getPluginConfig().spawnLog)
         {
-            OTG.log(LogMarker.DEBUG, "Attempting to spawn BO3 Entity() " + entityData.groupSize + " x " + entityData.name + " at " + entityData.x + " " + entityData.y + " " + entityData.z);
+            OTG.log(LogMarker.DEBUG, "Attempting to spawn BO3 Entity() " + entityData.groupSize + " x " + entityData.name + " at " + entityData.x() + " " + entityData.y() + " " + entityData.z());
         }
-        if (chunkBeingPopulated != null && !OTG.IsInAreaBeingPopulated((int) Math.floor(entityData.x), (int) Math.floor(entityData.z), chunkBeingPopulated)) {
+        if (chunkBeingPopulated != null && !OTG.IsInAreaBeingPopulated((int) Math.floor(entityData.x()), (int) Math.floor(entityData.z()), chunkBeingPopulated)) {
             // If outside area being populated, abort and remove entity
             if(OTG.getPluginConfig().spawnLog)
             {
@@ -1260,7 +1253,7 @@ public class BukkitWorld implements LocalWorld
             }
             return;
         }
-        if (entityData.y < 0 || entityData.y >= 256) {
+        if (entityData.y() < 0 || entityData.y() >= 256) {
             if(OTG.getPluginConfig().spawnLog)
             {
                 OTG.log(LogMarker.ERROR, "Failed to spawn mob "+entityData.name +", spawn position out of bounds");
@@ -1274,7 +1267,7 @@ public class BukkitWorld implements LocalWorld
         if(entity == null) return;
 
         // If either the block is a full block, or entity is a fish out of water, then we cancel
-        org.bukkit.Material material = world.getWorld().getBlockAt(new Location(world.getWorld(), entityData.x, entityData.y, entityData.z)).getType();
+        org.bukkit.Material material = world.getWorld().getBlockAt(new Location(world.getWorld(), entityData.x(), entityData.y(), entityData.z())).getType();
         if (!material.isTransparent() || material.isSolid() ||
                 ((entity.getBukkitEntity() instanceof CraftGuardian || EnumCreatureType.WATER_CREATURE.a().isAssignableFrom(entity.getClass())
                         && (material != org.bukkit.Material.WATER && material != org.bukkit.Material.STATIONARY_WATER))))
@@ -1359,12 +1352,12 @@ public class BukkitWorld implements LocalWorld
                 list.a(0, new NBTTagFloat((f+ ((2 - entityData.rotation) % 4)*90) % 360));
             }
             // Spawn entity, with potential passengers
-            entity = ChunkRegionLoader.spawnEntity(nbttagcompound, world, entityData.x+0.5, entityData.y, entityData.z+0.5, true, CreatureSpawnEvent.SpawnReason.CUSTOM);
+            entity = ChunkRegionLoader.spawnEntity(nbttagcompound, world, entityData.x()+0.5, entityData.y(), entityData.z()+0.5, true, CreatureSpawnEvent.SpawnReason.CUSTOM);
             if (entity == null) return null;
         } else {
             try
             {
-                org.bukkit.entity.Entity e = world.getWorld().spawn(new Location(world.getWorld(), entityData.x+0.5, entityData.y+0.0, entityData.z+0.5), EntityType.fromName(entityData.name).getEntityClass());
+                org.bukkit.entity.Entity e = world.getWorld().spawn(new Location(world.getWorld(), entityData.x()+0.5, entityData.y()+0.0, entityData.z()+0.5), EntityType.fromName(entityData.name).getEntityClass());
                 //entity = (Entity) EntityType.fromName(entityData.name).getEntityClass().getConstructor(new Class[] {World.class}).newInstance(world);
                 entity = world.getEntity( e.getUniqueId());
             } catch (Exception e) {
@@ -1400,46 +1393,30 @@ public class BukkitWorld implements LocalWorld
     @Override
     public LocalMaterialData getMaterial(int x, int y, int z, ChunkCoordinate chunkBeingPopulated)
     {
-        if (y >= PluginStandardValues.WORLD_HEIGHT || y < PluginStandardValues.WORLD_DEPTH)
+        if(y >= PluginStandardValues.WORLD_HEIGHT || y < PluginStandardValues.WORLD_DEPTH)
         {
-        	return null;
+            return BukkitMaterialData.AIR;
         }
 
-        // If the chunk exists or is inside the area being populated, fetch it normally.
-        Chunk chunk = null;
-    	if(
-			(chunkBeingPopulated != null && OTG.IsInAreaBeingPopulated(x, z, chunkBeingPopulated)) 
-			//|| getChunkGenerator().chunkExists(x, z)			
-		)
-    	{
-    		chunk = getChunkGenerator().getChunk(x, z);
-    	}
-    	
-		// If the chunk doesn't exist and we're doing something outside the
-    	// population sequence, return the material without loading the chunk.
-    	if(chunk == null && chunkBeingPopulated == null)
-		{
-			ChunkCoordinate chunkCoord = ChunkCoordinate.fromBlockCoords(x, z);
-    		// If the chunk has already been loaded, no need to use fake chunks.
-    		if(world.getChunkProviderServer().isLoaded(chunkCoord.getChunkX(), chunkCoord.getChunkZ()))
-    		{
-    			chunk = getChunkGenerator().getChunk(x, z);
-    		} else {
-    			// Calculate the material without loading the chunk.
-    			return getChunkGenerator().getMaterialInUnloadedChunk(x,y,z);
-    		}
-    	}
-    	
-		// Tried to query an unloaded chunk outside the area being populated
-    	if(chunk == null)
-    	{
-            return null;
-    	}
-    	
-		// Get internal coordinates for block in chunk
-        int internalX = x & 0xF;
-        int internalZ = z & 0xF;
-        return BukkitMaterialData.ofMinecraftBlockData(chunk.a(internalX, y, internalZ));
+        Chunk chunk;
+        if(chunkBeingPopulated != null)
+        {
+            if(!OTG.IsInAreaBeingPopulated(x, z, chunkBeingPopulated))
+            {
+                return BukkitMaterialData.AIR;
+            }
+            chunk = this.world.getChunkAt(x >> 4, z >> 4);
+        }
+        else
+        {
+            chunk = this.world.getChunkProvider().getLoadedChunkAt(x >> 4, z >> 4);
+            if(chunk == null)
+            {
+                return this.generator.getMaterialInUnloadedChunk(x, y, z);
+            }
+        }
+
+        return BukkitMaterialData.ofMinecraftBlockState(chunk.a(x & 15, y, z & 15));
     }
 	
     @Override
@@ -1538,7 +1515,7 @@ public class BukkitWorld implements LocalWorld
         {
     		blockData = chunk.getBlockData(new BlockPosition(internalX, i, internalZ));
     		block = blockData.getBlock();
-    		material = BukkitMaterialData.ofMinecraftBlockData(blockData);
+    		material = BukkitMaterialData.ofMinecraftBlockState(blockData);
         	isLiquid = material.isLiquid();
         	isSolid =
 			(
@@ -1733,4 +1710,14 @@ public class BukkitWorld implements LocalWorld
 	{
 		// TODO: Implement this for spigot.
 	}
+
+    @Override
+    public boolean canPlaceSnowAt(int x, int y, int z, ChunkCoordinate chunkBeingPopulated)
+    {
+        if(chunkBeingPopulated != null && OTG.IsInAreaBeingPopulated(x, z, chunkBeingPopulated))
+        {
+            return false;
+        }
+        return Blocks.SNOW_LAYER.canPlace(world, new BlockPosition(x, y, z));
+    }
 }

@@ -73,8 +73,8 @@ public class OTGBiomeBase extends BiomeBase
             throw new AssertionError("Biome temperature mismatch");
         }
 
-        this.q = ((BukkitMaterialData) biomeConfig.getDefaultSurfaceBlock()).internalBlock();
-        this.r = ((BukkitMaterialData) biomeConfig.getDefaultGroundBlock()).internalBlock();
+        this.q = ((BukkitMaterialData) biomeConfig.getDefaultSurfaceBlock()).getBlockState();
+        this.r = ((BukkitMaterialData) biomeConfig.getDefaultGroundBlock()).getBlockState();
 
         // Mob spawning
         // We add the merged lists and not the default lists

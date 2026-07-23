@@ -3,6 +3,8 @@ package com.pg85.otg.util.minecraft.defaults;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Contains a lot of alternative mob names. The implementation should support
  * this names, along with the other names that are available on the current
@@ -108,7 +110,7 @@ public enum EntityNames
     WITHER_SKULL("wither_skull", "witherskull");
    
     // Contains all aliases (alias, internalName)
-    private static Map<String, String> MobAliases = new HashMap<String, String>();
+    private static final Map<String, String> MobAliases = new HashMap<>();
 
     // Auto-register all aliases in the enum
     static
@@ -128,19 +130,7 @@ public enum EntityNames
      */
     public static String toInternalName(String alias)
     {
-    	for(String key : MobAliases.keySet())
-    	{
-    		if(
-				key.toLowerCase().trim().replace("minecraft:","").replace("entity","").trim().replace("_","").equalsIgnoreCase(
-					alias.toLowerCase().trim().replace("minecraft:","").replace("entity","").trim().replace("_","")
-				)
-			)
-    		{
-    			return MobAliases.get(key);
-    		}
-    	}
-    	
-        return alias;
+        return MobAliases.getOrDefault(keyFromAlias(alias), alias);
     }
 
     /**
@@ -151,10 +141,18 @@ public enum EntityNames
      */
     private static void register(String internalMinecraftName, String... aliases)
     {
-        for (String alias : aliases)
+        for(String alias : aliases)
         {
-            MobAliases.put("minecraft:" + alias, "minecraft:" + internalMinecraftName);
+            MobAliases.put(keyFromAlias(alias), internalMinecraftName);
         }
+    }
+
+    private static String keyFromAlias(String alias)
+    {
+        String key = alias.trim().toLowerCase();
+        key = StringUtils.removeStart(key, "minecraft:");
+        key = StringUtils.remove(key, '_');
+        return key;
     }
 
     private String[] aliases;
@@ -162,7 +160,8 @@ public enum EntityNames
 
     private EntityNames(String internalMinecraftName, String... aliases)
     {
-        this.internalMinecraftName = internalMinecraftName;
+        int i = internalMinecraftName.indexOf(':');
+        this.internalMinecraftName = i > 0 ? internalMinecraftName : i == 0 ? ("minecraft" + internalMinecraftName) : ("minecraft:" + internalMinecraftName);
         this.aliases = aliases;
     }
 
@@ -172,6 +171,6 @@ public enum EntityNames
      */
     public String getInternalName()
     {
-        return "minecraft:" + this.internalMinecraftName;
+        return this.internalMinecraftName;
     }
 }

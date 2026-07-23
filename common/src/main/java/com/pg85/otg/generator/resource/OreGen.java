@@ -95,7 +95,8 @@ public class OreGen extends Resource
     {
     	// Make sure we stay within population bounds, anything outside won't be spawned (unless it's in an existing chunk).
     	
-        parseMaterials(world, this.material, this.sourceBlocks);
+        material = material.parseForWorld(world);
+        sourceBlocks.parseForWorld(world);
         
         if(world.getConfigs().getWorldConfig().disableOreGen)
         {

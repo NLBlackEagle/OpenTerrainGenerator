@@ -1,5 +1,10 @@
 package com.pg85.otg.util;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
+import com.pg85.otg.configuration.customobjects.CustomObjectConfigFunction;
 import com.pg85.otg.customobjects.structures.CustomStructureCache;
 import com.pg85.otg.util.helpers.MathHelper;
 
@@ -139,22 +144,63 @@ public class ChunkCoordinate
         return new ChunkCoordinate(chunkX, chunkZ);
     }
     
+    public static ChunkCoordinate fromPacked(long packed)
+    {
+        return new ChunkCoordinate(packedX(packed), packedZ(packed));
+    }
+    
+    public static long packed(int chunkX, int chunkZ)
+    {
+        return (chunkZ & 0xFFFFFFFFL) << 32 | chunkX & 0xFFFFFFFFL;
+    }
+    
+    public static int packedX(long packed)
+    {
+        return (int) packed;
+    }
+    
+    public static int packedZ(long packed)
+    {
+        return (int) (packed >> 32);
+    }
+    
+    public static ChunkCoordinate read(DataInput in) throws IOException
+    {
+        return new ChunkCoordinate(in.readInt(), in.readInt());
+    }
+    
+    public static void write(DataOutput out, ChunkCoordinate chunkCoordinate) throws IOException
+    {
+        out.writeInt(chunkCoordinate.chunkX);
+        out.writeInt(chunkCoordinate.chunkZ);
+    }
+    
 	public ChunkCoordinate toRegionCoord()
 	{
 		return ChunkCoordinate.fromChunkCoords(
-			MathHelper.floor((double)getChunkX() / (double)CustomStructureCache.REGION_SIZE), 
-			MathHelper.floor((double)getChunkZ() / (double)CustomStructureCache.REGION_SIZE)
+			MathHelper.floorDiv(chunkX, CustomStructureCache.REGION_SIZE),
+			MathHelper.floorDiv(chunkZ, CustomStructureCache.REGION_SIZE)
 		);
 	}
 
+    public boolean regionContainsChunk(ChunkCoordinate chunkCoordinate)
+    {
+        return chunkCoordinate.toRegionCoord().equals(this);
+    }
+
+    public boolean regionContains(CustomObjectConfigFunction<?> function)
+    {
+        return regionContainsChunk(ChunkCoordinate.fromChunkCoords(function.x(), function.z()));
+    }
+
 	public int getRegionInternalX()
 	{
-		return MathHelper.mod(getChunkX(), CustomStructureCache.REGION_SIZE);
+		return MathHelper.floorMod(chunkX, CustomStructureCache.REGION_SIZE);
 	}
 	
 	public int getRegionInternalZ()
 	{
-		return MathHelper.mod(getChunkZ(), CustomStructureCache.REGION_SIZE);
+		return MathHelper.floorMod(chunkZ, CustomStructureCache.REGION_SIZE);
 	}
 	
     @Override
@@ -168,7 +214,7 @@ public class ChunkCoordinate
      * @return The x position.
      */
     public int getBlockXCenter() {
-        return chunkX * CHUNK_SIZE + CHUNK_POPULATION_OFFSET_X;
+        return (chunkX << 4) | CHUNK_POPULATION_OFFSET_X;
     }
     
     /**
@@ -176,7 +222,7 @@ public class ChunkCoordinate
      * @return The z position.
      */
     public int getBlockZCenter() {
-        return chunkZ * CHUNK_SIZE + CHUNK_POPULATION_OFFSET_Z;
+        return (chunkZ << 4) | CHUNK_POPULATION_OFFSET_Z;
     }
 
     /**
@@ -186,7 +232,7 @@ public class ChunkCoordinate
      */
     public int getBlockX()
     {
-        return chunkX * CHUNK_SIZE;
+        return chunkX << 4;
     }
 
     /**
@@ -196,7 +242,7 @@ public class ChunkCoordinate
      */
     public int getBlockZ()
     {
-        return chunkZ * CHUNK_SIZE;
+        return chunkZ << 4;
     }
 
     /**

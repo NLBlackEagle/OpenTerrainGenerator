@@ -5,6 +5,7 @@ import com.pg85.otg.configuration.standard.PluginStandardValues;
 import com.pg85.otg.customobjects.bo3.BO3Config;
 import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.util.ChunkCoordinate;
+import com.pg85.otg.util.bo3.Rotation;
 import com.pg85.otg.util.materials.MaterialSet;
 
 import java.util.List;
@@ -21,12 +22,10 @@ public class BlockCheck extends BO3Check
     }
 
     @Override
-    public void load(List<String> args) throws InvalidConfigException
+    public void load(BO3Config holder, List<String> args) throws InvalidConfigException
     {
         assureSize(4, args);
-        x = readInt(args.get(0), -100, 100);
-		y = readInt(args.get(1), -100, 100);
-		z = readInt(args.get(2), -100, 100);
+        readXYZ(args, 0);
         toCheck = readMaterials(args, 3);
     }
 
@@ -44,17 +43,38 @@ public class BlockCheck extends BO3Check
      */
     protected String makeString(String name)
     {
-        return name + '(' + x + ',' + y + ',' + z + makeMaterials(toCheck) + ')';
+        return name + '(' + x() + ',' + y() + ',' + z() + makeMaterials(toCheck) + ')';
     }
 
     @Override
-    public BO3Check rotate()
+    public BO3Check rotate(Rotation rotation)
     {
+        int rotatedX;
+        int rotatedZ;
+        switch(rotation)
+        {
+            case NORTH:
+                return this;
+            case WEST:
+                rotatedX = z();
+                rotatedZ = -x();
+                break;
+            case SOUTH:
+                rotatedX = -x();
+                rotatedZ = -z();
+                break;
+            case EAST:
+                rotatedX = -z();
+                rotatedZ = x();
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
         BlockCheck rotatedCheck = new BlockCheck();
-        rotatedCheck.x = z;
-        rotatedCheck.y = y;
-        rotatedCheck.z = -x;
-        rotatedCheck.toCheck = this.toCheck.rotate();
+        rotatedCheck.x(rotatedX);
+        rotatedCheck.y(y());
+        rotatedCheck.z(rotatedZ);
+        rotatedCheck.toCheck = this.toCheck.rotate(rotation);
         return rotatedCheck;
     }
     

@@ -42,7 +42,8 @@ public class BoulderGen extends Resource
             return;
         }
         
-        parseMaterials(world, material, sourceBlocks);
+        material = material.parseForWorld(world);
+        sourceBlocks.parseForWorld(world);
 
         while (y > 3)
         {

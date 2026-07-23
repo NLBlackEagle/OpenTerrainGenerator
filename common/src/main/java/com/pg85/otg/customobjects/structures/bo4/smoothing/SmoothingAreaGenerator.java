@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.Map.Entry;
 
+import com.pg85.otg.common.BlockContainer;
 import com.pg85.otg.common.LocalMaterialData;
 import com.pg85.otg.common.LocalWorld;
 import com.pg85.otg.customobjects.bo4.BO4;
@@ -117,19 +118,19 @@ public class SmoothingAreaGenerator
                                 bFoundNeighbour4 = false;
 
                                 // Check if any neighbouring blocks are air or non-existent within this BO3
-                                if(block.x - 1 >= 0 && heightMap[block.x - 1][block.z] != null)
+                                if(block.x() - 1 >= 0 && heightMap[block.x() - 1][block.z()] != null)
                                 {
                                     bFoundNeighbour1 = true;
                                 }
-                                if(block.x + 1 <= 15 && heightMap[block.x + 1][block.z] != null)
+                                if(block.x() + 1 <= 15 && heightMap[block.x() + 1][block.z()] != null)
                                 {
                                     bFoundNeighbour2 = true;
                                 }
-                                if(block.z - 1 >= 0 && heightMap[block.x][block.z - 1] != null)
+                                if(block.z() - 1 >= 0 && heightMap[block.x()][block.z() - 1] != null)
                                 {
                                     bFoundNeighbour3 = true;
                                 }
-                                if(block.z + 1 <= 15 && heightMap[block.x][block.z + 1] != null)
+                                if(block.z() + 1 <= 15 && heightMap[block.x()][block.z() + 1] != null)
                                 {
                                     bFoundNeighbour4 = true;
                                 }
@@ -138,44 +139,44 @@ public class SmoothingAreaGenerator
                                 // then check for other BO4's that may have blocks that border this block.
                                 // If a solid neighbouring block is found then don't smooth in that direction.
 
-                                if(!bFoundNeighbour1 && block.x - 1 < 0)
+                                if(!bFoundNeighbour1 && block.x() - 1 < 0)
                                 {
                                     // Check if the BO4 contains a block at the location of the neighbouring block
                                     // Normalize the coordinates of the neighbouring block taking into consideration rotation
-                                    neighbouringBlockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x - 1, block.y, block.z, objectInChunk.getRotation());
+                                    neighbouringBlockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x() - 1, block.y(), block.z(), objectInChunk.getRotation());
                                     normalizedNeigbouringBlockX = neighbouringBlockCoords.getX() + (objectInChunk.getX());
                                     normalizedNeigbouringBlockY = neighbouringBlockCoords.getY() + objectInChunk.getY();
                                     normalizedNeigbouringBlockZ = neighbouringBlockCoords.getZ() + (objectInChunk.getZ());
 
                                     bFoundNeighbour1 = findNeighbouringBlock(SmoothStartTop, normalizedNeigbouringBlockX, normalizedNeigbouringBlockY, normalizedNeigbouringBlockZ, objectsToSpawn, objectInChunk, start);
                                 }
-                                if(!bFoundNeighbour2 && block.x + 1 > 15)
+                                if(!bFoundNeighbour2 && block.x() + 1 > 15)
                                 {
                                     // Check if the BO4 contains a block at the location of the neighbouring block
                                     //Normalize the coordinates of the neigbouring block taking into consideration rotation
-                                    neighbouringBlockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x + 1, block.y, block.z, objectInChunk.getRotation());
+                                    neighbouringBlockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x() + 1, block.y(), block.z(), objectInChunk.getRotation());
                                     normalizedNeigbouringBlockX = neighbouringBlockCoords.getX() + (objectInChunk.getX());
                                     normalizedNeigbouringBlockY = neighbouringBlockCoords.getY() + objectInChunk.getY();
                                     normalizedNeigbouringBlockZ = neighbouringBlockCoords.getZ() + (objectInChunk.getZ());
 
                                     bFoundNeighbour2 = findNeighbouringBlock(SmoothStartTop, normalizedNeigbouringBlockX, normalizedNeigbouringBlockY, normalizedNeigbouringBlockZ, objectsToSpawn, objectInChunk, start);
                                 }
-                                if(!bFoundNeighbour3 && block.z - 1 < 0)
+                                if(!bFoundNeighbour3 && block.z() - 1 < 0)
                                 {
                                     // Check if the BO4 contains a block at the location of the neighbouring block
                                     //Normalize the coordinates of the neigbouring block taking into consideration rotation
-                                    neighbouringBlockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x, block.y, block.z - 1, objectInChunk.getRotation());
+                                    neighbouringBlockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x(), block.y(), block.z() - 1, objectInChunk.getRotation());
                                     normalizedNeigbouringBlockX = neighbouringBlockCoords.getX() + (objectInChunk.getX());
                                     normalizedNeigbouringBlockY = neighbouringBlockCoords.getY() + objectInChunk.getY();
                                     normalizedNeigbouringBlockZ = neighbouringBlockCoords.getZ() + (objectInChunk.getZ());
 
                                     bFoundNeighbour3 = findNeighbouringBlock(SmoothStartTop, normalizedNeigbouringBlockX, normalizedNeigbouringBlockY, normalizedNeigbouringBlockZ, objectsToSpawn, objectInChunk, start);
                                 }
-                                if(!bFoundNeighbour4 && block.z + 1 > 15)
+                                if(!bFoundNeighbour4 && block.z() + 1 > 15)
                                 {
                                     // Check if the BO4 contains a block at the location of the neighbouring block
                                     // Normalize the coordinates of the neighbouring block taking into consideration rotation
-                                    neighbouringBlockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x, (short)block.y, block.z + 1, objectInChunk.getRotation());
+                                    neighbouringBlockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x(), (short)block.y(), block.z() + 1, objectInChunk.getRotation());
                                     normalizedNeigbouringBlockX = neighbouringBlockCoords.getX() + (objectInChunk.getX());
                                     normalizedNeigbouringBlockY = neighbouringBlockCoords.getY() + objectInChunk.getY();
                                     normalizedNeigbouringBlockZ = neighbouringBlockCoords.getZ() + (objectInChunk.getZ());
@@ -207,21 +208,21 @@ public class SmoothingAreaGenerator
                                     if(!bFoundNeighbour1)
                                     {
                                         xOffset = -1;
-                                        blockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x + xOffset, (short)(block.y + yOffset), block.z, objectInChunk.getRotation());
+                                        blockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x() + xOffset, (short)(block.y() + yOffset), block.z(), objectInChunk.getRotation());
                                         smoothDirections = rotateSmoothDirections(true, false, false, false, objectInChunk.getRotation());                                                                               
                                         smoothToBlocks.add(new BlockCoordsAndNeighbours(objectInChunk, blockCoords.getX(), blockCoords.getY(), blockCoords.getZ(), (Boolean)smoothDirections[0], (Boolean)smoothDirections[1], (Boolean)smoothDirections[2], (Boolean)smoothDirections[3]));                                       
 
                                         if(!bFoundNeighbour3)
                                         {
                                             zOffset = -1;
-                                            blockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x + xOffset, (short)(block.y + yOffset), block.z + zOffset, objectInChunk.getRotation());
+                                            blockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x() + xOffset, (short)(block.y() + yOffset), block.z() + zOffset, objectInChunk.getRotation());
                                             smoothDirections = rotateSmoothDirections(true, false, true, false, objectInChunk.getRotation());
                                             smoothToBlocks.add(new BlockCoordsAndNeighbours(objectInChunk, blockCoords.getX(), blockCoords.getY(), blockCoords.getZ(), (Boolean)smoothDirections[0], (Boolean)smoothDirections[1], (Boolean)smoothDirections[2], (Boolean)smoothDirections[3]));
                                         }
                                         if(!bFoundNeighbour4)
                                         {
                                             zOffset = 1;
-                                            blockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x + xOffset, (short)(block.y + yOffset), block.z + zOffset, objectInChunk.getRotation());
+                                            blockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x() + xOffset, (short)(block.y() + yOffset), block.z() + zOffset, objectInChunk.getRotation());
                                             smoothDirections = rotateSmoothDirections(true, false, false, true, objectInChunk.getRotation());
                                             smoothToBlocks.add(new BlockCoordsAndNeighbours(objectInChunk, blockCoords.getX(), blockCoords.getY(), blockCoords.getZ(), (Boolean)smoothDirections[0], (Boolean)smoothDirections[1], (Boolean)smoothDirections[2], (Boolean)smoothDirections[3]));
                                         }
@@ -230,21 +231,21 @@ public class SmoothingAreaGenerator
                                     if(!bFoundNeighbour2)
                                     {
                                         xOffset = 1;
-                                        blockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x + xOffset, (short)(block.y + yOffset), block.z, objectInChunk.getRotation());
+                                        blockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x() + xOffset, (short)(block.y() + yOffset), block.z(), objectInChunk.getRotation());
                                         smoothDirections = rotateSmoothDirections(false, true, false, false, objectInChunk.getRotation());
                                         smoothToBlocks.add(new BlockCoordsAndNeighbours(objectInChunk, blockCoords.getX(), blockCoords.getY(), blockCoords.getZ(), (Boolean)smoothDirections[0], (Boolean)smoothDirections[1], (Boolean)smoothDirections[2], (Boolean)smoothDirections[3]));
 
                                         if(!bFoundNeighbour3)
                                         {
                                             zOffset = -1;
-                                            blockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x + xOffset, (short)(block.y + yOffset), block.z + zOffset, objectInChunk.getRotation());
+                                            blockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x() + xOffset, (short)(block.y() + yOffset), block.z() + zOffset, objectInChunk.getRotation());
                                             smoothDirections = rotateSmoothDirections(false, true, true, false, objectInChunk.getRotation());
                                             smoothToBlocks.add(new BlockCoordsAndNeighbours(objectInChunk, blockCoords.getX(), blockCoords.getY(), blockCoords.getZ(), (Boolean)smoothDirections[0], (Boolean)smoothDirections[1], (Boolean)smoothDirections[2], (Boolean)smoothDirections[3]));
                                         }
                                         if(!bFoundNeighbour4)
                                         {
                                             zOffset = 1;
-                                            blockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x + xOffset, (short)(block.y + yOffset), block.z + zOffset, objectInChunk.getRotation());
+                                            blockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x() + xOffset, (short)(block.y() + yOffset), block.z() + zOffset, objectInChunk.getRotation());
                                             smoothDirections = rotateSmoothDirections(false, true, false, true, objectInChunk.getRotation());
                                             smoothToBlocks.add(new BlockCoordsAndNeighbours(objectInChunk, blockCoords.getX(), blockCoords.getY(), blockCoords.getZ(), (Boolean)smoothDirections[0], (Boolean)smoothDirections[1], (Boolean)smoothDirections[2], (Boolean)smoothDirections[3]));
                                         }
@@ -253,7 +254,7 @@ public class SmoothingAreaGenerator
                                     if(!bFoundNeighbour3)
                                     {
                                         zOffset = -1;
-                                        blockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x, (short)(block.y + yOffset), block.z + zOffset, objectInChunk.getRotation());
+                                        blockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x(), (short)(block.y() + yOffset), block.z() + zOffset, objectInChunk.getRotation());
                                         smoothDirections = rotateSmoothDirections(false, false, true, false, objectInChunk.getRotation());
                                         smoothToBlocks.add(new BlockCoordsAndNeighbours(objectInChunk, blockCoords.getX(), blockCoords.getY(), blockCoords.getZ(), (Boolean)smoothDirections[0], (Boolean)smoothDirections[1], (Boolean)smoothDirections[2], (Boolean)smoothDirections[3]));
                                     }
@@ -261,7 +262,7 @@ public class SmoothingAreaGenerator
                                     if(!bFoundNeighbour4)
                                     {
                                         zOffset = 1;
-                                        blockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x, (short)(block.y + yOffset), block.z + zOffset, objectInChunk.getRotation());
+                                        blockCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(block.x(), (short)(block.y() + yOffset), block.z() + zOffset, objectInChunk.getRotation());
                                         smoothDirections = rotateSmoothDirections(false, false, false, true, objectInChunk.getRotation());
                                         smoothToBlocks.add(new BlockCoordsAndNeighbours(objectInChunk, blockCoords.getX(), blockCoords.getY(), blockCoords.getZ(), (Boolean)smoothDirections[0], (Boolean)smoothDirections[1], (Boolean)smoothDirections[2], (Boolean)smoothDirections[3]));
                                     }
@@ -349,7 +350,7 @@ public class SmoothingAreaGenerator
 	                    		blockToCheck = neighbouringBO3HeightMap[x][z];
 	                    		if(blockToCheck != null)
 	                    		{
-		                            blockToCheckCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(blockToCheck.x, (short)blockToCheck.y, blockToCheck.z, bO3ToCheck.getRotation());
+		                            blockToCheckCoords = BO4CustomStructureCoordinate.getRotatedSmoothingCoords(blockToCheck.x(), (short)blockToCheck.y(), blockToCheck.z(), bO3ToCheck.getRotation());
 		                            normalizedBlockToCheckX = blockToCheckCoords.getX() + (bO3ToCheck.getX());
 		                            normalizedBlockToCheckY = blockToCheckCoords.getY() + bO3ToCheck.getY();
 		                            normalizedBlockToCheckZ = blockToCheckCoords.getZ() + (bO3ToCheck.getZ());
@@ -378,8 +379,9 @@ public class SmoothingAreaGenerator
 		boolean isSmoothAreaAnchor = false;
 		if(blockToCheck instanceof BO4RandomBlockFunction)
 		{
-			for(LocalMaterialData material : ((BO4RandomBlockFunction)blockToCheck).blocks)
+			for(BlockContainer blockContainer : ((BO4RandomBlockFunction)blockToCheck).blockContainers)
 			{
+                LocalMaterialData material = blockContainer.material();
 				// TODO: Material should never be null, fix the code in RandomBlockFunction.load() that causes this.
 				if(material == null)
 				{
@@ -408,7 +410,7 @@ public class SmoothingAreaGenerator
 				!(
 					blockToCheck instanceof BO4RandomBlockFunction
 				) && 
-				blockToCheck.material.isSmoothAreaAnchor(
+				blockToCheck.material().isSmoothAreaAnchor(
 					((BO4)start.getObject()).getConfig().overrideChildSettings && 
 					((BO4)bO3ToCheck.getObject()).getConfig().overrideChildSettings ? 
 						((BO4)start.getObject()).getConfig().smoothStartWood : 
@@ -496,7 +498,7 @@ public class SmoothingAreaGenerator
 		fillSmoothingLineCaches(smoothingAreasToSpawn);
     }
 
-    void plotStraightLine(LocalWorld world, int blockX, short blockY, int blockZ, int smoothRadius, Map<ChunkCoordinate, ArrayList<SmoothingAreaLine>> smoothingAreasToSpawn, BO4CustomStructureCoordinate bO4, int direction)
+    void plotStraightLine(LocalWorld world, int blockX, int blockY, int blockZ, int smoothRadius, Map<ChunkCoordinate, ArrayList<SmoothingAreaLine>> smoothingAreasToSpawn, BO4CustomStructureCoordinate bO4, int direction)
     {
     	int normalizedSmoothStartPointBlockX = 0;
     	int normalizedSmoothStartPointBlockZ = 0;
@@ -506,7 +508,7 @@ public class SmoothingAreaGenerator
         boolean bFound;
         ArrayList<ChunkCoordinate> smoothingAreasToSpawnForThisBlock = new ArrayList<ChunkCoordinate>();
         int beginPointX;
-        short beginPointY;
+        int beginPointY;
         int beginPointZ;  
         int endPointX;
         int endPointZ;

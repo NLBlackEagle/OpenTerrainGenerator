@@ -5,9 +5,9 @@ import com.pg85.otg.generator.biome.ArraysCache;
 
 public class LayerRiver extends Layer
 {
-    LayerRiver(long seed, int defaultOceanId, Layer childLayer)
+    LayerRiver(long seed, LocalWorld world, Layer childLayer)
     {
-        super(seed, defaultOceanId);
+        super(seed, world);
         this.child = childLayer;
     }
 

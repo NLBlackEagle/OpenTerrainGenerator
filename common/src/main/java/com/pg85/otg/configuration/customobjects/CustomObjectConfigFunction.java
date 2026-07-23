@@ -13,27 +13,25 @@ import java.util.List;
 
 public abstract class CustomObjectConfigFunction<T>
 {
-    public int x;
-    public int z;
-	
-    protected T holder;
-	
+    protected static final int X_BITS = 11;
+    protected static final int Y_BITS = 10;
+    protected static final int Z_BITS = 11;
+    protected static final int X_SHIFT = 0;
+    protected static final int Y_SHIFT = X_SHIFT + X_BITS;
+    protected static final int Z_SHIFT = Y_SHIFT + Y_BITS;
+    protected static final int X_MASK = ((1 << X_BITS) - 1) << X_SHIFT;
+    protected static final int Y_MASK = ((1 << Y_BITS) - 1) << Y_SHIFT;
+    protected static final int Z_MASK = ((1 << Z_BITS) - 1) << Z_SHIFT;
+    protected static final int X_MIN = -1 << X_BITS - 1;
+    protected static final int X_MAX = (1 << X_BITS - 1) - 1;
+    protected static final int Y_MIN = -1 << Y_BITS - 1;
+    protected static final int Y_MAX = (1 << Y_BITS - 1) - 1;
+    protected static final int Z_MIN = -1 << Z_BITS - 1;
+    protected static final int Z_MAX = (1 << Z_BITS - 1) - 1;
     /**
-     * Has a value when valid == false, otherwise null.
+     * layout: z = {@value #X_BITS} bits [{@value #X_MIN}, {@value #X_MAX}], y = {@value #Y_BITS} bits [{@value #Y_MIN}, {@value #Y_MAX}], x = {@value #Z_BITS} bits [{@value #Z_MIN}, {@value #Z_MAX}]
      */
-    protected String error;
-
-    /**
-     * Only has a value when {@link #invalidate(String, List, String)} is
-     * called.
-     */
-    protected List<String> inputArgs;
-    /**
-     * Only has a value when {@link #invalidate(String, List, String)} is
-     * called.
-     */
-    protected String inputName;
-    protected boolean valid = true;
+    protected int coords;
 	
     /**
      * Convenience method for creating a config function. Used to create
@@ -63,10 +61,9 @@ public abstract class CustomObjectConfigFunction<T>
         {
             return null;
         }
-        configFunction.setHolder(holder);
         try
         {
-            configFunction.load(stringArgs);
+            configFunction.load(holder, stringArgs);
         } catch (InvalidConfigException e)
         {
             OTG.log(LogMarker.FATAL, "Invalid default config function! Please report! {}: {}",
@@ -98,22 +95,9 @@ public abstract class CustomObjectConfigFunction<T>
      * @throws IllegalStateException If the object {@link #isValid() is
      * valid}, so no error occurred.
      */
-    public final String getError() throws IllegalStateException
+    public String getError() throws IllegalStateException
     {
-        if (isValid())
-        {
-            throw new IllegalStateException("Function is valid, so no error");
-        }
-        return error;
-    }
-
-    /**
-     * Gets the holder of this config function.
-     * @return The holder.
-     */
-    public final T getHolder()
-    {
-        return holder;
+        throw new IllegalStateException("Function is valid, so no error");
     }
 
     /**
@@ -136,22 +120,7 @@ public abstract class CustomObjectConfigFunction<T>
      */
     final void init(T holder, List<String> args) throws InvalidConfigException
     {
-        this.holder = holder;
-        load(args);
-    }
-
-    /**
-     * Invalidates this resource.
-     * @param name  Name of this resource, for output.
-     * @param args  Arguments used in this resource, for output.
-     * @param error Error message detailing what went wrong.
-     */
-    final void invalidate(String name, List<String> args, String error)
-    {
-        valid = false;
-        this.inputName = name;
-        this.inputArgs = args;
-        this.error = error;
+        load(holder, args);
     }
 
     /**
@@ -170,9 +139,9 @@ public abstract class CustomObjectConfigFunction<T>
      * <p/>
      * @return Whether this ConfigFunction has a correct syntax.
      */
-    public final boolean isValid()
+    public boolean isValid()
     {
-        return valid;
+        return true;
     }
 
     /**
@@ -182,7 +151,7 @@ public abstract class CustomObjectConfigFunction<T>
      * @param args The arguments to parse.
      * @throws InvalidConfigException If the syntax is invalid.
      */
-    protected abstract void load(List<String> args) throws InvalidConfigException;
+    protected abstract void load(T holder, List<String> args) throws InvalidConfigException;
 
     /**
      * Formats the material list as a string list.
@@ -199,6 +168,15 @@ public abstract class CustomObjectConfigFunction<T>
      * @return A String representation, like Tree(10,BigTree,50,Tree,100)
      */
     public abstract String makeString();
+
+    public void readXYZ(List<String> args, int index) throws InvalidConfigException
+    {
+        this.assureSize(index + 3, args);
+        int x = this.readInt(args.get(index + 0), X_MIN, X_MAX);
+        int y = this.readInt(args.get(index + 1), Y_MIN, Y_MAX);
+        int z = this.readInt(args.get(index + 2), Z_MIN, Z_MAX);
+        coords = ((x << X_SHIFT) & X_MASK) | ((y << Y_SHIFT) & Y_MASK) | ((z << Z_SHIFT) & Z_MASK);
+    }
 
     /**
      * Parses the string and returns a number between minValue and
@@ -261,57 +239,41 @@ public abstract class CustomObjectConfigFunction<T>
      */
     protected final MaterialSet readMaterials(List<String> strings, int start) throws InvalidConfigException
     {
-        MaterialSet materials = new MaterialSet();
-        for (int i = start; i < strings.size(); i++)
-        {
-            materials.parseAndAdd(strings.get(i));
-        }
-
-        return materials;
-    }
-
-    /**
-     * Sets the holder to the given parameter. Must only be used when manually
-     * constructing this function. The holder must of the type returned by
-     * {@link #getHolderType()}.
-     * @param holder The hoilder.
-     * @see #init(Object, List).
-     */
-    public final void setHolder(T holder)
-    {
-        this.holder = holder;
-    }
-
-    /**
-     * @deprecated Use {@link #invalidate(String, List, String)} to invalidate
-     * the object. Manually validating an object is no longer needed.
-     * Re-validating is no longer possible, just create a new instance.
-     */
-    @Deprecated
-    public final void setValid(boolean valid)
-    {
-        if (valid == false)
-        {
-            throw new UnsupportedOperationException("Use the invalidate method");
-        }
-        if (valid == true && !isValid())
-        {
-            throw new UnsupportedOperationException("Revalidating objects is no longer supported");
-        }
-        // So (valid == true && isValid()), so it's safe to do nothing
+        return MaterialSet.create(strings.subList(start, strings.size()));
     }
 
     public final String write()
     {
-        if (!valid)
-        {
-            // Show error message
-            return "## INVALID " + inputName.toUpperCase() + " - " + error + " ##" + System.getProperty("line.separator") + inputName + "("
-                    + StringHelper.join(inputArgs, ",") + ")";
-        } else
-        {
-            return makeString();
-        }
+        return makeString();
     }
 
+    public void x(int x)
+    {
+        coords = (coords & ~X_MASK) | ((x << X_SHIFT) & X_MASK);
+    }
+
+    public int x()
+    {
+        return coords << (Integer.SIZE - (X_SHIFT + X_BITS)) >> (Integer.SIZE - X_BITS);
+    }
+
+    public void y(int y)
+    {
+        coords = (coords & ~Y_MASK) | ((y << Y_SHIFT) & Y_MASK);
+    }
+
+    public int y()
+    {
+        return coords << (Integer.SIZE - (Y_SHIFT + Y_BITS)) >> (Integer.SIZE - Y_BITS);
+    }
+
+    public void z(int z)
+    {
+        coords = (coords & ~Z_MASK) | ((z << Z_SHIFT) & Z_MASK);
+    }
+
+    public int z()
+    {
+        return coords << (Integer.SIZE - (Z_SHIFT + Z_BITS)) >> (Integer.SIZE - Z_BITS);
+    }
 }

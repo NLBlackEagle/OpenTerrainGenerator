@@ -344,7 +344,7 @@ public class MesaSurfaceGenerator implements SurfaceGenerator
             }
             else if (i1 < 15 || this.brycePillars)
             {
-            	if(worldMaterial.isEmptyOrAir())
+            	if(worldMaterial.isAir())
                 {
                     k1 = -1;
                 }
@@ -356,7 +356,7 @@ public class MesaSurfaceGenerator implements SurfaceGenerator
             	// same biome water block as surface/ground/stone block.
                 // TODO: If other mods have problems bc of replacedblocks in the chunk during ReplaceBiomeBlocks, 
                 // do replaceblock for stone/water here instead of when initially filling the chunk.            	
-                else if(!worldMaterial.equals(biomeConfig.getWaterBlockReplaced(world, y)))
+                else if(!biomeConfig.getWaterBlockReplaced(world, y).matches(worldMaterial))
                 {
                     if (k1 == -1)
                     {

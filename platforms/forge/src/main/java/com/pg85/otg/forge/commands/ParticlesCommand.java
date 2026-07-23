@@ -28,7 +28,7 @@ public class ParticlesCommand extends BaseCommand
         for (String entry : EnumParticleTypes.getParticleNames())
         {
             String msg = entry;
-            OTG.log(LogMarker.INFO, msg.replace("ง2", "").replace("ง", "").replace("งa", ""));
+            OTG.log(LogMarker.INFO, msg.replace("ยง2", "").replace("ยง", "").replace("ยงa", ""));
             sender.sendMessage(new TextComponentString(MESSAGE_COLOR + "- " + msg));
         }
 

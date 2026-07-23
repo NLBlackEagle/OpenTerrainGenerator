@@ -7,6 +7,7 @@ import com.pg85.otg.common.LocalWorld;
 import com.pg85.otg.customobjects.bo3.BO3Config;
 import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.util.ChunkCoordinate;
+import com.pg85.otg.util.bo3.Rotation;
 
 public class ModCheck extends BO3Check
 {
@@ -19,13 +20,13 @@ public class ModCheck extends BO3Check
     }
 
     @Override
-    public BO3Check rotate()
+    public BO3Check rotate(Rotation rotation)
     {
         return this;
     }
 
     @Override
-    protected void load(List<String> args) throws InvalidConfigException
+    protected void load(BO3Config holder, List<String> args) throws InvalidConfigException
     {
         assureSize(1, args);
         mods = new String[args.size()];

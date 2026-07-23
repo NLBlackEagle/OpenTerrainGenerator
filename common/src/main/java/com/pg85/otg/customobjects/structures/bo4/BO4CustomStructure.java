@@ -2258,4 +2258,14 @@ public class BO4CustomStructure extends CustomStructure
 		world.getStructureCache().markRegionForSaving(ChunkCoordinate.fromChunkCoords(this.start.getChunkX(), this.start.getChunkZ()).toRegionCoord());
 		world.getStructureCache().markRegionForSaving(chunkCoordinate.toRegionCoord());
     }
+
+    public Map<ChunkCoordinate, Stack<BO4CustomStructureCoordinate>> getObjectsToSpawn()
+    {
+        return objectsToSpawn;
+    }
+
+    public Map<ChunkCoordinate, ArrayList<SmoothingAreaLine>> getSmoothingAreasToSpawn()
+    {
+        return smoothingAreaManager.smoothingAreasToSpawn;
+    }
 }

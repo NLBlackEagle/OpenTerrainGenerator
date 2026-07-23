@@ -81,7 +81,7 @@ public class EntityTravelToDimensionListener
 				boolean bIsPortalMaterial = false;
 				for(LocalMaterialData portalMaterial : portalMaterials)
 				{
-					if(playerPortalMaterial.equals(portalMaterial))
+					if(portalMaterial.matches(playerPortalMaterial))
 					{
 						bIsPortalMaterial = true;
 						bOTGPortalFound = true;

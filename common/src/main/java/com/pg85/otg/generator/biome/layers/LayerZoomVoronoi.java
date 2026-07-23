@@ -7,9 +7,9 @@ import com.pg85.otg.generator.biome.ArraysCache;
 public class LayerZoomVoronoi extends Layer
 {
 
-    LayerZoomVoronoi(long seed, int defaultOceanId, Layer childLayer)
+    LayerZoomVoronoi(long seed, LocalWorld world, Layer childLayer)
     {
-        super(seed, defaultOceanId);
+        super(seed, world);
         this.child = childLayer;
     }
 

@@ -1,7 +1,6 @@
 package com.pg85.otg.bukkit.util;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,7 +36,6 @@ public class BO3Creator extends BOCreator
         this.name = name;
     }
 
-    @SuppressWarnings("deprecation")
     public boolean create(Selection selection, String blockName, boolean branch)
     {
         int tileEntityCount = 1;
@@ -94,7 +92,7 @@ public class BO3Creator extends BOCreator
                     block = world.getBlockAt(x + start.getBlockX(), y + start.getBlockY(), z + start.getBlockZ());
                     data = BukkitMaterialData.ofBukkitBlock(block);
 
-                    if (centerBlock != null && centerBlock.equals(data))
+                    if (centerBlock != null && centerBlock.matches(data))
                     {
                         centerPointX = x + start.getBlockX();
                         centerPointY = y + start.getBlockY();
@@ -151,7 +149,6 @@ public class BO3Creator extends BOCreator
         NamedBinaryTag tag;
         String tileEntityName;
         File tileEntityFile;
-        FileOutputStream fos;
         
         for (int x = start.getBlockX(); x <= end.getBlockX(); x++)
         {
@@ -216,13 +213,8 @@ public class BO3Creator extends BOCreator
 
                                 tileEntityCount++;
                                 try {
-                                    tileEntityFile.createNewFile();
-                                    fos = new FileOutputStream(tileEntityFile);
-                                    tag.writeTo(fos);
-                                    fos.flush();
-                                    fos.close();
-                                    blockFunction.metaDataTag = tag;
-                                    blockFunction.metaDataName = name + "/" + tileEntityName;
+                                    tag.writeTo(tileEntityFile.toPath());
+                                    blockFunction.blockContainer = material.blockContainer(tileEntitiesFolder.getParentFile().toPath(), name + "/" + tileEntityName);
                                 } catch (IOException e) {
                                     throw new RuntimeException(e);
                                 }

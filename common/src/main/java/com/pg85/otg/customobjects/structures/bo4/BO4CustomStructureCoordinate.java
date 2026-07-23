@@ -1,12 +1,18 @@
 package com.pg85.otg.customobjects.structures.bo4;
 
+import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.IOException;
+
 import com.pg85.otg.OTG;
 import com.pg85.otg.common.LocalWorld;
-import com.pg85.otg.logging.LogMarker;
-import com.pg85.otg.util.bo3.Rotation;
 import com.pg85.otg.customobjects.CustomObject;
 import com.pg85.otg.customobjects.structures.CustomStructureCoordinate;
 import com.pg85.otg.customobjects.structures.StructuredCustomObject;
+import com.pg85.otg.logging.LogMarker;
+import com.pg85.otg.util.DataUtil.IOFunction;
+import com.pg85.otg.util.bo3.Rotation;
+import com.pg85.otg.util.helpers.StreamHelper;
 
 /**
  * Represents an object along with its location in the world.
@@ -19,7 +25,7 @@ public class BO4CustomStructureCoordinate extends CustomStructureCoordinate
 	boolean isWeightedBranch;
 	String branchGroup;
 	   
-    public BO4CustomStructureCoordinate(LocalWorld world, StructuredCustomObject object, String customObjectName, Rotation rotation, int x, short y, int z, int branchDepth, boolean isRequiredBranch, boolean isWeightedBranch, String branchGroup)
+    public BO4CustomStructureCoordinate(LocalWorld world, StructuredCustomObject object, String customObjectName, Rotation rotation, int x, int y, int z, int branchDepth, boolean isRequiredBranch, boolean isWeightedBranch, String branchGroup)
     {
     	this.worldName = world != null ? world.getName() : null;
     	this.bo3Name = object != null ? object.getName() : customObjectName != null && customObjectName.length() > 0 ? customObjectName : null;
@@ -33,7 +39,22 @@ public class BO4CustomStructureCoordinate extends CustomStructureCoordinate
         this.isWeightedBranch = isWeightedBranch;
         this.branchGroup = branchGroup;
     }
-    
+
+    public static IOFunction<DataInputStream, BO4CustomStructureCoordinate> reader(LocalWorld world) throws IOException
+    {
+        return in -> read(world, in);
+    }
+
+    public static BO4CustomStructureCoordinate read(LocalWorld world, DataInput in) throws IOException
+    {
+        String bo3Name = StreamHelper.readStringFromStream(in);
+        Rotation coordRotation = Rotation.getRotation(in.readInt());
+        int coordX = in.readInt();
+        int coordY = in.readInt();
+        int coordZ = in.readInt();
+        return new BO4CustomStructureCoordinate(world, null, bo3Name, coordRotation, coordX, (short) coordY, coordZ, 0, false, false, null);
+    }
+
     /**
      * Returns the object of this coordinate.
      *
@@ -73,13 +94,7 @@ public class BO4CustomStructureCoordinate extends CustomStructureCoordinate
     {
     	return (StructuredCustomObject)getObject();
     }
-        
-    @Override
-    public int hashCode()
-    {
-        return (x >> 13) ^ (y >> 7) ^ z ^ object.getName().hashCode() ^ rotation.toString().hashCode();
-    }
-    
+
     @Override
     public boolean equals(Object otherObject)
     {
@@ -209,12 +224,12 @@ public class BO4CustomStructureCoordinate extends CustomStructureCoordinate
     }
     
     // TODO: Why is this necessary for smoothing areas?
-    public static BO4CustomStructureCoordinate getRotatedSmoothingCoords(int x, short y, int z, Rotation newRotation)
+    public static BO4CustomStructureCoordinate getRotatedSmoothingCoords(int x, int y, int z, Rotation newRotation)
     {
         // Assuming initial rotation is always north
 
         int newX = 0;
-        short newY = 0;
+        int newY = 0;
         int newZ = 0;
         int rotations = 0;
 

@@ -1,6 +1,7 @@
 package com.pg85.otg.customobjects.bo4;
 
 import com.pg85.otg.OTG;
+import com.pg85.otg.common.BlockContainer;
 import com.pg85.otg.common.LocalMaterialData;
 import com.pg85.otg.configuration.customobjects.CustomObjectConfigFile;
 import com.pg85.otg.configuration.customobjects.CustomObjectConfigFunction;
@@ -12,7 +13,6 @@ import com.pg85.otg.configuration.standard.WorldStandardValues;
 import com.pg85.otg.configuration.world.WorldConfig.ConfigMode;
 import com.pg85.otg.customobjects.CustomObject;
 import com.pg85.otg.customobjects.bo4.BO4Config;
-import com.pg85.otg.customobjects.bo4.BO4Settings;
 import com.pg85.otg.customobjects.bo4.bo4function.BO4BlockFunction;
 import com.pg85.otg.customobjects.bo4.bo4function.BO4BranchFunction;
 import com.pg85.otg.customobjects.bo4.bo4function.BO4EntityFunction;
@@ -27,25 +27,24 @@ import com.pg85.otg.customobjects.bo3.BO3Settings;
 import com.pg85.otg.customobjects.bo3.BO3Settings.SpawnHeightEnum;
 import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.logging.LogMarker;
-import com.pg85.otg.util.bo3.NamedBinaryTag;
+import com.pg85.otg.util.CompressionUtils;
 import com.pg85.otg.util.bo3.Rotation;
 import com.pg85.otg.util.helpers.StreamHelper;
 import com.pg85.otg.util.materials.MaterialHelper;
 import com.pg85.otg.util.minecraft.defaults.DefaultStructurePart;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.BufferUnderflowException;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
+import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.zip.DataFormatException;
+
+import org.apache.commons.lang3.StringUtils;
 
 public class BO4Config extends CustomObjectConfigFile
 {
@@ -152,20 +151,7 @@ public class BO4Config extends CustomObjectConfigFile
 
     private String worldName;
 
-    // Store blocks in arrays instead of as BO4BlockFunctions,
-    // since that gives way too much overhead memory wise.
-    // We may have tens of millions of blocks, java doesn't handle lots of small classes well.
-    private short[][][]blocks;
-    private LocalMaterialData[]blocksMaterial;
-    private String[]blocksMetaDataName;
-    private NamedBinaryTag[]blocksMetaDataTag;
-
-    private LocalMaterialData[][] randomBlocksBlocks;
-    private byte[][] randomBlocksBlockChances;
-    private String[][] randomBlocksMetaDataNames;
-    private NamedBinaryTag[][] randomBlocksMetaDataTags;
-    private byte[] randomBlocksBlockCount;    
-    //
+    private BO4BlockFunction[] blocks;
     
     private BO4BranchFunction[] branchesOTGPlus;
     private BO4ModDataFunction[] modDataOTGPlus;
@@ -313,83 +299,42 @@ public class BO4Config extends CustomObjectConfigFile
     		
     		this.heightMap = new BO4BlockFunction[16][16];
 
-	        // make heightmap containing the highest or lowest blocks in this chunk
-    		int blockIndex = 0;
-    		LocalMaterialData material;
-    		boolean isSmoothAreaAnchor;
-    		boolean isRandomBlock;
-    		int y;
-	    	for(int x = 0; x < xSize; x++)
-	    	{
-	    		for(int z = 0; z < zSize; z++)
-	    		{
-	    			if(blocks[x][z] != null)
-	    			{
-	    				for(int i = 0; i < blocks[x][z].length; i++)
-	    				{
-	    					isSmoothAreaAnchor = false;
-	    					isRandomBlock = this.randomBlocksBlocks[blockIndex] != null;
-	    					y = blocks[x][z][i];
-	    					
-				    		if(isRandomBlock)
-				    		{
-	        					for(LocalMaterialData randomMaterial : this.randomBlocksBlocks[blockIndex])
-		            			{
-	        						// TODO: Material should never be null, fix the code in RandomBlockFunction.load() that causes this.
-	        						if(randomMaterial == null)
-	        						{
-	        							continue;
-	        						}
-	        						if(randomMaterial.isSmoothAreaAnchor(start.getConfig().overrideChildSettings && this.overrideChildSettings ? start.getConfig().smoothStartWood : this.smoothStartWood, start.getConfig().spawnUnderWater))
-	        						{
-	        							isSmoothAreaAnchor = true;
-	        							break;
-	        						}
-		            			}
-				    		}
-
-				    		material = this.blocksMaterial[blockIndex];
-	            			if(
-	            					isSmoothAreaAnchor ||
-	        						(
-	    								!isRandomBlock &&
-	    								material.isSmoothAreaAnchor(start.getConfig().overrideChildSettings && this.overrideChildSettings ? start.getConfig().smoothStartWood : this.smoothStartWood, start.getConfig().spawnUnderWater)
-	    							)
-	        					)
-	                			{
-	    	            			if(
-	    	            				(!(start.getConfig().overrideChildSettings && this.overrideChildSettings ? start.getConfig().smoothStartTop : this.smoothStartTop) && y == getminY()) ||
-	    		        				((start.getConfig().overrideChildSettings && this.overrideChildSettings ? start.getConfig().smoothStartTop : this.smoothStartTop) && (this.heightMap[x][z] == null || y > this.heightMap[x][z].y))
-	    	    					)
-	    	            			{
-	    	            				BO4BlockFunction blockFunction = null;
-	    	            				if(isRandomBlock)
-	    	            				{
-	    	            					blockFunction = new BO4RandomBlockFunction();
-	    	    			    			((BO4RandomBlockFunction)blockFunction).blocks = this.randomBlocksBlocks[blockIndex];
-	    	    			    			((BO4RandomBlockFunction)blockFunction).blockChances = this.randomBlocksBlockChances[blockIndex];
-	    	    			    			((BO4RandomBlockFunction)blockFunction).metaDataNames = this.randomBlocksMetaDataNames[blockIndex];
-	    	    			    			((BO4RandomBlockFunction)blockFunction).metaDataTags = this.randomBlocksMetaDataTags[blockIndex];
-	    	    			    			((BO4RandomBlockFunction)blockFunction).blockCount = this.randomBlocksBlockCount[blockIndex];
-	    	            				} else {
-	    	            					blockFunction = new BO4BlockFunction();
-	    	            				}
-	    	            				blockFunction.material = material;
-	    	            				blockFunction.x = x;
-	    	            				blockFunction.y = (short) y;
-	    	            				blockFunction.z = z;	    	            				
-	    	            				blockFunction.metaDataName = this.blocksMetaDataName[blockIndex];
-	    	            				blockFunction.metaDataTag = this.blocksMetaDataTag[blockIndex];
-	    	            				
-	    	            				this.heightMap[x][z] = blockFunction;
-	    	            			}
-	                			}
-				    		
-							blockIndex++;
-	    				}
-	    			}
-	    		}
-	    	}
+            // make heightmap containing the highest or lowest blocks in this chunk
+            boolean startTop = start.getConfig().overrideChildSettings && overrideChildSettings ? start.getConfig().smoothStartTop : smoothStartTop;
+            boolean allowWood = start.getConfig().overrideChildSettings && overrideChildSettings ? start.getConfig().smoothStartWood : smoothStartWood;
+            boolean allowLiquid = start.getConfig().spawnUnderWater;
+            for(BO4BlockFunction block : blocks)
+            {
+                if(!startTop)
+                {
+                    if(block.y() != getminY())
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    if(heightMap[block.x()][block.z()] != null && block.y() <= heightMap[block.x()][block.z()].y())
+                    {
+                        continue;
+                    }
+                }
+                if(block instanceof BO4RandomBlockFunction)
+                {
+                    if(Arrays.stream(((BO4RandomBlockFunction) block).blockContainers).noneMatch(b -> b.material().isSmoothAreaAnchor(allowWood, allowLiquid)))
+                    {
+                        continue;
+                    }
+                }
+                else
+                {
+                    if(!block.material().isSmoothAreaAnchor(allowWood, allowLiquid))
+                    {
+                        continue;
+                    }
+                }
+                heightMap[block.x()][block.z()] = block;
+            }
     	}
     	return this.heightMap;
     }
@@ -424,45 +369,7 @@ public class BO4Config extends CustomObjectConfigFile
 			}
     	}
     	
-    	BO4BlockFunction[] blocksOTGPlus = new BO4BlockFunction[this.blocksMaterial.length];
-    	
-    	BO4BlockFunction block;
-    	int blockIndex = 0;
-    	for(int x = 0; x < xSize; x++)
-    	{
-    		for(int z = 0; z < zSize; z++)
-			{
-    			if(this.blocks[x][z] != null)
-    			{
-			    	for(int i = 0; i < this.blocks[x][z].length; i++)
-			    	{
-			    		if(this.randomBlocksBlocks[blockIndex] != null)
-			    		{
-			    			block = new BO4RandomBlockFunction(this);
-			    			((BO4RandomBlockFunction)block).blocks = this.randomBlocksBlocks[blockIndex];
-			    			((BO4RandomBlockFunction)block).blockChances = this.randomBlocksBlockChances[blockIndex];
-			    			((BO4RandomBlockFunction)block).metaDataNames = this.randomBlocksMetaDataNames[blockIndex];
-			    			((BO4RandomBlockFunction)block).metaDataTags = this.randomBlocksMetaDataTags[blockIndex];
-			    			((BO4RandomBlockFunction)block).blockCount = this.randomBlocksBlockCount[blockIndex];
-			    		} else {
-			    			block = new BO4BlockFunction(this);
-			    		}
-			    		
-			    		block.x = x;
-			    		block.y = this.blocks[x][z][i];
-			    		block.z = z;
-			    		block.material = this.blocksMaterial[blockIndex];
-			    		block.metaDataName = this.blocksMetaDataName[blockIndex];
-			    		block.metaDataTag = this.blocksMetaDataTag[blockIndex];
-			    					    		
-			    		blocksOTGPlus[blockIndex] = block;
-						blockIndex++;
-			    	} 
-    			}
-			}
-    	}
-
-    	return blocksOTGPlus;
+        return this.blocks;
     }
 
     protected BO4BranchFunction[] getbranches()
@@ -565,7 +472,7 @@ public class BO4Config extends CustomObjectConfigFile
 				short[][] columnSizes = new short[16][16];
 				for(BO4BlockFunction block : newBlocks)
 				{
-					columnSizes[block.x][block.z]++;
+					columnSizes[block.x()][block.z()]++;
 				}
 				
 				loadBlockArrays(newBlocks, columnSizes);
@@ -681,21 +588,21 @@ public class BO4Config extends CustomObjectConfigFile
             		!(res instanceof CustomObjectErroredFunction)
     			)
             	{
-	        		if(res.x < minX)
+	        		if(res.x() < minX)
 	        		{
-	        			minX = res.x;
+	        			minX = res.x();
 	        		}
-	        		if(res.x > maxX)
+	        		if(res.x() > maxX)
 	        		{
-	        			maxX = res.x;
+	        			maxX = res.x();
 	        		}
-	        		if(res.z < minZ)
+	        		if(res.z() < minZ)
 	        		{
-	        			minZ = res.z;
+	        			minZ = res.z();
 	        		}
-	        		if(res.z > maxZ)
+	        		if(res.z() > maxZ)
 	        		{
-	        			maxZ = res.z;
+	        			maxZ = res.z();
 	        		}
             	}
             }
@@ -739,8 +646,8 @@ public class BO4Config extends CustomObjectConfigFile
         		!(res instanceof CustomObjectErroredFunction)
     			)
         	{
-	        	res.x += xOffset;
-	        	res.z += zOffset;
+	        	res.x(res.x() + xOffset);
+	        	res.z(res.z() + zOffset);
         	}
         	
             if (res instanceof BO4BlockFunction)
@@ -750,39 +657,39 @@ public class BO4Config extends CustomObjectConfigFile
         		if(res instanceof BO4RandomBlockFunction)
         		{
                 	tempBlocksList.add((BO4RandomBlockFunction)res);
-                	columnSizes[res.x + (this.xSize / 2)][res.z + (this.zSize / 2) - 1]++;
+                	columnSizes[res.x() + (this.xSize / 2)][res.z() + (this.zSize / 2) - 1]++;
         		} else {
-        			if(!this.removeAir || !((BO4BlockFunction)res).material.isAir())
+        			if(!this.removeAir || !((BO4BlockFunction)res).material().isAir())
         			{
                     	tempBlocksList.add((BO4BlockFunction)res);
-                		columnSizes[res.x + (this.xSize / 2)][res.z + (this.zSize / 2) - 1]++;
+                		columnSizes[res.x() + (this.xSize / 2)][res.z() + (this.zSize / 2) - 1]++;
         			}
         		}
         		
             	// Get the real size of this BO3
-            	if(res.x < this.minX)
+            	if(res.x() < this.minX)
             	{
-            		this.minX = res.x;
+            		this.minX = res.x();
             	}
-            	if(res.x > this.maxX)
+            	if(res.x() > this.maxX)
             	{
-            		this.maxX = res.x;
+            		this.maxX = res.x();
             	}
-            	if(((BO4BlockFunction)res).y < this.minY)
+            	if(((BO4BlockFunction)res).y() < this.minY)
             	{
-            		this.minY = ((BO4BlockFunction)res).y;
+            		this.minY = ((BO4BlockFunction)res).y();
             	}
-            	if(((BO4BlockFunction)res).y > this.maxY)
+            	if(((BO4BlockFunction)res).y() > this.maxY)
             	{
-            		this.maxY = ((BO4BlockFunction)res).y;
+            		this.maxY = ((BO4BlockFunction)res).y();
             	}
-            	if(res.z < this.minZ)
+            	if(res.z() < this.minZ)
             	{
-            		this.minZ = res.z;
+            		this.minZ = res.z();
             	}
-            	if(res.z > this.maxZ)
+            	if(res.z() > this.maxZ)
             	{
-            		this.maxZ = res.z;
+            		this.maxZ = res.z();
             	}                	
             } else {
                 if (res instanceof BO4WeightedBranchFunction)
@@ -841,85 +748,33 @@ public class BO4Config extends CustomObjectConfigFile
         boolean illegalBlock = false;
         for(BO4BlockFunction block1 : tempBlocksList)
         {
-        	block1.x += this.getXOffset();
-        	block1.z += this.getZOffset();
+        	block1.x(block1.x() + this.getXOffset());
+        	block1.z(block1.z() + this.getZOffset());
 
-    		if(block1.x > 15 || block1.z > 15)
+    		if(block1.x() > 15 || block1.z() > 15)
     		{
     			illegalBlock = true;
     		}
 
-    		if(block1.x < 0 || block1.z < 0)
+    		if(block1.x() < 0 || block1.z() < 0)
     		{
     			illegalBlock = true;
     		}	    		
         }
-        
-        this.blocks = new short[this.xSize][this.zSize][];
-    	this.blocksMaterial = new LocalMaterialData[tempBlocksList.size()];
-    	this.blocksMetaDataName = new String[tempBlocksList.size()];
-    	this.blocksMetaDataTag = new NamedBinaryTag[tempBlocksList.size()];
-    	
-        this.randomBlocksBlocks = new LocalMaterialData[tempBlocksList.size()][];
-        this.randomBlocksBlockChances = new byte[tempBlocksList.size()][];
-        this.randomBlocksMetaDataNames = new String[tempBlocksList.size()][];
-        this.randomBlocksMetaDataTags = new NamedBinaryTag[tempBlocksList.size()][];
-        this.randomBlocksBlockCount = new byte[tempBlocksList.size()]; 
-        
-        short[][] columnBlockIndex = new short[this.xSize][this.zSize];
-        BO4BlockFunction[] blocksSorted = new BO4BlockFunction[tempBlocksList.size()];
-        int blocksSortedIndex = 0;
-        for(int x = 0; x < this.xSize; x++)
-        {
-        	for(int z = 0; z < this.zSize; z++)
-        	{
-        		for(int h = 0; h < tempBlocksList.size(); h++)
-        		{
-        			if(tempBlocksList.get(h).x == x && tempBlocksList.get(h).z == z)
-        			{
-        				blocksSorted[blocksSortedIndex] = tempBlocksList.get(h);
-        				blocksSortedIndex++;
-        			}
-        		}
-        	}
-        }
-        BO4BlockFunction block;
-        for(int blockIndex = 0; blockIndex < blocksSorted.length; blockIndex++)
-        {
-        	block = blocksSorted[blockIndex];
-        	if(this.blocks[block.x][block.z] == null)
-        	{
-        		this.blocks[block.x][block.z] = new short[columnSizes[block.x][block.z]];
-        	}
-       		this.blocks[block.x][block.z][columnBlockIndex[block.x][block.z]] = (short) block.y;
-        	
-        	this.blocksMaterial[blockIndex] = block.material;
-        	this.blocksMetaDataName[blockIndex] = block.metaDataName;
-        	this.blocksMetaDataTag[blockIndex] = block.metaDataTag;
-        	
-        	if(block instanceof BO4RandomBlockFunction)
-        	{
-	            this.randomBlocksBlocks[blockIndex] = ((BO4RandomBlockFunction)block).blocks;
-	            this.randomBlocksBlockChances[blockIndex] = ((BO4RandomBlockFunction)block).blockChances;
-	            this.randomBlocksMetaDataNames[blockIndex] = ((BO4RandomBlockFunction)block).metaDataNames;
-	            this.randomBlocksMetaDataTags[blockIndex] = ((BO4RandomBlockFunction)block).metaDataTags;
-	            this.randomBlocksBlockCount[blockIndex] = ((BO4RandomBlockFunction)block).blockCount;
-        	}
-        	columnBlockIndex[block.x][block.z]++;
-        }
+        this.blocks = tempBlocksList.toArray(new BO4BlockFunction[tempBlocksList.size()]);
 
 		boolean illegalModData = false;
         for(BO4ModDataFunction modData : tempModDataList)
         {
-			modData.x += this.getXOffset();
-			modData.z += this.getZOffset();
+			modData.x(modData.x() + this.getXOffset());
+			modData.z(modData.z() + this.getZOffset());
 
-    		if(modData.x > 15 || modData.z > 15)
+    		if(modData.x() > 15 || modData.z() > 15)
     		{
     			illegalModData = true;
     		}
 
-    		if(modData.x < 0 || modData.z < 0)
+    		if(modData.x() < 0 || modData.z() < 0)
     		{
     			illegalModData = true;
     		}
@@ -929,15 +784,15 @@ public class BO4Config extends CustomObjectConfigFile
 		boolean illegalSpawnerData = false;
         for(BO4SpawnerFunction spawnerData : tempSpawnerList)
         {
-        	spawnerData.x += this.getXOffset();
-        	spawnerData.z += this.getZOffset();
+        	spawnerData.x(spawnerData.x() + this.getXOffset());
+        	spawnerData.z(spawnerData.z() + this.getZOffset());
 
-    		if(spawnerData.x > 15 || spawnerData.z > 15)
+    		if(spawnerData.x() > 15 || spawnerData.z() > 15)
     		{
     			illegalSpawnerData = true;
     		}
 
-    		if(spawnerData.x < 0 || spawnerData.z < 0)
+    		if(spawnerData.x() < 0 || spawnerData.z() < 0)
     		{
     			illegalSpawnerData = true;
     		}
@@ -947,15 +802,15 @@ public class BO4Config extends CustomObjectConfigFile
 		boolean illegalParticleData = false;
         for(BO4ParticleFunction particleData : tempParticlesList)
         {
-        	particleData.x += this.getXOffset();
-        	particleData.z += this.getZOffset();
+        	particleData.x(particleData.x() + this.getXOffset());
+        	particleData.z(particleData.z() + this.getZOffset());
 
-    		if(particleData.x > 15 || particleData.z > 15)
+    		if(particleData.x() > 15 || particleData.z() > 15)
     		{
     			illegalParticleData = true;
     		}
 
-    		if(particleData.x < 0 || particleData.z < 0)
+    		if(particleData.x() < 0 || particleData.z() < 0)
     		{
     			illegalParticleData = true;
     		}
@@ -965,15 +820,15 @@ public class BO4Config extends CustomObjectConfigFile
 		boolean illegalEntityData = false;
         for(BO4EntityFunction entityData : tempEntitiesList)
         {
-        	entityData.x += this.getXOffset();
-        	entityData.z += this.getZOffset();
+        	entityData.x(entityData.x() + this.getXOffset());
+        	entityData.z(entityData.z() + this.getZOffset());
 
-    		if(entityData.x > 15 || entityData.z > 15)
+    		if(entityData.x() > 15 || entityData.z() > 15)
     		{
     			illegalEntityData = true;
     		}
 
-    		if(entityData.x < 0 || entityData.z < 0)
+    		if(entityData.x() < 0 || entityData.z() < 0)
     		{
     			illegalEntityData = true;
     		}
@@ -1350,7 +1205,7 @@ public class BO4Config extends CustomObjectConfigFile
         this.doReplaceBlocks = readSettings(BO4Settings.DO_REPLACE_BLOCKS);
 
 		String fixedRotation = readSettings(BO4Settings.FIXED_ROTATION);
-		this.fixedRotation = fixedRotation == null || fixedRotation.trim().length() == 0 ? null : Rotation.FromString(fixedRotation);
+		this.fixedRotation = StringUtils.isBlank(fixedRotation) ? null : Rotation.FromString(fixedRotation);
 
         // Read the resources
         readResources();
@@ -1669,8 +1524,9 @@ public class BO4Config extends CustomObjectConfigFile
         	if(block instanceof BO4RandomBlockFunction)
         	{
         		randomBlockCount++;
-        		for(LocalMaterialData material : ((BO4RandomBlockFunction)block).blocks)
+        		for(BlockContainer blockContainer : ((BO4RandomBlockFunction)block).blockContainers)
         		{
+                    LocalMaterialData material = blockContainer.material();
                 	if(!materials.contains(material))
                 	{
                 		materials.add(material);
@@ -1680,13 +1536,13 @@ public class BO4Config extends CustomObjectConfigFile
         		nonRandomBlockCount++;
         	}
         	       	
-        	if(block.material != null && !materials.contains(block.material))
+        	if(block.material() != null && !materials.contains(block.material()))
         	{
-        		materials.add(block.material);
+        		materials.add(block.material());
         	}        	
-        	if(block.metaDataName != null && !metaDataNames.contains(block.metaDataName))
+        	if(block.hasTag() && !metaDataNames.contains(block.tagPath()))
         	{
-        		metaDataNames.add(block.metaDataName);
+        		metaDataNames.add(block.tagPath());
         	}
         }
         
@@ -1721,7 +1577,7 @@ public class BO4Config extends CustomObjectConfigFile
 			        {
 			        	if(!(blockFunction instanceof BO4RandomBlockFunction))
 			        	{
-			        		if(blockFunction.x == x && blockFunction.z == z)
+			        		if(blockFunction.x() == x && blockFunction.z() == z)
 			        		{
 			        			blocksInColumn.add(blockFunction);
 			        		}
@@ -1761,7 +1617,7 @@ public class BO4Config extends CustomObjectConfigFile
 			        {
 			        	if(blockFunction instanceof BO4RandomBlockFunction)
 			        	{
-			        		if(blockFunction.x == x && blockFunction.z == z)
+			        		if(blockFunction.x() == x && blockFunction.z() == z)
 			        		{
 			        			blocksInColumn.add(blockFunction);
 			        		}
@@ -1791,118 +1647,78 @@ public class BO4Config extends CustomObjectConfigFile
 
     public BO4Config readFromBO4DataFile(boolean getBlocks) throws InvalidConfigException
     {   	
-    	FileInputStream fis;
-    	ByteBuffer bufferCompressed = null;
-    	ByteBuffer bufferDecompressed = null;
-		try
+		try(DataInputStream in = new DataInputStream(new BufferedInputStream(CompressionUtils.newInflaterInputStream(this.reader.getFile().toPath()))))
 		{
-	    	fis = new FileInputStream(this.reader.getFile());
-	    	try
-	    	{
-	    		bufferCompressed = fis.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, fis.getChannel().size());
-				byte[] compressedBytes = new byte[(int) fis.getChannel().size()];
-				bufferCompressed.get(compressedBytes);
-				try {
-					byte[] decompressedBytes = com.pg85.otg.util.CompressionUtils.decompress(compressedBytes);
-					bufferDecompressed = ByteBuffer.wrap(decompressedBytes);
-				} catch (DataFormatException e1) {
-					e1.printStackTrace();
-				}
-
-				//buffer.get(data, 0, remaining);
 				// do something with data
 
 				boolean isBO4Data = true;
 				boolean inheritedBO3Loaded = true;
-	        	int bo4DataVersion = bufferDecompressed.getInt();
+	        	int bo4DataVersion = in.readInt();
 	        	if(bo4DataVersion != this.bo4DataVersion)
 	        	{
-			    	// TODO: Should only need to close the reader?
-	    	    	if(bufferCompressed != null)
-	    	    	{
-	    	    		bufferCompressed.clear();
-	    	    	}
-	    	    	if(bufferDecompressed != null)
-	    	    	{
-	    	    		bufferDecompressed.clear();
-	    	    	}   	    	
-	        		try {
-	        			fis.getChannel().close();
-	        		}
-	        		catch (IOException e)
-	        		{
-	    				e.printStackTrace();
-	    			}
-	    			try {
-	    				fis.close();
-	    			}
-	    			catch (IOException e)
-	    			{
-	    				e.printStackTrace();
-	    			}
 	        		throw new InvalidConfigException("Could not read BO4Data file " + this.reader.getName() + ", it is outdated. Delete and re-export BO4Data files to fix this, or delete and reinstall your OTG preset.");
 	        	}
-	        	int minimumSizeTop = bufferDecompressed.getInt();
-	        	int minimumSizeBottom = bufferDecompressed.getInt();
-	        	int minimumSizeLeft = bufferDecompressed.getInt();
-	        	int minimumSizeRight = bufferDecompressed.getInt();
+	        	int minimumSizeTop = in.readInt();
+	        	int minimumSizeBottom = in.readInt();
+	        	int minimumSizeLeft = in.readInt();
+	        	int minimumSizeRight = in.readInt();
 
-	        	int minX = bufferDecompressed.getInt();
-	        	int maxX = bufferDecompressed.getInt();
-	        	int minY = bufferDecompressed.getInt();
-	        	int maxY = bufferDecompressed.getInt();
-	        	int minZ = bufferDecompressed.getInt();
-	        	int maxZ = bufferDecompressed.getInt();
+	        	int minX = in.readInt();
+	        	int maxX = in.readInt();
+	        	int minY = in.readInt();
+	        	int maxY = in.readInt();
+	        	int minZ = in.readInt();
+	        	int maxZ = in.readInt();
 
-				String author = StreamHelper.readStringFromBuffer(bufferDecompressed);
-				String description = StreamHelper.readStringFromBuffer(bufferDecompressed);
-				ConfigMode settingsMode = ConfigMode.valueOf(StreamHelper.readStringFromBuffer(bufferDecompressed));
-				int frequency = bufferDecompressed.getInt();
-				SpawnHeightEnum spawnHeight = SpawnHeightEnum.valueOf(StreamHelper.readStringFromBuffer(bufferDecompressed));
-				int minHeight = bufferDecompressed.getInt();
-				int maxHeight = bufferDecompressed.getInt();
-		        short inheritedBO3sSize = bufferDecompressed.getShort();
+				String author = StreamHelper.readStringFromStream(in);
+				String description = StreamHelper.readStringFromStream(in);
+				ConfigMode settingsMode = ConfigMode.valueOf(StreamHelper.readStringFromStream(in));
+				int frequency = in.readInt();
+				SpawnHeightEnum spawnHeight = SpawnHeightEnum.valueOf(StreamHelper.readStringFromStream(in));
+				int minHeight = in.readInt();
+				int maxHeight = in.readInt();
+		        short inheritedBO3sSize = in.readShort();
 		        ArrayList<String> inheritedBO3s = new ArrayList<String>();
 		        for(int i = 0; i < inheritedBO3sSize; i++)
 		        {
-		        	inheritedBO3s.add(StreamHelper.readStringFromBuffer(bufferDecompressed));
+		        	inheritedBO3s.add(StreamHelper.readStringFromStream(in));
 		        }
 
-		        String inheritBO3 = StreamHelper.readStringFromBuffer(bufferDecompressed);
-		        Rotation inheritBO3Rotation = Rotation.valueOf(StreamHelper.readStringFromBuffer(bufferDecompressed));
-				boolean overrideChildSettings = bufferDecompressed.get() != 0;
-				boolean overrideParentHeight = bufferDecompressed.get() != 0;
-				boolean canOverride = bufferDecompressed.get() != 0;
-				int branchFrequency = bufferDecompressed.getInt();
-				String branchFrequencyGroup = StreamHelper.readStringFromBuffer(bufferDecompressed);
-				boolean mustBeBelowOther = bufferDecompressed.get() != 0;
-				boolean mustBeInsideWorldBorders = bufferDecompressed.get() != 0;
-				String mustBeInside = StreamHelper.readStringFromBuffer(bufferDecompressed);
-				String cannotBeInside = StreamHelper.readStringFromBuffer(bufferDecompressed);
-				String replacesBO3 = StreamHelper.readStringFromBuffer(bufferDecompressed);
-				boolean canSpawnOnWater = bufferDecompressed.get() != 0;
-				boolean spawnOnWaterOnly = bufferDecompressed.get() != 0;
-				boolean spawnUnderWater = bufferDecompressed.get() != 0;
-				boolean spawnAtWaterLevel = bufferDecompressed.get() != 0;
-				boolean doReplaceBlocks = bufferDecompressed.get() != 0;
-				int heightOffset = bufferDecompressed.getInt();
-				boolean removeAir = bufferDecompressed.get() != 0;
-				String replaceAbove = StreamHelper.readStringFromBuffer(bufferDecompressed);
-				String replaceBelow = StreamHelper.readStringFromBuffer(bufferDecompressed);
-				boolean replaceWithBiomeBlocks = bufferDecompressed.get() != 0;
-				String replaceWithSurfaceBlock = StreamHelper.readStringFromBuffer(bufferDecompressed);				
-				String replaceWithGroundBlock = StreamHelper.readStringFromBuffer(bufferDecompressed);
-				String replaceWithStoneBlock = StreamHelper.readStringFromBuffer(bufferDecompressed);
-				int smoothRadius = bufferDecompressed.getInt();
-				int smoothHeightOffset = bufferDecompressed.getInt();
-				boolean smoothStartTop = bufferDecompressed.get() != 0;
-				boolean smoothStartWood = bufferDecompressed.get() != 0;
-				String smoothingSurfaceBlock = StreamHelper.readStringFromBuffer(bufferDecompressed);
-				String smoothingGroundBlock = StreamHelper.readStringFromBuffer(bufferDecompressed);
-				String bo3Group = StreamHelper.readStringFromBuffer(bufferDecompressed);
-				boolean isSpawnPoint = bufferDecompressed.get() != 0;        
-				boolean isCollidable = bufferDecompressed.get() != 0;
-				boolean useCenterForHighestBlock = bufferDecompressed.get() != 0;				
+		        String inheritBO3 = StreamHelper.readStringFromStream(in);
+		        Rotation inheritBO3Rotation = Rotation.valueOf(StreamHelper.readStringFromStream(in));
+				boolean overrideChildSettings = in.readByte() != 0;
+				boolean overrideParentHeight = in.readByte() != 0;
+				boolean canOverride = in.readByte() != 0;
+				int branchFrequency = in.readInt();
+				String branchFrequencyGroup = StreamHelper.readStringFromStream(in);
+				boolean mustBeBelowOther = in.readByte() != 0;
+				boolean mustBeInsideWorldBorders = in.readByte() != 0;
+				String mustBeInside = StreamHelper.readStringFromStream(in);
+				String cannotBeInside = StreamHelper.readStringFromStream(in);
+				String replacesBO3 = StreamHelper.readStringFromStream(in);
+				boolean canSpawnOnWater = in.readByte() != 0;
+				boolean spawnOnWaterOnly = in.readByte() != 0;
+				boolean spawnUnderWater = in.readByte() != 0;
+				boolean spawnAtWaterLevel = in.readByte() != 0;
+				boolean doReplaceBlocks = in.readByte() != 0;
+				int heightOffset = in.readInt();
+				boolean removeAir = in.readByte() != 0;
+				String replaceAbove = StreamHelper.readStringFromStream(in);
+				String replaceBelow = StreamHelper.readStringFromStream(in);
+				boolean replaceWithBiomeBlocks = in.readByte() != 0;
+				String replaceWithSurfaceBlock = StreamHelper.readStringFromStream(in);				
+				String replaceWithGroundBlock = StreamHelper.readStringFromStream(in);
+				String replaceWithStoneBlock = StreamHelper.readStringFromStream(in);
+				int smoothRadius = in.readInt();
+				int smoothHeightOffset = in.readInt();
+				boolean smoothStartTop = in.readByte() != 0;
+				boolean smoothStartWood = in.readByte() != 0;
+				String smoothingSurfaceBlock = StreamHelper.readStringFromStream(in);
+				String smoothingGroundBlock = StreamHelper.readStringFromStream(in);
+				String bo3Group = StreamHelper.readStringFromStream(in);
+				boolean isSpawnPoint = in.readByte() != 0;        
+				boolean isCollidable = in.readByte() != 0;
+				boolean useCenterForHighestBlock = in.readByte() != 0;				
 			
 				HashMap<String, Integer> branchFrequencyGroups = new HashMap<String, Integer>();
 	            if(branchFrequencyGroup != null && branchFrequencyGroup.trim().length() > 0)
@@ -1989,48 +1805,48 @@ public class BO4Config extends CustomObjectConfigFile
 	    	        }
 	            }
             
-		        int branchesOTGPlusLength = bufferDecompressed.getInt();
+		        int branchesOTGPlusLength = in.readInt();
 		        boolean branchType;
 		        BO4BranchFunction branch;
 		        BO4BranchFunction[] branchesOTGPlus = new BO4BranchFunction[branchesOTGPlusLength];
 		        for(int i = 0; i < branchesOTGPlusLength; i++)
 		        {
-		        	branchType = bufferDecompressed.get() != 0;
+		        	branchType = in.readByte() != 0;
 		        	if(branchType)
 		        	{
-		        		branch = BO4WeightedBranchFunction.fromStream(this, bufferDecompressed);
+		        		branch = BO4WeightedBranchFunction.fromStream(this, in);
 		        	} else {
-		        		branch = BO4BranchFunction.fromStream(this, bufferDecompressed);
+		        		branch = BO4BranchFunction.fromStream(this, in);
 		        	}
 		        	branchesOTGPlus[i] = branch;
 		        }
 		        
-		        int entityDataOTGPlusLength = bufferDecompressed.getInt();
+		        int entityDataOTGPlusLength = in.readInt();
 		        BO4EntityFunction[] entityDataOTGPlus = new BO4EntityFunction[entityDataOTGPlusLength];
 		        for(int i = 0; i < entityDataOTGPlusLength; i++)
 		        {
-		        	entityDataOTGPlus[i] = BO4EntityFunction.fromStream(this, bufferDecompressed);
+		        	entityDataOTGPlus[i] = BO4EntityFunction.fromStream(this, in);
 		        }
 		        
-		        int particleDataOTGPlusLength = bufferDecompressed.getInt();
+		        int particleDataOTGPlusLength = in.readInt();
 		        BO4ParticleFunction[] particleDataOTGPlus = new BO4ParticleFunction[particleDataOTGPlusLength];
 		        for(int i = 0; i < particleDataOTGPlusLength; i++)
 		        {
-	        		particleDataOTGPlus[i] = BO4ParticleFunction.fromStream(this, bufferDecompressed);
+	        		particleDataOTGPlus[i] = BO4ParticleFunction.fromStream(this, in);
 		        }
 				        
-		        int spawnerDataOTGPlusLength = bufferDecompressed.getInt();
+		        int spawnerDataOTGPlusLength = in.readInt();
 		        BO4SpawnerFunction[] spawnerDataOTGPlus = new BO4SpawnerFunction[spawnerDataOTGPlusLength];
 		        for(int i = 0; i < spawnerDataOTGPlusLength; i++)
 		        {
-		        	spawnerDataOTGPlus[i] = BO4SpawnerFunction.fromStream(this, bufferDecompressed);
+		        	spawnerDataOTGPlus[i] = BO4SpawnerFunction.fromStream(this, in);
 		        }
 		
-		        int modDataOTGPlusLength = bufferDecompressed.getInt();
+		        int modDataOTGPlusLength = in.readInt();
 		        BO4ModDataFunction[] modDataOTGPlus = new BO4ModDataFunction[modDataOTGPlusLength];
 		        for(int i = 0; i < modDataOTGPlusLength; i++)
 		        {
-		        	modDataOTGPlus[i] = BO4ModDataFunction.fromStream(this, bufferDecompressed);
+		        	modDataOTGPlus[i] = BO4ModDataFunction.fromStream(this, in);
 		        }
 		        	
 		        ArrayList<BO4BlockFunction> newBlocks = new ArrayList<BO4BlockFunction>();
@@ -2046,18 +1862,18 @@ public class BO4Config extends CustomObjectConfigFile
 				// Reconstruct blocks
 		        if(getBlocks)
 		        {
-					short metaDataNamesArrLength = bufferDecompressed.getShort();
+					short metaDataNamesArrLength = in.readShort();
 					String[] metaDataNames = new String[metaDataNamesArrLength];
 			        for(int i = 0; i < metaDataNamesArrLength; i++)
 			        {
-			        	metaDataNames[i] = StreamHelper.readStringFromBuffer(bufferDecompressed);
+			        	metaDataNames[i] = StreamHelper.readStringFromStream(in);
 			        }
 			        
-			        short blocksArrArrLength = bufferDecompressed.getShort();
+			        short blocksArrArrLength = in.readShort();
 			        LocalMaterialData[] blocksArr = new LocalMaterialData[blocksArrArrLength];
 			        for(int i = 0; i < blocksArrArrLength; i++)
 			        {
-			        	String materialName = StreamHelper.readStringFromBuffer(bufferDecompressed);
+			        	String materialName = StreamHelper.readStringFromStream(in);
 			        	try {
 							blocksArr[i] = MaterialHelper.readMaterial(materialName);
 						} catch (InvalidConfigException e) {
@@ -2073,7 +1889,7 @@ public class BO4Config extends CustomObjectConfigFile
 			               
 			        // TODO: This assumes that loading blocks in a different order won't matter, which may not be true?
 			        // Anything that spawns on top, entities/spawners etc, should be spawned last tho, so shouldn't be a problem?
-			        int nonRandomBlockCount = bufferDecompressed.getInt();
+			        int nonRandomBlockCount = in.readInt();
 			        int nonRandomBlockIndex = 0;
 			        ArrayList<BO4BlockFunction> nonRandomBlocks = new ArrayList<BO4BlockFunction>();
 			        if(nonRandomBlockCount > 0)
@@ -2082,11 +1898,11 @@ public class BO4Config extends CustomObjectConfigFile
 				        {
 				        	for(int z = this.getminZ(); z < this.zSize; z++)
 				        	{
-					        	short blocksInColumnSize = bufferDecompressed.getShort();
+					        	short blocksInColumnSize = in.readShort();
 					        	for(int j = 0; j < blocksInColumnSize; j++)
 					        	{
 					        		columnSizes[x][z]++;
-					        		nonRandomBlocks.add(BO4BlockFunction.fromStream(x, z, metaDataNames, blocksArr, this, bufferDecompressed));
+					        		nonRandomBlocks.add(BO4BlockFunction.fromStream(x, z, metaDataNames, blocksArr, this, in));
 					        		nonRandomBlockIndex++;
 					        		if(nonRandomBlockCount == nonRandomBlockIndex)
 					        		{
@@ -2105,7 +1921,7 @@ public class BO4Config extends CustomObjectConfigFile
 				        }
 			        }		       
 			        		        
-			        int randomBlockCount = bufferDecompressed.getInt();
+			        int randomBlockCount = in.readInt();
 			        int randomBlockIndex = 0;
 			        ArrayList<BO4RandomBlockFunction> randomBlocks = new ArrayList<BO4RandomBlockFunction>();
 			        if(randomBlockCount > 0)
@@ -2114,11 +1930,11 @@ public class BO4Config extends CustomObjectConfigFile
 				        {
 				        	for(int z = this.getminZ(); z < this.zSize; z++)
 				        	{
-				        		short blocksInColumnSize = bufferDecompressed.getShort();
+				        		short blocksInColumnSize = in.readShort();
 					        	for(int j = 0; j < blocksInColumnSize; j++)
 					        	{
 					        		columnSizes[x][z]++;
-					        		randomBlocks.add(BO4RandomBlockFunction.fromStream(x, z, metaDataNames, blocksArr, this, bufferDecompressed));
+					        		randomBlocks.add(BO4RandomBlockFunction.fromStream(x, z, metaDataNames, blocksArr, this, in));
 					        		randomBlockIndex++;
 					        		if(randomBlockCount == randomBlockIndex)
 					        		{
@@ -2211,67 +2027,15 @@ public class BO4Config extends CustomObjectConfigFile
 		        {
 					loadBlockArrays(newBlocks, columnSizes);
 		        }
-			}
-	    	catch (Exception | Error e1)
-	    	{
-		    	// TODO: Should only need to close the reader?
-    	    	if(bufferCompressed != null)
-    	    	{
-    	    		bufferCompressed.clear();
-    	    	}
-    	    	if(bufferDecompressed != null)
-    	    	{
-    	    		bufferDecompressed.clear();
-    	    	}   	    	
-        		try {
-        			fis.getChannel().close();
-        		}
-        		catch (IOException e)
-        		{
-    				e.printStackTrace();
-    			}
-    			try {
-    				fis.close();
-    			}
-    			catch (IOException e)
-    			{
-    				e.printStackTrace();
-    			}
-    			
-    			e1.printStackTrace();
-        		throw new InvalidConfigException("Could not read BO4Data file " + this.reader.getName() + ", it may be outdated or corrupted. Delete and re-export BO4Data files to fix this, or delete and reinstall your OTG preset.");
-			}
-
-	    	// When finished
-	    	
-	    	// TODO: Should only need to close the reader?
-	    	if(bufferCompressed != null)
-	    	{
-	    		bufferCompressed.clear();
-	    	}
-	    	if(bufferDecompressed != null)
-	    	{
-	    		bufferDecompressed.clear();
-	    	}
-    		try {
-    			fis.getChannel().close();
-    		}
-    		catch (IOException e)
-    		{
-				e.printStackTrace();
-			}
-			try {
-				fis.close();
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
 		}
-		catch (FileNotFoundException e2)
+		catch (NoSuchFileException e) {
+            e.printStackTrace();
+            return null;
+		}
+		catch (IOException e)
 		{
-			e2.printStackTrace();
-			return null;
+			e.printStackTrace();
+            throw new InvalidConfigException("Could not read BO4Data file " + this.reader.getName() + ", it may be outdated or corrupted. Delete and re-export BO4Data files to fix this, or delete and reinstall your OTG preset.");
 		}
 
     	return this;
@@ -2279,71 +2043,7 @@ public class BO4Config extends CustomObjectConfigFile
 
     private void loadBlockArrays(ArrayList<BO4BlockFunction> newBlocks, short[][] columnSizes)
     {
-        // Store blocks in arrays instead of BO4BlockFunctions,
-        // since that gives way too much overhead memory wise.
-        // We may have tens of millions of blocks, java doesn't handle lots of small classes well.
-		this.blocks = new short[xSize][zSize][];
-		this.blocksMaterial = new LocalMaterialData[newBlocks.size()];
-		this.blocksMetaDataName = new String[newBlocks.size()];
-		this.blocksMetaDataTag = new NamedBinaryTag[newBlocks.size()];
-		
-		this.randomBlocksBlocks = new LocalMaterialData[newBlocks.size()][];
-		this.randomBlocksBlockChances = new byte[newBlocks.size()][];
-		this.randomBlocksMetaDataNames = new String[newBlocks.size()][];
-		this.randomBlocksMetaDataTags = new NamedBinaryTag[newBlocks.size()][];
-		this.randomBlocksBlockCount = new byte[newBlocks.size()]; 
-		
-		BO4BlockFunction block;
-    	short[][] columnBlockIndex = new short[xSize][zSize];
-    	for(int x = 0; x < xSize; x++)
-    	{
-    		for(int z = 0; z < zSize; z++)
-    		{
-				if(this.blocks[x][z] == null)
-				{
-					this.blocks[x ][z] = new short[columnSizes[x][z]];
-				}
-    		}
-    	}
-		for(int i = 0; i < newBlocks.size(); i++)
-		{
-			block = newBlocks.get(i);
-
-			this.blocks[block.x][block.z][columnBlockIndex[block.x][block.z]] = (short) block.y;
-
-			int blockIndex = columnBlockIndex[block.x][block.z] + getColumnBlockIndex(columnSizes, block.x, block.z);
-
-			this.blocksMaterial[blockIndex] = block.material;
-			this.blocksMetaDataName[blockIndex] = block.metaDataName;
-			this.blocksMetaDataTag[blockIndex] = block.metaDataTag;
-			
-			if(block instanceof BO4RandomBlockFunction)
-			{
-		        this.randomBlocksBlocks[blockIndex] = ((BO4RandomBlockFunction)block).blocks;
-		        this.randomBlocksBlockChances[blockIndex] = ((BO4RandomBlockFunction)block).blockChances;
-		        this.randomBlocksMetaDataNames[blockIndex] = ((BO4RandomBlockFunction)block).metaDataNames;
-		        this.randomBlocksMetaDataTags[blockIndex] = ((BO4RandomBlockFunction)block).metaDataTags;
-		        this.randomBlocksBlockCount[blockIndex] = ((BO4RandomBlockFunction)block).blockCount;
-			}
-			columnBlockIndex[block.x][block.z]++;
-		}
-    }
-    
-    private int getColumnBlockIndex(short[][] columnSizes, int columnX, int columnZ)
-    {
-    	int blockIndex = 0;
-    	for(int x = 0; x < 16; x++)
-    	{
-    		for(int z = 0; z < 16; z++)
-    		{
-    			if(columnX == x && columnZ == z)
-    			{
-    				return blockIndex;
-    			}
-    			blockIndex += columnSizes[x][z];
-    		}
-    	}
-    	return blockIndex;
+        this.blocks = newBlocks.toArray(new BO4BlockFunction[newBlocks.size()]);
     }
     
 	@Override

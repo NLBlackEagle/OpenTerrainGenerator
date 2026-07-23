@@ -36,44 +36,44 @@ public class ParticlesManager
                 // Apply rotation
             	if(rotations == 0)
             	{
-            		newParticleData.x = particleDataInObject[i].x;
+            		newParticleData.x(particleDataInObject[i].x());
             		newParticleData.velocityX = particleDataInObject[i].velocityX;
-            		newParticleData.z = particleDataInObject[i].z;
+            		newParticleData.z(particleDataInObject[i].z());
             		newParticleData.velocityZ = particleDataInObject[i].velocityZ;
             		newParticleData.velocityXSet = particleDataInObject[i].velocityXSet;
             		newParticleData.velocityZSet = particleDataInObject[i].velocityZSet;
             	}
             	if(rotations == 1)
             	{
-            		newParticleData.x = particleDataInObject[i].z;
+            		newParticleData.x(particleDataInObject[i].z());
             		newParticleData.velocityX = particleDataInObject[i].velocityZ;
-            		newParticleData.z = -particleDataInObject[i].x + 15;
+            		newParticleData.z(-particleDataInObject[i].x() + 15);
             		newParticleData.velocityZ = -particleDataInObject[i].velocityX;
             		newParticleData.velocityXSet = particleDataInObject[i].velocityZSet;
             		newParticleData.velocityZSet = particleDataInObject[i].velocityXSet;
             	}
             	if(rotations == 2)
             	{
-            		newParticleData.x = -particleDataInObject[i].x + 15;
+            		newParticleData.x(-particleDataInObject[i].x() + 15);
             		newParticleData.velocityX = -particleDataInObject[i].velocityX;
-            		newParticleData.z = -particleDataInObject[i].z + 15;
+            		newParticleData.z(-particleDataInObject[i].z() + 15);
             		newParticleData.velocityZ = -particleDataInObject[i].velocityZ;
             		newParticleData.velocityXSet = particleDataInObject[i].velocityXSet;
             		newParticleData.velocityZSet = particleDataInObject[i].velocityZSet;
             	}
             	if(rotations == 3)
             	{
-            		newParticleData.x = -particleDataInObject[i].z + 15;
+            		newParticleData.x(-particleDataInObject[i].z() + 15);
             		newParticleData.velocityX = -particleDataInObject[i].velocityZ;
-            		newParticleData.z = particleDataInObject[i].x;
+            		newParticleData.z(particleDataInObject[i].x());
             		newParticleData.velocityZ = particleDataInObject[i].velocityX;
             		newParticleData.velocityXSet = particleDataInObject[i].velocityZSet;
             		newParticleData.velocityZSet = particleDataInObject[i].velocityXSet;
             	}
-            	newParticleData.y = coordObject.getY() + particleDataInObject[i].y;
+            	newParticleData.y(coordObject.getY() + particleDataInObject[i].y());
 
-            	newParticleData.x = coordObject.getX() + newParticleData.x;
-            	newParticleData.z = coordObject.getZ() + newParticleData.z;
+            	newParticleData.x(coordObject.getX() + newParticleData.x());
+            	newParticleData.z(coordObject.getZ() + newParticleData.z());
 
             	newParticleData.particleName = particleDataInObject[i].particleName;
 
@@ -84,16 +84,16 @@ public class ParticlesManager
 
             	particleData.add(newParticleData);
 
-        		if(!ChunkCoordinate.fromBlockCoords(newParticleData.x, newParticleData.z).equals(chunkCoordinate))
+        		if(!ChunkCoordinate.fromBlockCoords(newParticleData.x(), newParticleData.z()).equals(chunkCoordinate))
         		{
         			throw new RuntimeException(); // TODO: Remove after testing
         		}
         	} else {
 
-        		newParticleData.y = coordObject.getY() + particleDataInObject[i].y;
+        		newParticleData.y(coordObject.getY() + particleDataInObject[i].y());
 
-        		newParticleData.x = coordObject.getX() + particleDataInObject[i].x;
-        		newParticleData.z = coordObject.getZ() + particleDataInObject[i].z;
+        		newParticleData.x(coordObject.getX() + particleDataInObject[i].x());
+        		newParticleData.z(coordObject.getZ() + particleDataInObject[i].z());
 
         		newParticleData.particleName = particleDataInObject[i].particleName;
 
@@ -109,7 +109,7 @@ public class ParticlesManager
 
         		particleData.add(newParticleData);
 
-        		if(!ChunkCoordinate.fromBlockCoords(newParticleData.x, newParticleData.z).equals(chunkCoordinate))
+        		if(!ChunkCoordinate.fromBlockCoords(newParticleData.x(), newParticleData.z()).equals(chunkCoordinate))
         		{
         			throw new RuntimeException(); // TODO: Remove after testing
         		}

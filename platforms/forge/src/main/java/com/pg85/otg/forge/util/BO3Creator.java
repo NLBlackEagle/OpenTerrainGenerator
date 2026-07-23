@@ -1,7 +1,6 @@
 package com.pg85.otg.forge.util;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -87,7 +86,7 @@ public class BO3Creator extends BOCreator
 
                     ForgeMaterialData data = ForgeMaterialData.ofMinecraftBlockState(block);
 
-                    if (centerBlock != null && centerBlock.equals(data))
+                    if (centerBlock != null && centerBlock.matches(data))
                     {
                         centerPointX = x + start.getBlockX();
                         centerPointY = y + start.getBlockY();
@@ -203,13 +202,8 @@ public class BO3Creator extends BOCreator
 
                                 tileEntityCount++;
                                 try {
-                                    tileEntityFile.createNewFile();
-                                    FileOutputStream fos = new FileOutputStream(tileEntityFile);
-                                    tag.writeTo(fos);
-                                    fos.flush();
-                                    fos.close();
-                                    blockFunction.metaDataTag = tag;
-                                    blockFunction.metaDataName = name + "/" + tileEntityName;
+                                    tag.writeTo(tileEntityFile.toPath());
+                                    blockFunction.blockContainer = material.blockContainer(tileEntitiesFolder.getParentFile().toPath(), name + "/" + tileEntityName);
                                 } catch (IOException e) {
                                     throw new RuntimeException(e);
                                 }

@@ -1,5 +1,7 @@
 package com.pg85.otg.configuration.settingType;
 
+import java.util.List;
+
 import com.pg85.otg.exception.InvalidConfigException;
 import com.pg85.otg.util.helpers.StringHelper;
 
@@ -31,12 +33,12 @@ public class DoubleArraySetting extends Setting<double[]>
         {
             return new double[0];
         }
-        String[] split = StringHelper.readCommaSeperatedString(string);
-        double[] values = new double[split.length];
-        for (int i = 0; i < split.length; i++)
+        List<String> split = StringHelper.readCommaSeperatedString(string);
+        double[] values = new double[split.size()];
+        for (int i = 0; i < split.size(); i++)
         {
             // Trimming the values allows "Value1, Value2"
-            values[i] = StringHelper.readDouble(split[i], -Double.MAX_VALUE, Double.MAX_VALUE);
+            values[i] = StringHelper.readDouble(split.get(i), -Double.MAX_VALUE, Double.MAX_VALUE);
         }
         return values;
     }

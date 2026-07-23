@@ -27,6 +27,8 @@ import com.pg85.otg.util.minecraft.defaults.DefaultBiome;
 import com.pg85.otg.worldsave.BiomeIdData;
 import com.pg85.otg.worldsave.WorldSaveData;
 
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
+
 /**
  * Holds the WorldConfig and all BiomeConfigs.
  *
@@ -60,6 +62,8 @@ public final class ServerConfigProvider implements ConfigProvider
      * The number of loaded biomes.
      */
     private int biomesCount;
+
+    private WorldSaveData worldSaveData;
 
     /**
      * Loads the settings from the given directory for the given world.
@@ -469,7 +473,7 @@ public final class ServerConfigProvider implements ConfigProvider
         }
         
         // Get OTG world save version
-        WorldSaveData worldSaveData = WorldSaveData.loadWorldSaveData(worldSaveFolder);
+        worldSaveData = WorldSaveData.loadWorldSaveData(worldSaveFolder);
         
         // This is a legacy (pre-v7) world if its not being created and either has no worldsavedata or worldsavedata version 6. 
         // If this world has biome data but not worldsavedata, it's v7.
@@ -478,7 +482,7 @@ public final class ServerConfigProvider implements ConfigProvider
         //boolean isLegacyWorld = (!hasWorldData || (worldSaveData != null && worldSaveData.version == 6));
         if(worldSaveData == null)
         {
-        	worldSaveData = new WorldSaveData(isLegacyWorld ? 6 : 8);
+        	worldSaveData = new WorldSaveData(isLegacyWorld ? 6 : 9);
             WorldSaveData.saveWorldSaveData(worldSaveFolder, worldSaveData);
         }
         
@@ -730,11 +734,11 @@ public final class ServerConfigProvider implements ConfigProvider
         // Indexing BiomeColor
         if (this.worldConfig.biomeMode == OTG.getBiomeModeManager().FROM_IMAGE) {
             if (this.worldConfig.biomeColorMap == null) {
-                this.worldConfig.biomeColorMap = new HashMap<Integer, Integer>();
+                this.worldConfig.biomeColorMap = new Int2IntOpenHashMap();
+                this.worldConfig.biomeColorMap.defaultReturnValue(-1);
             }
 
-            int color = biomeConfig.biomeColor;
-            this.worldConfig.biomeColorMap.put(color, biome.getIds().getOTGBiomeId());
+            this.worldConfig.biomeColorMap.put(biomeConfig.biomeColor, biome.getIds().getOTGBiomeId());
         }
     }
 	/** Recursive method to get saved ID from ReplaceToBiomeName, allows chain replacing to virtual biomes.
@@ -826,4 +830,10 @@ public final class ServerConfigProvider implements ConfigProvider
         
 		return outputBiomes;
 	}
+
+    @Override
+    public WorldSaveData getWorldSaveData()
+    {
+        return worldSaveData;
+    }
 }

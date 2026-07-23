@@ -210,7 +210,7 @@ public class RavinesGen extends TerrainGenBase
                             {
                             	material = generatingChunkBuffer.getBlock(localX, currentDepth, localZ);
                                 
-                                if (!surfaceBlockFound && material.equals(biomeConfig.getSurfaceBlockReplaced(this.world, currentDepth)))
+                                if (!surfaceBlockFound && biomeConfig.getSurfaceBlockReplaced(this.world, currentDepth).matches(material))
                                 {
                                 	surfaceBlockFound = true;
                                 	surfaceBlockMaterial = material;

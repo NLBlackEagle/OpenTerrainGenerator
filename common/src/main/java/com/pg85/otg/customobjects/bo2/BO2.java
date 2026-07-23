@@ -433,11 +433,11 @@ public class BO2 extends CustomObjectConfigFile implements CustomObject
             ObjectCoordinate coordinate = coordinates.get(i);
 
             data[0][i] = coordinate;
-            coordinate = coordinate.rotate();
+            coordinate = coordinate.rotate(Rotation.WEST);
             data[1][i] = coordinate;
-            coordinate = coordinate.rotate();
+            coordinate = coordinate.rotate(Rotation.WEST);
             data[2][i] = coordinate;
-            coordinate = coordinate.rotate();
+            coordinate = coordinate.rotate(Rotation.WEST);
             data[3][i] = coordinate;
         }
 

@@ -31,7 +31,7 @@ final class BukkitChunkBuffer extends ChunkBuffer
         int blockId = chunkData.getTypeId(blockX, blockY, blockZ);
         @SuppressWarnings("deprecation")
         byte blockData = chunkData.getData(blockX, blockY, blockZ);
-        return BukkitMaterialData.ofIds(blockId, blockData);
+        return BukkitMaterialData.ofMinecraftBlockState(blockId, blockData);
     }
 
     @Override
