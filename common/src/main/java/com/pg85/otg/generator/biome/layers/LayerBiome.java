@@ -45,7 +45,12 @@ public class LayerBiome extends Layer
                     {
                         LocalBiome biome = weightedBiomes.getRandom(this::nextInt);
                         if (biome != null) {
-                            currentPiece |= biome.getIds().getOTGBiomeId() |
+                            // Clear any stale BiomeBits/IceBit/BiomeBitsAreSetBit (e.g. from a
+                            // previous depth having set this cell to defaultOceanId) before
+                            // writing the newly picked biome's id, otherwise the old bits get
+                            // OR'd into the new id instead of being replaced by it.
+                            currentPiece = (currentPiece & ~(BiomeBits | IceBit | BiomeBitsAreSetBit)) |
+                                biome.getIds().getOTGBiomeId() |
                                 // Set IceBit based on Biome Temperature
                                 (biome.getBiomeConfig().biomeTemperature <= freezeTemp ? IceBit : 0) |
                                 // Set BiomeBitsAreSetBit

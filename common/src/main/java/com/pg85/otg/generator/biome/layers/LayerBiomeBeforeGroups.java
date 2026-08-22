@@ -45,7 +45,7 @@ public class LayerBiomeBeforeGroups extends Layer
                         biome = this.biomes[nextInt(this.biomes.length)];
                         if (biome != null)
                         {
-                            currentPiece |= biome.getIds().getOTGBiomeId() | BiomeBitsAreSetBit;
+                            currentPiece = (currentPiece & ~(BiomeBits | BiomeBitsAreSetBit)) | biome.getIds().getOTGBiomeId() | BiomeBitsAreSetBit;
                         }
                     }
                     else if (this.ice_biomes.length > 0 && (currentPiece & IceBit) != 0) // Ice biome
@@ -53,7 +53,7 @@ public class LayerBiomeBeforeGroups extends Layer
                         biome = this.ice_biomes[nextInt(this.ice_biomes.length)];
                         if (biome != null)
                         {
-                            currentPiece |= biome.getIds().getOTGBiomeId() | BiomeBitsAreSetBit;
+                            currentPiece = (currentPiece & ~(BiomeBits | BiomeBitsAreSetBit)) | biome.getIds().getOTGBiomeId() | BiomeBitsAreSetBit;
                         }
                     }
                 }            

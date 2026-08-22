@@ -103,7 +103,24 @@ public class LayerMixWithRiver extends Layer
                     cachedId = this.defaultOceanId;
                 }
                 
-                if (worldConfig.riversEnabled && (currentRiver & RiverBits) != 0 && !this.configs.getBiomeByOTGIdOrNull(cachedId).getBiomeConfig().riverBiome.isEmpty())
+                LocalBiome cachedBiome = this.configs.getBiomeByOTGIdOrNull(cachedId);
+                if (cachedBiome == null)
+                {
+                    throw new RuntimeException(
+                        "LayerMixWithRiver.getFull: no biome registered for OTG id " + cachedId +
+                        " (x=" + x + ", z=" + z + ", xSize=" + xSize + ", zSize=" + zSize +
+                        ", xi=" + xi + ", zi=" + zi +
+                        ", currentPiece=" + Integer.toBinaryString(currentPiece) +
+                        ", landBitSet=" + ((currentPiece & LandBit) != 0) +
+                        ", biomeBitsAreSetBit=" + ((currentPiece & BiomeBitsAreSetBit) != 0) +
+                        ", frozenOceanEnabled=" + worldConfig.frozenOcean +
+                        ", iceBitSet=" + ((currentPiece & IceBit) != 0) +
+                        ", defaultOceanId=" + this.defaultOceanId +
+                        ", defaultFrozenOceanId=" + this.defaultFrozenOceanId + ")"
+                    );
+                }
+
+                if (worldConfig.riversEnabled && (currentRiver & RiverBits) != 0 && !cachedBiome.getBiomeConfig().riverBiome.isEmpty())
                 {
                 	currentPiece = this.riverBiomes[cachedId];
                 } else {
@@ -197,7 +214,22 @@ public class LayerMixWithRiver extends Layer
                 }
 
                 biome = this.configs.getBiomeByOTGIdOrNull(cachedId);
-                
+                if (biome == null)
+                {
+                    throw new RuntimeException(
+                        "LayerMixWithRiver.getOnlyRivers: no biome registered for OTG id " + cachedId +
+                        " (x=" + x + ", z=" + z + ", xSize=" + xSize + ", zSize=" + zSize +
+                        ", xi=" + xi + ", zi=" + zi +
+                        ", currentPiece=" + Integer.toBinaryString(currentPiece) +
+                        ", landBitSet=" + ((currentPiece & LandBit) != 0) +
+                        ", biomeBitsAreSetBit=" + ((currentPiece & BiomeBitsAreSetBit) != 0) +
+                        ", frozenOceanEnabled=" + worldConfig.frozenOcean +
+                        ", iceBitSet=" + ((currentPiece & IceBit) != 0) +
+                        ", defaultOceanId=" + this.defaultOceanId +
+                        ", defaultFrozenOceanId=" + this.defaultFrozenOceanId + ")"
+                    );
+                }
+
                 if (worldConfig.riversEnabled && (currentRiver & RiverBits) != 0 && !biome.getBiomeConfig().riverBiome.isEmpty())
                 {
                 	currentPiece = 1;

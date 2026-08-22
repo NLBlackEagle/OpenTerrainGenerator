@@ -93,7 +93,7 @@ public class LayerBiomeBorder extends Layer
                             }
                         }
                     }
-                    biomeData[z1 * zSize + x1] = biomeDataAt;
+                    biomeData[z1 * xSize + x1] = biomeDataAt;
                 }
             }
         }
@@ -134,7 +134,7 @@ public class LayerBiomeBorder extends Layer
                             }
                         }
                     }
-                    biomeData[z1 * zSize + x1] = biomeDataAt;
+                    biomeData[z1 * xSize + x1] = biomeDataAt;
                 }
             }
         }
