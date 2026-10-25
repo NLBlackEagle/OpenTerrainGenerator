@@ -132,9 +132,13 @@ public class OTGBiomeProvider extends BiomeProvider
         for (int i3 = 0; i3 < arrayOfInt.length; i3++)
         {
         	ForgeBiome biome = this.localWorld.getBiomeByOTGIdOrNull(arrayOfInt[i3]);
+        	if (biome == null)
+        	{
+        		throw new IllegalStateException("Biome " + arrayOfInt[i3] + " does not exist");
+        	}
         	int i4 = i + i3 % n << 2;
             int i5 = j + i3 / n << 2;
-            Biome localBiomeBase = biome.biomeBase;            
+            Biome localBiomeBase = biome.biomeBase;
             if (
         		allowedBiomes.contains(localBiomeBase) && 
         		!(
